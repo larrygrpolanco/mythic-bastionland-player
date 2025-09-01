@@ -1,0 +1,65 @@
+Specifics of Combat
+
+FEATS
+After using a Feat the user must pass a Save or become Fatigued, unable to perform Feats until they rest. Each Feat can only be used once per Attack by each combatant involved.
+
+SMITE - Release your righteous fury
+• Use before rolling a melee Attack.
+• The Attack gains either +d12 or Blast.
+• Pass a VIG Save or become Fatigued.
+
+FOCUS - Create an opening to exploit
+• Use after rolling an Attack.
+• Perform a Gambit without using a die.
+• Pass a CLA Save or become Fatigued.
+
+DENY - Rebuff an attack before it lands
+• Use after an Attack roll against you or an ally within arm’s reach.
+• Discard one Attack die from the roll.
+• Pass a SPI Save or become Fatigued.
+
+GAMBITS
+Attackers may discard any number of Attack dice of 4 or higher to perform Gambits, each causing one of the effects below. The affected foe must be a target of the original attack.
+For Gambits other than Bolster and Move the target receives a VIG Save to ignore the effect.
+• Bolster the Attack for +1 total Damage
+• Move after the Attack, even if you already moved or are unable to move
+• Repel a foe away from you
+• Stop a foe from moving next turn
+• Impair a weapon on their next turn
+• Trap a shield until your next turn
+• Dismount a foe
+• Other effect of a similar level of impact
+
+If a die of 8 or higher is used in melee then a Strong Gambit is performed and the attacker chooses one of the following:
+• No Save is granted to the target
+• Greater effect such as disarming an item, breaking a wooden shield or weapon, or removing a helm. This does not increase the Damage from Bolster.
+
+MINOR ACTIONS
+Changing weapons, dismounting, and similar actions do not count as a combatant’s action for the turn.
+
+BONUS ATTACK DICE
+These are gained from useful information, shrewd preparations, or a tactical advantage. +d8 is a typical bonus.
+
+UNARMED COMBAT
+Unarmed attacks are Impaired unless the attacker has suitable natural weapons.
+
+RANGED COMBAT
+Purely ranged weapons cannot be used if the attacker began their turn engaged in melee.
+Protective cover grants an additional point of Armour against ranged attacks.
+
+MOUNTED COMBAT
+Mounted combatants use their steed’s trample Damage in addition to their own weapons when charging enemies on foot.
+This doesn’t work against spearwalls. Steeds can be targeted separately by attacks.
+Being dismounted causes d6 Damage. If this occurs in combat, add it to the existing dice.
+
+DUELS & JOUSTS
+Two combatants can mutually agree to engage in a duel, or joust if mounted.
+They fight as normal but their attacks are rolled and resolved simultaneously, including the effects of Gambits. Both combatants can use Feats before the attacks are resolved.
+
+SHIELDWALLS & SPEARWALLS
+3 or more allies may form a wall formation.
+If they all bear shields (not bucklers) then they gain an additional point of Armour. If they all bear spears (or similar) then enemies cannot Attack on the turn that they charge.
+
+WAVERING MORALE
+Individuals who are Wounded, or groups who lose half their number, must pass a SPI Save to avoid rout or surrender.
+Organised groups roll once using their leader's SPI. Disorganised groups roll for each individual against their own SPI. This does not affect player characters.

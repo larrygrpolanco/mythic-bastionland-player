@@ -1,0 +1,60 @@
+Travel
+
+Travelling consumes a whole Phase of the day and uses one of 3 methods:
+• Trek: 1 Hex on foot or steed.
+• Gallop: 2 Hexes on a non-Exhausted steed. The steed loses d6 VIG.
+• Cruise: 3 Hexes by boat, or by steed on a rarely-found proper road.
+
+When ending a phase in Wilderness, roll:
+WILDERNESS ROLL
+1 Encounter the next Omen from a random Myth in this Realm.
+2-3 Encounter the next Omen from the nearest Myth.
+4-6 Encounter the Hex’s Landmark. Otherwise all clear.
+
+HOSPITALITY
+When sleeping indoors, do not make a Wilderness Roll. Manners dictate that hospitality be granted to travelling Knights. Longer stays warrant a favour in return.
+
+CAMPING
+When sleeping outdoors make a Wilderness Roll as normal, ignoring Landmarks. Hostile Omens prevent proper sleep, while others may not occur at all if they are improbable as nighttime activity.
+
+SUPPLIES
+Knights gather food, water, and firewood as they travel, so these are not tracked. In situations where essential needs are deprived the Company each lose d6 VIG each morning.
+
+NIGHT
+Travelling or exploring at night causes the Company to lose d6 SPI each. If they lack a guide and light they are also travelling blind.
+
+SLEEP
+Each morning, all who did not get proper sleep the previous day lose d6 CLA.
+
+WINTER
+Anybody camping or travelling at night in Winter loses d6 VIG. Most Realms also risk dire weather during Winter (see opposite).
+
+OMENS
+Each Myth has 6 Omens, listed in the order in which they are encountered. The first encounter with a specific Myth is always Omen 1, the second Omen 2 etc.
+Remember primacy of action (p16). If the players want to hunt for the Wyvern’s nest they don’t have to wait for that Omen to appear if they take action themselves.
+
+MYTH HEXES
+Ending a phase in the Hex containing a Myth always reveals its next Omen without making a Wilderness Roll. When possible, the Knights also get the drop on the Omen.
+
+BARRIERS
+Travel through a Barrier is not normally possible, though locals might know a way. Attempting to travel through a Barrier wastes that Phase of the day, but still causes a Wilderness Roll.
+
+OTHER TRAVELLING TABLES
+Travellers who find themselves roaming without a proper sense of direction, or shrouded by darkness or mist, must roll when they try to move to a new Hex.
+
+TRAVELLING BLIND
+1 Circle back to where you started.
+2-3 Drift a Hex to the Left (2) or Right (3).
+4-6 Progress as planned.
+
+When travelling in lands at the mercy of dire weather, roll at the start of each Phase.
+DIRE WEATHER
+1 Dire weather. You can’t leave the Hex and can’t get proper sleep.
+2-3 Looming threat. If this is rolled a second consecutive time, treat as dire weather.
+4-6 Fine weather for travel.
+
+When arriving in a Holding, roll to gauge the local mood.
+LOCAL MOOD
+1 Occupied by a looming or recent woe.
+2-3 There is a sense of things in decline.
+4-6 A fine mood and all seems well enough.

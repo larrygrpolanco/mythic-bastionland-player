@@ -1,0 +1,44 @@
+Harm & Scars
+
+VIRTUE LOSS
+Virtues may be reduced by means other than Damage, typically referred to as Virtue Loss.
+In addition to the situations listed in the rules, characters may suffer Virtue Loss as the cost or consequence of an action. This is detailed in the Action Procedure (p16).
+Victims are only Slain or Mortally Wounded if the Virtue was reduced by Damage, never as a result of Virtue Loss.
+At VIG 0 you are Exhausted and cannot Attack if you have moved this turn.
+At CLA 0 you are Exposed and treated as having 0GD.
+At SPI 0 your attacks are Impaired rolling a single d4 only.
+
+RECOVERY
+Guard is fully restored with just a moment of peace after the danger has passed.
+Fatigue is also removed this way.
+Virtues can be fully restored by 3 means:
+• Consuming a specific type of Remedy
+• Performing a specific Action
+• Skipping to a new Season
+Vigour is restored by consuming Sustenance or spending a full day in warm hospitality.
+Clarity is restored by consuming Stimulant or receiving guidance from a Seer.
+Spirit is restored by consuming Sacrament or indulging a Passion.
+
+REMEDIES
+A single Remedy is a sizeable bundle of materials and tools. A person or dedicated beast of burden can only carry one at once.
+Using a Remedy requires a whole Phase of the day, and is more about the ceremonial act than the material components themselves.
+The Virtue is restored before resolving any Omens or other encounters. A single Remedy is enough to benefit all company present.
+
+SCARS
+Take the die that caused the Scar and roll it again, consulting the table below for the specific Scar caused.
+Virtue Loss through Scars is not Damage, so cannot Mortally Wound or Slay the victim.
+Scars are only gained through real, deadly combat, not training or bloodless duels.
+
+SCAR
+1 Distress – A lucky escape. Lose d6 SPI.
+2 Disfigurement – A permanent mark. Roll 1d6: 1: Eye, 2: Cheek, 3: Neck, 4: Torso, 5: Nose, 6: Jaw. If your max GD is 2 or less, increase it by d6.
+3 Smash – A sudden spray of blood. Lose d6 VIG.
+4 Stun – Pain drowns the senses. Lose d6 CLA. If your max GD is 4 or less, increase it by d6.
+5 Rupture – Innards pierced and compressed. Lose 2d6 VIG.
+6 Gouge – Flesh torn from bone. When you get stitched up, if your max GD is 6 or less, increase it by d6.
+7 Concussion – A heavy blow numbs the mind. Lose 2d6 CLA.
+8 Tear – Something taken in violent struggle. Roll 1d6: 1: Nose, 2: Ear, 3: Finger, 4: Thumb, 5: Eye, 6: Chunk of Scalp. When you get patched up, if your max GD is 8 or less, increase it by d6.
+9 Agony – With a crack, a torturous break. Lose 2d6 SPI.
+10 Mutilation – A limb rendered lost or useless. Roll 1d6: 1-2: Leg, 3-4: Shield Arm, 5-6: Sword Arm. By next Season you have a prosthetic or have learned to get by, and if your max GD is 10 or less, increase it by d6.
+11 Doom – A cheated death haunts you. If you take a Mortal Wound this Season you are Slain instead.
+12 Humiliation – A most dolorous stroke. When you achieve revenge, if your max GD is 12 or less, increase it by d6.

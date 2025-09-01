@@ -1,0 +1,129 @@
+Civilisation
+Rare havens of timber and stone, filled with joy and turmoil.
+Roll 2d12 on a Spark Table and combine the results for an improvisational prompt.
+
+HOLDING (Style Feature)
+1 Dark Turrets
+2 Ruined Tower
+3 Hostile Wall
+4 Ancient Battlements
+5 Ornate Citadel
+6 Wild Gate
+7 Pristine Spire
+8 Fortified Dome
+9 Unfinished Beacons
+10 Welcoming Bridge
+11 Proud Pillars
+12 Bright Moat
+
+BAILEY (Style Feature)
+1 Filthy Marketplace
+2 Abandoned Forge
+3 Joyous Library
+4 Sophisticated Fountain
+5 Industrious Temple
+6 Humble Forum
+7 Majestic Tomb
+8 Hallowed Garden
+9 Rustic Hall
+10 Solemn Workshops
+11 Bustling Arena
+12 Immaculate Garrison
+
+KEEP (Centrepiece Decoration)
+1 Hearth Antlers
+2 Throne Silver
+3 Musicians Heraldry
+4 Pool Bones
+5 Advisers Flowers
+6 Servants Scripture
+7 Shrine Jewels
+8 Table Wreaths
+9 Reliquary Candles
+10 Cauldron Fur
+11 Chandelier Tapestries
+12 Guards Shields
+
+FOOD (Quality Type)
+1 Spiced Fish
+2 Herbal Fruit
+3 Crunchy Stew
+4 Sour Mushrooms
+5 Dry Pie
+6 Fermented Cheese
+7 Salted Nuts
+8 Wet Cake
+9 Fatty Porridge
+10 Chewy Bread
+11 Sweet Vegetable
+12 Mild Meat
+
+GOODS (Theme Type)
+1 Military Textile
+2 Abundant Livestock
+3 Traditional Grain
+4 Specialist Mead
+5 Industrious Tools
+6 Innovative Stone
+7 Secretive Wood
+8 Simple Pottery
+9 Strong Metal
+10 Decorated Leather
+11 Fine Honey
+12 Lucky Herb
+
+LUXURIES (Rarity Type)
+1 Antique Jewel
+2 Intricate Wine
+3 Unique Spice
+4 Scarce Fragrance
+5 Hazardous Silk
+6 Flawless Fur
+7 Luminous Artwork
+8 Lost Sword
+9 Esoteric Creature
+10 Sacred Ore
+11 Mythical Root
+12 Beautiful Scripture
+
+DRAMA (Theme Detail)
+1 Betrayal Brawl
+2 Jealousy Poison
+3 Rivalry Oath
+4 Infidelity Feast
+5 Coup Letters
+6 Ambition Disguise
+7 Redemption Inheritance
+8 Revelation Assassin
+9 Wrath Family
+10 Greed Alcohol
+11 Banishment Blackmail
+12 Manipulation Gold
+
+WOE (Description Incident)
+1 Secretive Disease
+2 Violent Famine
+3 Looming Raids
+4 Sudden Invasion
+5 Ongoing Abduction
+6 Prophecised Storm
+7 Mysterious Fire
+8 Sanctioned Revolt
+9 Unseen Exodus
+10 Vast Beast
+11 Escalating Killing
+12 Concealed Theft
+
+NEWS (Subject Mood)
+1 Duel Pensive
+2 Birth Joyous
+3 Market Content
+4 Trial Divided
+5 Ritual Furious
+6 Mercenaries Sceptical
+7 Festival Adoring
+8 Tournament Nostalgic
+9 Punishment Unified
+10 Performance Bleak
+11 Death Solemn
+12 Marriage Optimistic
