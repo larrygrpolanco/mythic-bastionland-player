@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { gameStore, gameActions } from '../lib/gameStore.js';
 	import Footer from '../components/Footer.svelte';
+	import './+page.css';
 
 	let placeName = $state('');
 	let placeDescription = $state('');
@@ -11,6 +12,14 @@
 
 	let currentFaceCard = $state(null);
 	let faceCardAnswers = $state({});
+
+	let currentSection = $state('setting'); // 'setting', 'timeline', 'establishing'
+	let showGuidance = $state(false);
+	let guidanceText = $state('');
+	let isTyping = $state(false);
+	let timeoutId = $state(null);
+	let showCardReview = $state(false);
+	let cardTransitionDirection = $state(''); // 'next', 'prev', 'jump'
 
 	const faceCards = [
 		{ suit: 'clubs', name: 'Jack of Clubs', question: 'What was this place in the past? How long ago was that?' },
@@ -29,6 +38,41 @@
 
 	let currentCardIndex = $state(0);
 	let setupComplete = $state(false);
+
+	const sectionGuidance = {
+		setting: `The setting for our game should be decided collaboratively. This may be emergent— one player may suggest a place that involves animals. Another player may amend this suggestion to mean a zoo. A third player may agree— but suggest making it a zoo planet, established as a biodiversity reserve in the far future. You may feel out multiple options, but try not to say no to other's suggestions. Rather, build on top of existent ideas or ask clarifying questions to create a place that is everyone's.`,
+		timeline: `This game is played in 4 cycles, and each cycle is separated by a gap in time. One player rolls the six sided die and records the result. This die will determine the unit of time that this gap is measured in, and this metric stays for the remainder of the game. A 1 means days, which might lend itself to an intimate and close-textured story. A 6 means millennia— you are playing a game over thousands of years, and what was here may not survive these jumps in recognizable ways.`,
+		establishing: `Each player is dealt cards from the face-cards stack in a circle until no cards are left. Then, going in this same circle, each player sets down one card at a time and answers the question associated with that card. They may read the questions first, or pick between their cards at random. Keep going until the world feels established or each player is out of cards, whichever happens first. Try to keep this discussion under 25 minutes; keep your answers to each question very short.`
+	};
+
+	function typeText(text) {
+		if (timeoutId) clearTimeout(timeoutId);
+		guidanceText = '';
+		isTyping = true;
+		let index = 0;
+
+		function type() {
+			if (index < text.length) {
+				guidanceText += text[index];
+				index++;
+				timeoutId = setTimeout(type, 25);
+			} else {
+				isTyping = false;
+			}
+		}
+		type();
+	}
+
+	function nextSection() {
+		if (currentSection === 'setting' && placeName && placeDescription) {
+			currentSection = 'timeline';
+			if (showGuidance) typeText(sectionGuidance.timeline);
+		} else if (currentSection === 'timeline' && timelineUnit) {
+			currentSection = 'establishing';
+			currentFaceCard = faceCards[0];
+			if (showGuidance) typeText(sectionGuidance.establishing);
+		}
+	}
 
 	function nextCard() {
 		if (currentFaceCard && faceCardAnswers[currentFaceCard.name]) {
@@ -75,160 +119,44 @@
 		goto('/games/the-ground-itself/gameplay');
 	}
 
-	// Initialize first card when component mounts
-	onMount(() => {
-		if (placeName && placeDescription && timelineUnit) {
-			currentFaceCard = faceCards[0];
-		}
-	});
+	// Helper functions
+	function getSuitSymbol(suit) {
+		const symbols = {
+			clubs: '♣',
+			hearts: '♥',
+			diamonds: '♦',
+			spades: '♠'
+		};
+		return symbols[suit] || '';
+	}
 
-	// Reactive effect for when basic setup is complete
-	$effect(() => {
-		if (placeName && placeDescription && timelineUnit && !currentFaceCard) {
-			currentFaceCard = faceCards[0];
-		}
+	function getSuitName(suit) {
+		const names = {
+			clubs: 'Past',
+			hearts: 'People',
+			diamonds: 'Places',
+			spades: 'Challenges'
+		};
+		return names[suit] || '';
+	}
+
+	function getSuitGuidance(suit) {
+		const guidance = {
+			clubs: 'Think about what shaped this place before your story begins.',
+			hearts: 'Consider the inhabitants and their daily lives.',
+			diamonds: 'Explore the physical and social structures.',
+			spades: 'Examine the conflicts and difficulties.'
+		};
+		return guidance[suit] || '';
+	}
+
+	// Initialize guidance
+	onMount(() => {
+		if (showGuidance) typeText(sectionGuidance.setting);
 	});
 </script>
 
-<style>
-	@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Lora:wght@400;500&display=swap');
 
-	:root {
-		--c-cream: #F4F0E9;
-		--c-charcoal: #3A3232;
-		--c-green: #4A7C59;
-		--c-mint: #7FB685;
-		--c-cosmic: #2D4A3E;
-		--c-stardust: #A8C5B8;
-		--font-serif: 'Lora', serif;
-		--font-sans: 'Inter', sans-serif;
-		--space-xs: 4px;
-		--space-sm: 8px;
-		--space-md: 16px;
-		--space-lg: 32px;
-		--space-xl: 64px;
-	}
-
-	* {
-		transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-	}
-
-	.cosmic-bg {
-		background: linear-gradient(135deg, var(--c-cream) 0%, var(--c-stardust) 100%);
-		min-height: 100vh;
-	}
-
-	.setup-card {
-		background-color: rgba(255, 255, 255, 0.95);
-		border: 1px solid rgba(168, 197, 184, 0.3);
-		border-radius: var(--space-md);
-		padding: var(--space-lg);
-		transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-		box-shadow: 0 8px 25px rgba(74, 124, 89, 0.1);
-	}
-
-	.setup-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 12px 35px rgba(74, 124, 89, 0.15);
-	}
-
-	.form-input {
-		width: 100%;
-		padding: var(--space-sm) var(--space-md);
-		border: 1px solid rgba(168, 197, 184, 0.3);
-		border-radius: var(--space-xs);
-		font-family: var(--font-sans);
-		font-weight: 300;
-		color: var(--c-charcoal);
-		background-color: var(--c-cream);
-		transition: all 0.3s ease;
-	}
-
-	.form-input:focus {
-		outline: none;
-		border-color: var(--c-green);
-		box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
-	}
-
-	.form-label {
-		display: block;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--c-charcoal);
-		margin-bottom: var(--space-sm);
-	}
-
-	.btn-primary {
-		background: linear-gradient(135deg, var(--c-green) 0%, var(--c-cosmic) 100%);
-		color: var(--c-cream);
-		border: none;
-		border-radius: var(--space-xs);
-		padding: var(--space-sm) var(--space-md);
-		font-family: var(--font-sans);
-		font-weight: 400;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		box-shadow: 0 4px 15px rgba(74, 124, 89, 0.3);
-	}
-
-	.btn-primary:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 8px 25px rgba(74, 124, 89, 0.4);
-	}
-
-	.btn-secondary {
-		background-color: var(--c-mint);
-		color: var(--c-charcoal);
-		border: none;
-		border-radius: var(--space-xs);
-		padding: var(--space-sm) var(--space-md);
-		font-family: var(--font-sans);
-		font-weight: 400;
-		cursor: pointer;
-		transition: all 0.3s ease;
-	}
-
-	.btn-secondary:hover:not(:disabled) {
-		background-color: var(--c-stardust);
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(168, 197, 184, 0.2);
-	}
-
-	.btn-secondary:disabled {
-		background-color: rgba(168, 197, 184, 0.3);
-		color: rgba(58, 50, 50, 0.6);
-		cursor: not-allowed;
-		transform: none;
-		box-shadow: none;
-	}
-
-	.progress-indicator {
-		display: flex;
-		justify-content: center;
-		margin-bottom: var(--space-lg);
-	}
-
-	.progress-step {
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		background-color: rgba(168, 197, 184, 0.3);
-		margin: 0 var(--space-xs);
-		transition: all 0.3s ease;
-	}
-
-	.progress-step.active {
-		background-color: var(--c-green);
-		transform: scale(1.2);
-	}
-
-	.card-counter {
-		text-align: center;
-		font-size: 0.875rem;
-		color: var(--c-charcoal);
-		margin-bottom: var(--space-md);
-	}
-</style>
 
 <main class="cosmic-bg" style="padding: var(--space-xl) 0;">
 	<div class="container mx-auto px-4 py-8 max-w-4xl">
@@ -244,15 +172,38 @@
 
 		<!-- Progress Indicator -->
 		<div class="progress-indicator mb-8">
-			<div class="progress-step active"></div>
-			<div class="progress-step" class:active={placeName && placeDescription && timelineUnit}></div>
+			<div class="progress-step" class:active={currentSection === 'setting'}></div>
+			<div class="progress-step" class:active={currentSection === 'timeline'}></div>
+			<div class="progress-step" class:active={currentSection === 'establishing'}></div>
 			<div class="progress-step" class:active={setupComplete}></div>
 		</div>
 
-		<!-- Basic Setup -->
-		{#if !currentFaceCard && !setupComplete}
+		<!-- Guidance Toggle -->
+		<div class="text-center mb-6">
+			<button
+				onclick={() => { showGuidance = !showGuidance; if (showGuidance) typeText(sectionGuidance[currentSection]); }}
+				class="guidance-toggle"
+			>
+				{showGuidance ? 'Hide Guidance' : 'Show Guidance'}
+			</button>
+		</div>
+
+		<!-- Guidance Text -->
+		{#if showGuidance && !setupComplete}
+			<div class="guidance-card mb-8">
+				<div class="guidance-text">
+					{guidanceText}
+					{#if isTyping}
+						<span class="cursor"></span>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Our Setting Section -->
+		{#if currentSection === 'setting'}
 			<div class="setup-card">
-				<h2 class="text-2xl mb-6" style="font-family: var(--font-serif); font-weight: 500; color: var(--c-green); line-height: 1.25;">Basic Information</h2>
+				<h2 class="text-2xl mb-6" style="font-family: var(--font-serif); font-weight: 500; color: var(--c-green); line-height: 1.25;">Our Setting</h2>
 
 				<div class="space-y-4">
 					<div>
@@ -276,79 +227,181 @@
 							class="form-input"
 						></textarea>
 					</div>
+				</div>
 
-					<div class="grid md:grid-cols-2 gap-4">
-						<div>
-							<label for="timelineUnit" class="form-label">Timeline Unit</label>
-							<select
-								id="timelineUnit"
-								bind:value={timelineUnit}
-								class="form-input"
-							>
-								<option value="">Select unit...</option>
-								<option value="days">Days</option>
-								<option value="weeks">Weeks</option>
-								<option value="years">Years</option>
-								<option value="decades">Decades</option>
-								<option value="centuries">Centuries</option>
-								<option value="millennia">Millennia</option>
-							</select>
-						</div>
-
-						<div>
-							<label for="timelineValue" class="form-label">Gap Length</label>
-							<input
-								id="timelineValue"
-								bind:value={timelineValue}
-								type="number"
-								min="1"
-								max="6"
-								class="form-input"
-							/>
-						</div>
-					</div>
+				<div class="text-right mt-6">
+					<button
+						onclick={nextSection}
+						disabled={!placeName || !placeDescription}
+						class="btn-primary"
+					>
+						Continue to Timeline
+					</button>
 				</div>
 			</div>
 		{/if}
 
-		<!-- Face Cards Setup -->
-		{#if currentFaceCard && !setupComplete}
+		<!-- Our Timeline Section -->
+		{#if currentSection === 'timeline'}
 			<div class="setup-card">
-				<div class="card-counter">
-					Card {currentCardIndex + 1} of {faceCards.length}
+				<h2 class="text-2xl mb-6" style="font-family: var(--font-serif); font-weight: 500; color: var(--c-green); line-height: 1.25;">Our Timeline</h2>
+
+				<div class="grid md:grid-cols-2 gap-4">
+					<div>
+						<label for="timelineUnit" class="form-label">Timeline Unit</label>
+						<select
+							id="timelineUnit"
+							bind:value={timelineUnit}
+							class="form-input"
+						>
+							<option value="">Select unit...</option>
+							<option value="days">Days</option>
+							<option value="weeks">Weeks</option>
+							<option value="years">Years</option>
+							<option value="decades">Decades</option>
+							<option value="centuries">Centuries</option>
+							<option value="millennia">Millennia</option>
+						</select>
+					</div>
+
+					<div>
+						<label for="timelineValue" class="form-label">Gap Length</label>
+						<input
+							id="timelineValue"
+							bind:value={timelineValue}
+							type="number"
+							min="1"
+							max="6"
+							class="form-input"
+						/>
+					</div>
 				</div>
 
-				<h3 class="text-xl mb-4" style="font-family: var(--font-serif); font-weight: 500; color: var(--c-green); line-height: 1.25;">
-					{currentFaceCard.name}
-				</h3>
-
-				<p class="mb-4" style="color: var(--c-charcoal); font-weight: 300;">
-					{currentFaceCard.question}
-				</p>
-
-				<textarea
-					bind:value={faceCardAnswers[currentFaceCard.name]}
-					rows="4"
-					placeholder="Your answer..."
-					class="form-input mb-4"
-				></textarea>
-
-				<div class="flex justify-between">
+				<div class="flex justify-between mt-6">
 					<button
-						onclick={previousCard}
-						disabled={currentCardIndex === 0}
+						onclick={() => { currentSection = 'setting'; if (showGuidance) typeText(sectionGuidance.setting); }}
 						class="btn-secondary"
 					>
-						Previous
+						Back to Setting
 					</button>
 
 					<button
-						onclick={nextCard}
+						onclick={nextSection}
+						disabled={!timelineUnit}
 						class="btn-primary"
 					>
-						{currentCardIndex === faceCards.length - 1 ? 'Complete Setup' : 'Next Card'}
+						Continue to Establishing
 					</button>
 				</div>
+			</div>
+		{/if}
+
+		<!-- Establishing Our Place -->
+		{#if currentFaceCard && !setupComplete}
+			<div class="establishing-section">
+				<h2 class="text-2xl mb-6" style="font-family: var(--font-serif); font-weight: 500; color: var(--c-green); line-height: 1.25;">Establishing Our Place</h2>
+
+				<!-- Progress and Navigation -->
+				<div class="flex justify-between items-center mb-6">
+					<div class="card-counter">
+						Card {currentCardIndex + 1} of {faceCards.length}
+					</div>
+					<div class="flex gap-2">
+						<button
+							onclick={() => showCardReview = !showCardReview}
+							class="btn-secondary text-sm"
+						>
+							{showCardReview ? 'Hide Review' : 'Review Cards'}
+						</button>
+					</div>
+				</div>
+
+				<!-- Card Review Modal -->
+				{#if showCardReview}
+					<div class="review-modal-overlay" onclick={() => showCardReview = false}>
+						<div class="review-modal" onclick={(e) => e.stopPropagation()}>
+							<h3 class="text-lg mb-4" style="font-family: var(--font-serif); color: var(--c-green);">Review Your Answers</h3>
+							<div class="review-grid">
+								{#each faceCards as card, index}
+									<button
+										class="review-card {card.suit}"
+										class:current={index === currentCardIndex}
+										onclick={() => { currentCardIndex = index; currentFaceCard = card; showCardReview = false; }}
+									>
+										<div class="review-card-header">
+											<span class="suit-symbol">{getSuitSymbol(card.suit)}</span>
+											<span class="card-name">{card.name.split(' ')[1]}</span>
+										</div>
+										<div class="review-status">
+											{faceCardAnswers[card.name] ? '✓' : '○'}
+										</div>
+									</button>
+								{/each}
+							</div>
+							<button
+								onclick={() => showCardReview = false}
+								class="btn-secondary mt-4"
+							>
+								Close Review
+							</button>
+						</div>
+					</div>
+				{/if}
+
+				<!-- Main Card -->
+				<div class="face-card {currentFaceCard.suit}" class:transitioning={cardTransitionDirection}>
+					<div class="card-header-section">
+						<div class="suit-indicator">
+							<span class="suit-symbol">{getSuitSymbol(currentFaceCard.suit)}</span>
+							<span class="suit-name">{getSuitName(currentFaceCard.suit)}</span>
+						</div>
+					</div>
+					<h3 class="card-title">
+						{currentFaceCard.name}
+					</h3>
+
+					<div class="card-content">
+						<p class="card-question">
+							{currentFaceCard.question}
+						</p>
+
+						<textarea
+							bind:value={faceCardAnswers[currentFaceCard.name]}
+							rows="5"
+							placeholder="Share your thoughts about this aspect of the place..."
+							class="card-textarea"
+						></textarea>
+
+						<!-- Navigation buttons moved here -->
+						<div class="card-content-navigation">
+							<button
+								onclick={previousCard}
+								disabled={currentCardIndex === 0}
+								class="btn-secondary"
+							>
+								← Previous
+							</button>
+
+							<button
+								onclick={nextCard}
+								class="btn-primary"
+							>
+								{currentCardIndex === faceCards.length - 1 ? 'Complete Setup' : 'Next Card →'}
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Encouragement -->
+				<div class="encouragement">
+					<p class="encouragement-text">
+						{currentCardIndex < 4 ? "Building the foundation..." :
+						 currentCardIndex < 8 ? "Fleshing out the details..." :
+						 "Putting the finishing touches..."}
+					</p>
+				</div>
+
+
 			</div>
 		{/if}
 
