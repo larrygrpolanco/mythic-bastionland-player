@@ -1,0 +1,34 @@
+Authority
+
+MUSTERING TROOPS
+A typical Seat of Power can muster 3 Warbands, other Holdings 2. The Marshal determines their training and armament.
+
+TAXES, TITHES, & LEVIES
+Standard collections (p17) keep the Domain running without too much strain. A Steward can squeeze more from their Vassals for a war or great project, but must roll:
+INCREASED COLLECTIONS
+1 Immediate misrule.
+2-3 Your coffers are filled, but take a Crisis.
+4-6 The Vassals pay willingly, mostly.
+
+COURTLY CONFLICT
+Courtiers breed problems, especially when they hold leverage over their ruler, whether family influence, dark secrets, or military might. Here a ruler must tread carefully, as obvious solutions always leave at least one party feeling mistreated.
+Every Season brings some drama. Spark Tables (p22) can help to describe this.
+Roll to see how you’re involved:
+DRAMA IN COURT
+1 You are personally involved.
+2-3 You are involved by association.
+4-6 You are not involved.
+
+SUCCESSION
+Typically a ruler names their successor, though some Realms defer the decision to a conclave of Seers or a group of specially chosen Knights-Elector.
+Whoever the successor, they are sure to face at least some resistance, and should quickly establish their own authority.
+
+CONQUEST
+Knights live between two worlds. One of rank, oath, and rule of the worthy. The other of chaos, brutality, and rule of the strong.
+Often, having the audacity to seat yourself in a Holding is enough to make you the ruler.
+Holdings and Realms seized by force and left unchallenged tend to have a period of turmoil before adapting to the new status quo.
+
+GRAND DESIGNS
+Work on existing buildings or infrastructure is generally completed by the next Season.
+New buildings or infrastructure can be completed in a Season.
+Grand projects such as castles and roads require an entire Age of work.

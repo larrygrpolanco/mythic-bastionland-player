@@ -1,0 +1,454 @@
+
+The Ground Itself
+Everest Pipkin
+
+
+This is a game about places over time. 
+
+Think about places that have been important to you; your childhood fort under the rosebush; your first apartment, the one with the view; the town where your grandmother spent her last few years. Or, think about places that have been or will be important to others; a city-state in revolt; an ant colony; a generation ship 400 centuries into its voyage towards another star.
+
+Although there may be times during the game when we are compelled to widen or narrow our focus, this is not possible for us; the story we are building is about this place, this field, this star, this city, this tree, this crossroads. No matter how we feel about our characters, if they leave our frame we may not follow. Our camera is anchored to our place, and may not pivot or stray. 
+
+Remember that places have memory— that what has happened here is always, in some small or big way, written into the walls, the stones, or the future of the people who continue to live here. 
+
+Fundamentally, this is a game about the echoes and traces we leave for others after we are gone.
+
+Requires;
+2-5 players
+A deck of cards
+A six sided die
+A coin
+A piece of paper and a writing implement
+A few hours
+
+
+------------------------------------------------------------------------------------
+
+
+Getting started: 
+
+Pass the book around the table so everyone may flip through and become familiar with where the sections are.
+
+Establish whether you will read aloud in turns, or whether one person will take on the role of facilitator during setup. Regardless, these rules should be read aloud to the group.
+
+Clear the tabletop of extra clutter and gather a deck of cards, a six sided die, a coin, a piece of paper, and a pen or pencil.
+
+Separate the cards into two stacks, one of faces (jacks, queens, kings) and one of numbers (aces — 10s). Remove jokers. Shuffle each stack and place them face down on the table. The face-cards stack will be used during game setup, and the number cards will be used during main gameplay.
+
+Place the die on the table. The die will be used to establish our timeline.
+
+Touch the sheet of paper. This paper will be used to take very brief notes about names, places, and other story developments. You may choose to elect a scribe or to all take turns writing notes. Optionally, you may decide to skip taking notes entirely, merely relying on collective memory to tell the story.
+
+Place the coin on the table, heads up. This is a consent mechanic; some stories are hard to tell, and some games are scary to play. 
+
+If this coin is flipped to tails at any point, by any player, the game must immediately pause. It may not be resumed until everyone takes a break and discusses the reason for the pause, and any possible adjustments to the story that need to be made. Only after collectively deciding whether to end or to continue may the coin be flipped back and the game resume.
+
+If you are playing online or at a distance, or are interested in additional material, you may wish to skim the ‘optional mechanics’ section at the back of the book before starting play.
+
+Begin!
+
+
+------------------------------------------------------------------------------------
+
+
+Our setting: 
+
+The setting for our game should be decided collaboratively, around the table.
+
+This may be emergent— for example, one player may suggest a place that involves animals. Another player may amend this suggestion to mean a zoo. A third player may agree— but suggest making it a zoo planet, established as a biodiversity reserve in the far future. You may feel out multiple options, but try not to say no to other's suggestions. Rather, build on top of existent ideas or ask clarifying questions to create a place that is everyone’s.
+
+Remember that everything we see happen over the course of our game occurs in this single location— we cannot move outside of our established frame or see any actions or events elsewhere. Be prepared to spend time in the place that you choose.
+
+This place does not need to be thoroughly mapped out; for now, the barest description that may be summed up in a few sentences will suffice. We will discover it together, during play.
+
+Decide this now. The process should go around the table, and take no more than a few minutes. Everyone should contribute.
+
+
+------------------------------------------------------------------------------------
+
+
+Our timeline:
+
+This game is played in 4 cycles, and each cycle is separated by a gap in time. One player rolls the six sided die and records the result. This die will determine the unit of time that this gap is measured in, and this metric stays for the remainder of the game. A 1 means days, which might lend itself to an intimate and close-textured story. A 6 means millennia— you are playing a game over thousands of years, and what was here may not survive these jumps in recognizable ways.
+
+1 = days
+2 = weeks
+3 = years
+4 = decades
+5 = centuries
+6 = millennia
+
+This unit of time will affect the way the story is told. If you rolled days, your action should be quick-paced, happening in a ‘now’ that may see a few hours pass. If you rolled centuries or Millenia, your ‘now’ may be years or even decades.
+
+If the collective group feels that the given timeline is antagonistic to the story that you would like to tell, you may re-roll. However, try to think broadly; a story that was about a high school, may instead be about the fields that were there before, the place abandoned in the future, and the stones that are underneath it all. Conversely, a story that was at first glance about the movements of empire may narrow, instead focusing on one late-summer week, in a golden city that knows things are changing soon.
+
+You will begin by playing in the period of time you establish during setup— you will not move around in time until the first gap, detailed later. 
+
+
+------------------------------------------------------------------------------------
+
+
+Establishing our place:
+
+Each player is dealt cards from the face-cards stack in a circle until no cards are left. Then, going in this same circle, each player sets down one card at a time and answers the question associated with that card detailed below. They may read the questions first, or pick between their cards at random. Keep going until the world feels established or each player is out of cards, whichever happens first. Try to keep this discussion under 25 minutes; keep your answers to each question very short. You may wish to make brief notes to jog your memory later.
+
+Clubs:
+
+> Jack of Clubs - What was this place in the past? How long ago was that?
+
+> Queen of Clubs - What was the greatest moment in this place's history? (An innovation? A discovery? A revolution? A new sapling? The emergence of a cycle of cicadas?)
+
+> King of Clubs - If there are inhabitants, what are the visions for the future that they hold? Is it a long view? A short one?
+
+Hearts:
+
+> Jack of Hearts - Who lives here? What is an average person like in this place? What do they look like? What do they wear?
+or-
+Describe the flora and fauna. What is the landscape like? What animals and plants call it home?
+
+> Queen of Hearts - Who or what (a person, landmark, society) has been in this place the longest? How did they come to be here?
+
+> King of Hearts - What stories are told in or about this place? Does it have legends or myths? Does it have religion?
+Diamonds:
+
+> Jack of Diamonds - What is this placed named or called? Who named it, and for what reason?
+
+> Queen of Diamonds - What is valued in this place? What is it known to have in excess?
+
+> King of Diamonds - Who or what is in power here? (Is it a ruler? An apex predator? A series of laws that govern society? The weather?)
+
+Spades:
+
+> Jack of Spades - What are the threats to this place? Are these threats to the materiality of the place, or the people that live in it?
+
+> Queen of Spades - What was the greatest tragedy in this place’s past? How is it remembered?
+
+> King of Spades - If there are multiple people who live here, what are they divided on? What are the points of contention that are fought over?
+or-
+If there are not multiple people, what resources do the plants, animals, or visitors to our place vie for? 
+
+
+------------------------------------------------------------------------------------
+
+
+Main gameplay:
+
+During our 4 cycles of gameplay, players draw cards from the numerical pile. Each type of card is associated with a set of questions, which are answered in order. For example, the first time the player draws an ace of any suit, they would answer the first question listed under ‘The Aces’, which is; 
+	
+> 1st: What are the plants like in our place? The rocks? The soil?
+
+The second time an ace is drawn the player would answer the second question; 
+
+> 2nd: It is time to plant ‘the seedlings’. What are the seedlings and where are they planted? What is the harvest that is hoped for?
+
+And so forth. Read the question out loud, narrate your answer to the group, and then discard the card in the discard pile (optionally making a note of which card it was). The group may ask follow-up or clarifying questions, but may not contradict what you have expressly said.
+
+The player may also discard the card before addressing the question, and enter a focused situation, choosing to;
+
+> Tell a story
+> Throw a party
+> Discover something
+> See an omen
+> Leave the frame
+> Or move on, skipping this turn
+
+These focused situations allow us to skip certain questions, instead spending more time on a single moment. Choosing to enter a focused situation still counts as the ‘nth’ instance of the card. You may enter the same focused situation multiple times. The specific rules of these situations are detailed in a later section. 
+
+If the drawn card is a ten, the cycle ends, moving us forward in time. See the following section 'After every cycle' for more details about these gaps.
+
+
+------------------------------------------------------------------------------------
+
+
+After every cycle;
+
+When a player draws a 10 of any suit, time advances.
+
+The player rolls the six sided die, and this number, plus the unit of time decided at the beginning of the game, is the length of our gap. For example, if the die lands on a 3, and the unit decided at the top was days, 3 days pass. If the die reveals a 5, and the unit was centuries, you have a gap of 500 years. 
+
+You may choose to go forward or backward in time. 
+
+This may be a narratively useful place to take a break. After rolling the die, talk about something else, grab a snack from the kitchen, walk outside, or feed the cat. This is probably a tiny gap compared with the one described in our story, but consider allowing some moment to pass, and for the actions of the last cycle to fade just slightly into history.
+
+When the table reconvenes, you will collectively answer the following questions, optionally taking short notes. The players may each answer one question in a circle, or all chime in on each one. Remember, try not to contradict other player's assertions, but rather work your own ideas into the fabric of what they have said.
+
+> Do our characters/civilization still live here? If not, who lives here now? Does anyone?
+
+> What does the place physically look like now? Has anything visually changed? How does it smell now? How does it feel here?
+
+> Does the place still use the same name? If not, what is it called now, and who calls it that?
+
+After answering these questions, resume the normal pattern of gameplay.
+
+
+------------------------------------------------------------------------------------
+
+
+Ending the game;
+
+When the 4th ten card is drawn, the game is over— no matter the number of cards left in the pile, or the stories that are in motion. Our window has fogged, and the clarity of vision we had into our place is lost to us. It may feel sudden, but in truth there is never a clean exit. Places go on forever, building narrative by their mere existence. 
+
+However, just because we cannot know for certain what takes place after the window of our game does not mean that we cannot make some conjectures. After all, this is a game about long traces over time— by watching our place with such attention, maybe we have learned to predict what could come to pass. As a group, without cards, decide on the following —
+
+> What happens tomorrow in our place? Who wakes up (does anyone)? What do they see, and what is the feeling they get from the world?
+
+
+------------------------------------------------------------------------------------
+
+ 
+Summary of play;
+
+Gather friends, clear space, and read rules together.
+
+Discuss and decide on a setting.
+
+Roll die to establish length of gaps.
+
+Answer face-card questions, building out the place.
+
+Answer number-card questions or discard to take focused actions.
+
+Draw a ten to move forward or backward in time.
+
+Play until you have drawn the fourth ten and conclude together.
+
+
+------------------------------------------------------------------------------------
+
+
+Focused situations: 
+
+You may discard your card and pursue one of these actions during your turn, unless your drawn card is a 10.
+
+> Tell a story. The player adopts (or invents) a storytelling character in-game. Briefly describe them; their name, what they sound like. This may be an old bard, an entertainer on tv, a parent with a bedtime book, or something more abstract like a bird cawing at the morning.
+
+Other players may enter the scene as listeners, who may choose to interrupt to ask questions. Roleplay or narrate telling the story. The story that is told is known as a fiction or legend, not an actual course of in-game events; however the stories we tell about our world are as important as the things that happen in it.
+
+> Throw a party. The player describes the situation of the party (A birthday? A ball? A festival in the street? The spring, when the flowers all bloom?), and every player picks or invents a character or thing that attends. Roleplay or narrate as these characters, chatting idly, dancing, having cake, or merely existing in splendor. Topics of the larger story or situation may come up in these conversations, but do not act on the big things in any tangible way at the party— they are just a topic of gossip for a very good day.
+
+> Discover something. This is a chance to name a fact that enters the world whole-cloth. Maybe a teenager unearths some strange old artifact, or a chemist synthesizes a new periodic element, or a water main breaks in the street. Do not add details to past events— this is a discovery that is happening right now. Narrate what was discovered and why it is important.
+
+> See an omen. Here, the player may gesture at a future possibility. An omen may be the classic type; a comet or a spell gone awry; or something that points at the materiality of the world— a hungry animal in from a famine in the countryside, or an heir to the throne that sickens ahead of a coup. 
+
+This is a chance to set things in motion. The player narrates what is seen, by who, and how it is perceived by those that hear the news.
+
+> Leave the frame. Just for a second, the window widens and we are able to see a little bit more of our world. You may ask— what is the mountain like to the north of our house? Are there massing armies on the sea? What type of dogs do the neighbors have? Or anything else that you wish to know.
+
+You get one question and the table collectively answers, then the world snaps back.
+
+> Move on. The player skips this turn, merely discarding the card and letting the action rest elsewhere.
+
+
+------------------------------------------------------------------------------------
+
+
+Aces-
+
+1st: What are the plants like in our place? The rocks? The soil?
+
+2nd: It is time to plant ‘the seedlings’. What are the seedlings and where are they planted? What is the harvest that is hoped for?
+
+3rd: The harvest day has arrived. What is being harvested, for what purpose, and how is it being stored?
+
+4th: Sometimes change is so slow that the world shifts unnoticed. What is the groundswell that has been taking place so quietly?
+
+
+
+Twos-
+
+1st: Name a monument, marker, statue, or other physicalized memory that exists in our place. What does it mark? 
+
+2nd: What is produced in our place right now, and how does it make its way into the wider world? (Is this export a physical good? Knowledge? Something else?)
+
+3rd: A major modification is made to the environment of our place. What is this change? Was it made by someone or did it simply come to pass?
+
+4th: A breakthrough moment (in technology, arts, politics, philosophy, or daily life) tips the scales of a power balance. What was this breakthrough, and how does it play out socially?
+
+
+
+Threes-
+
+1st: What do people listen to and perform here? What is considered the folk art?
+
+2nd: What do people in our place argue about for fun (whether at the bar, in the square, or in other social spaces)?
+
+3rd: A new style, fad, or devotion sweeps our place. What is it? Who cares about it?
+
+4th: A bad decision leaves marks on the land. What was this decision, and what trace does it leave?
+
+
+
+Fours-
+
+1st: What is the primary building or natural material of our place?
+
+2nd: ‘The bar’ opens their doors to all. What is the bar, and who is a regular there? 
+or- 
+‘The church’ changes a core mandate. What is the church, and what about their worldview has shifted?
+
+3rd: Something new has been constructed, and stands where there was once something else. What was once there, and what has replaced it?
+
+4th: A creative or artistic achievement is unveiled. What is it? How is it received? 
+
+
+
+Fives-
+
+1st: What are the stars like in our place? The sky? The weather?
+
+2nd: What secrets are kept in our place? Why are they kept? By who and from whom?
+
+3rd: There is a union. Is it political? Emotional? Marital? What is newly aligned?
+
+4th: Someone is found guilty, and is punished. What did they do, and what is the punishment?
+
+
+
+Sixes-
+
+1st: What is the most horrible thing in or about our place? 
+
+2nd: Someone returns to our place changed. Who are they, and how are they different?
+
+3rd: Something small but noticeable is destroyed. What was it, and who or what destroyed it?
+
+4th: A natural or architectural disaster strikes with no warning, leaving something in ruins. What was this disaster?
+
+
+
+Sevens-
+
+1st: What is the most beautiful thing in or about our place?
+
+2nd: Invent a specific street, building, corner, overlook, or meeting-place. What is it called officially, and what do the locals call it?
+
+3rd: A forgotten aspect to our place is recovered. What is it? A corner? A basement? A hidden garden?
+
+4th: A previous alliance shows cracks. There is bickering and infighting. Who is fighting? What are they fighting about?
+
+
+
+Eights-
+
+1st: What does success look like in our place? What do the inhabitants want?
+
+2nd: The news is dramatic, and tensions are high. What is the news? How is this reaction physicalized in space?
+
+3rd: Someone (or a group of people) comes to our place. Who are they, and why have they come? Do they bring anything with them? 
+
+4th: The future feels unsure, and the talk of our place has turned to preparations. What preparations are being taken, and for what?
+
+
+
+Nines-
+
+1st: What do people eat and drink here? What is considered traditional?
+
+2nd: Someone (or a group) leaves our place. Who are they, and why are they going? What do they take with them and what do they leave behind?
+
+3rd: There is planning going into a celebration. Is it a festival, holiday, or remembrance? What is it celebrating?
+
+4th: New information about a past event is uncovered, casting it in a dramatically different light. What was found and how does it change how the past is perceived?
+
+
+
+Tens-
+
+You may pick freely between the following questions (but do not pick the same one twice):
+
+> The ‘gardens’ are planted, the work has been done, and now we wait. What was planted, and what are we waiting for? 
+
+> There is a great victory that enables the inhabitants of our place to build towards a new future. What is this future they wish for? How will they set to work on it?
+
+> There a great loss, one that sets new burdens on the inhabitants of our place. How do they cope, and what have they lost forever?
+
+> Someone important (socially, political, or emotionally) in our place dies. Who were they, and how were they killed? How are they remembered after? 
+
+> It is a resting day, in anticipation of problems just across the horizon. What is believed to be coming, and how do the inhabitants of our place set these problems aside, for just one day?
+
+> It is a resting day, in the knowledge of a secure future. What is taken as a given, and how do the inhabitants of our place spend a lazy day?
+
+
+After answering this question, you will roll the die and move in time, then collectively decide;
+
+> Do our characters/civilization still live here? If not, who lives here now? Does anyone?
+
+> What does the place physically look like now? Has anything visually changed? How does it smell now? How does it feel here?
+
+> Does the place still use the same name? If not, What is it called now, and who calls it that?
+
+Refer to the section ‘After every cycle’ for the complete rules pertaining to these gaps.
+
+If this was your 4th ten card, the game is over— instead refer to the section ‘Ending the game’.
+
+
+------------------------------------------------------------------------------------
+
+
+Notes about style of play (optional);
+
+If you find yourself struggling to establish a place that feels real, ask and answer questions about what the place looks, smells, sounds, and feels like. Create and investigate daily patterns— the office manager who always gets a coffee at 11:35 am, or the academy that lets out at the 4 pm bell. Talk about markers, monuments, and statues. Decide on the colloquial names for fishings spots and romantic overlooks, and then make up the story that gained it such a moniker. Remember that every place is densely lived.
+
+As you play, difficult situations will arise, conflicts will flame, and lives will be cut short, but our place will likely endure. It is up to the table to willfully expose our place to such difficulty, knowing that it is through such challenges that we reveal the mettle of where we are.
+
+Remember, we are not focused on individual people, but rather the walls that they live in, the paths that they walk on, and the statues and legal regulations and mythologies that they erect which outlast them. Try to avoid embodying a single character repeatedly, or becoming so invested in a single life that you find yourself trying to 'win' for them. Instead, we must watch from the frame we established, not impartially but with the knowledge that every place sees much and cannot hold on to one person forever.
+
+There is no GM in this game, but one player may take on the role of the facilitator— this is someone who has played before, or is merely familiar with the ruleset. The facilitator does not have any additional story-telling power over the other players, but may choose to gently remind of the goals of the game if the table becomes myopic or sidetracked. 
+
+As always, the health of the players is more important than the game. Always warn other players first if you want to take the story to a place that might be difficult, and listen carefully to any concerns. If at any point the story is too hard to hear for anyone, pause the game and choose to take a break, jump forward to a different scene, change the course of events, or choose to stop playing.
+
+
+------------------------------------------------------------------------------------
+
+
+Special Cases (optional);
+
+Poetic interpretation- 
+Some of the cards will mention things like the street, the church, or crowds. These may not be applicable to the world you chose, but they likely have an emotional equivalent. A town square may be the kitchen table and a parade may be on television. Please take liberties with these (and any) cards.
+
+Non-human timelines- 
+If you are playing a story with non-human characters, please feel free to adapt these metrics to their lifetimes if it feels more appropriate. A day in a city of bugs may mean something quite different from a day in online space. However, if in doubt, err on the side of human timelines, as we can implicitly understand those metrics of scope.
+
+Places with no inhabitants- 
+It is possible that you choose a place that is not peopled, or that loses its population over time. You may choose to skip cards that ask about those who live here, or to apply them abstractly to the landscape, plants, and other non-sentient aspects of the world.
+
+Real history- 
+You may tell a story about actual historical events; or, because of the way that our timeline works, you might end up in real history. Do not feel obligated to reproduce what actually occurred in the world. Remember that this is a story.
+
+Tarot decks-
+The players may optionally choose to use a tarot deck instead of a deck of playing cards. If this is the case, the major arcana should be removed, as will as the 'page' cards, which have no equivalent in a playing card deck. In the tarot, wands are equivalent to clubs, cups correlate to hearts, pentacles are diamonds, and swords correspond to spades. 
+
+Variable time spans- 
+You may elect to skip establishing your timeline at the top of the game, and instead roll two 6-sided die during each gap. Your first die will correspond to the unit of measurement (1 = days, 2 = weeks, 3 = years, 4 = decades, 5 = centuries, 6 = millennia), while the second refers to how many of these units have passed each time. This way, you may have wildly different time spans. One gap may be 4 days, while the next is 3000 years.
+
+
+------------------------------------------------------------------------------------
+
+
+Playing online (optional);
+
+If you are playing this game over a distance, you will need to adapt some of the rules for online play.
+
+Please use only one deck of cards— this may be a digital deck that every player has access to (via roll20 or another service), or one player may draw physical cards for everyone and narrate the results each turn. 
+
+Any notes may be kept in a shared doc, or in the text of the chat client you are using.
+
+The consent token should be replaced with a safe word that may be dropped into the text chat to immediately pause the game. I recommend ‘STOP’ but you may pick your own. 
+
+It is easy to skip breaks when playing online— don’t forget to pay attention to the energy level of your group and self, and take time when needed. Telling stories is tiring!
+
+
+------------------------------------------------------------------------------------
+
+
+Thanks; 
+
+This game is dedicated to the group of friends with whom I first played The Quiet Year, a map-drawing game about managing a small community to which The Ground Itself owes its roots. 
+
+Kat Brewster, Jack de Quidt, and V Buckenham— thank you.
+
+I also wish to thank the generous playtesters who helped me refine this game over the course of development by providing feedback; Alex Lukas, Loren Schmidt, V Buckenham, Lily Pipkin, Ronan Melomo, Brooks Naylor, Cal Filkin, Shreya Shanker, Filipa Estrela, Alexander Ahlquist, Jackson Tegu, Jon Baker, Brenna Asplund, Laurel Asplund, Ivy Asplund, Ella Asplund, Kevin Masterson, Christian Sorrell, J Hewes, David Hartley, Lois Stone, Ben Leverett-Jaques, Bryony C., Siera C., Julia D., Ollie D., Kathryn M., Catherine L., Colin Stearns, Evan Skamarock, Ethan Skamarock, Andy Lasnik, Cian Booth, Neil Anderson, Ruth Hunter, Jennifer Lorigan, Conor Barry, Andrew Yoder, James Horgan, E. Forney, Zach Urtes, Dillon Lareau, Emily Durham, and Matthew Glisson.
+
+
+The Ground Itself, 
+Everest Pipkin, 2019

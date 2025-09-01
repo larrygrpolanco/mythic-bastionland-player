@@ -1,0 +1,300 @@
+The "Her" Aesthetic: Your Final Design Brief
+Core Concept: Your website is Theodore's apartment. The primary experience is warm, clean, and intimate (light mode). The vast, cool cityscape is always present, but it's viewed through a window—in the background of a hero section, or as a dark-themed footer that grounds the page.
+1. Color & Light: The Warm Interior
+The default theme is light, warm, and airy.
+Primary Background: A soft, creamy off-white. This is the "walls" of your apartment. (--her-cream: #F4F0E9;)
+Primary Text: A dark, warm charcoal, not a harsh black. Easy to read and soft on the eyes. (--her-charcoal: #2A2525;)
+Main Accent: The signature desaturated red. Use this for key elements: links, heading accents, and important buttons. It's the pop of color from Theodore's shirt. (--her-red: #D95B43;)
+The "Window" (Dark Elements): The cool her-slate and her-twilight colors are reserved for background elements like the hero section backdrop or the footer, creating the view of the city at night.
+Generated css
+body {
+  background-color: var(--her-cream);
+  color: var(--her-charcoal);
+}
+Use code with caution.
+Css
+2. Typography: A Balanced Blend (Retro + Future)
+This is the heart of your retro-futurism. We combine the soul of handwritten letters with the clarity of a modern OS.
+Headings (The "Retro Letter"): Use an elegant, classic serif font. This brings warmth, personality, and a touch of nostalgia.
+Suggestions: Playfair Display, Lora, Cormorant Garamond.
+CSS: font-family: 'Playfair Display', serif; color: var(--her-red);
+Body Text (The "Future OS"): Use a clean, minimalist, and highly readable sans-serif font. Crucially, use a lighter font weight to keep it feeling airy and modern.
+Suggestions: Inter, Lato, Rubik.
+CSS: font-family: 'Inter', sans-serif; font-weight: 300; line-height: 1.7;
+3. Interactivity: Subtle Cinema
+Motion is present, but it's slow, gentle, and atmospheric, reflecting the film's pacing. It should feel graceful, not flashy.
+Your Guiding Principle: Favor opacity and transform transitions over things that change color or position drastically.
+Atmospheric (Static) Effects:
+A hero section with a permanently blurred cityscape background.
+Subtle glows on text (text-shadow) or containers (box-shadow) in dark sections.
+Responsive (Interactive) Effects:
+Links: A slow fade to a slightly brighter red on hover, not a jarring color switch.
+Cards/Projects: On hover, a card might lift almost imperceptibly (transform: translateY(-4px);) with a slightly softer shadow.
+No: Bouncing, sliding from the side, or fast-spinning animations.
+Generated css
+/* A graceful hover for a project card */
+.project-card {
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(42, 37, 37, 0.1);
+}
+Use code with caution.
+Css
+4. Layout & Details: The Clean OS
+Your desire for clean, precise design means we prioritize structure and minimalism over organic texture.
+Layout: Embrace negative space. Content should have room to breathe. Use a simple grid for structure, but give each element generous padding.
+Icons: Use a thin-line, geometric icon set. This reinforces the "OS" feel.
+Suggestions: Feather Icons, Phosphor Icons.
+Dividers: Avoid hard <hr> lines. Use empty space or very subtle, light-grey borders (border: 1px solid rgba(0,0,0,0.1);) to divide sections.
+No Textures: We will not use film grain or paper texture overlays. The beauty will come from the pristine layout, typography, and color.
+Putting It All Together: A Recipe for Your Homepage
+Based on your decisions, here is a clear, actionable plan for your homepage:
+Hero Section (The Window):
+Full-width section with a dark, blurred cityscape image as the background (filter: blur(8px)).
+Centered on top is your name and/or title.
+Your name is in the elegant serif font (Playfair Display), in her-cream color, with a subtle text-shadow to lift it off the background.
+Main Content (The Apartment):
+The page background switches to her-cream.
+Your introduction/bio text is in the clean sans-serif font (Inter), with generous line-height.
+Your projects are laid out in a clean grid. Each project card has a thin border, a serif heading, sans-serif description, and a her-red link to view more.
+Hovering on a card triggers a very subtle "lift" animation.
+Footer (The Rooftop):
+A simple, solid block of her-slate or her-twilight color.
+Contains your contact links (e.g., Email, LinkedIn) using thin-line icons and text in her-cream or her-peach. It's quiet, dark, and functional.
+This framework is both highly specific and flexible. It provides clear guidelines while giving you the freedom to build your content within it. You have successfully defined your own unique variant of the "Her" aesthetic.
+
+The "Her" Aesthetic: A Detailed Style Guide for Your Website
+The core philosophy of this design is Warm, Introspective Minimalism. It aims to feel clean and futuristic like a modern OS, but with the warmth and emotional depth of a handwritten letter. It's calm, organized, and quietly confident.
+I. Foundation
+These are the global rules that define the site's foundational look and feel.
+1. Color Palette
+Aesthetic Choice & Reasoning:
+We're establishing a primary "light mode" based on the warm interiors of the film. The colors are muted and natural, with a complete absence of pure #000000 black and #FFFFFF white to maintain a soft, filmic quality. The cool tones are reserved for background elements to create that "view from the window" depth.
+CSS Implementation:
+Using CSS Custom Properties (:root) allows us to define this palette once and use it everywhere, making future tweaks easy.
+Generated css
+:root {
+  /* Warm Palette (Primary) */
+  --c-red: #D95B43;        /* The primary accent for links, highlights */
+  --c-cream: #F4F0E9;      /* The primary background "white" */
+  --c-charcoal: #3A3232;   /* The primary text "black" */
+  --c-wood: #6E4A34;        /* For borders or secondary backgrounds */
+
+  /* Cool Palette (Backgrounds/Accents) */
+  --c-slate: #31363F;      /* For footers or dark background elements */
+  --c-twilight: #4A4C5E;    /* Dusky sky blue, for gradients or subtle accents */
+  
+  /* Effect Colors */
+  --c-glow-red: rgba(217, 91, 67, 0.25); /* For glowing box-shadows */
+  --c-glow-light: rgba(244, 240, 233, 0.7); /* For glowing text-shadows */
+}
+
+body {
+  background-color: var(--c-cream);
+  color: var(--c-charcoal);
+}
+Use code with caution.
+Css
+2. Typography
+Aesthetic Choice & Reasoning:
+We're using a Balanced Blend to capture the retro-futurist theme. A classic, personable Serif for headings feels like the letters Theodore writes—thoughtful and human. A clean, lightweight Sans-Serif for body text feels like the modern OS—clear, efficient, and breathable. Generous line-height is crucial for the airy, uncluttered feel.
+CSS Implementation:
+Import fonts from a service like Google Fonts. Define them in variables for easy use.
+Generated css
+/* In your HTML <head> or CSS @import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Lora:wght@400;500&display=swap');
+
+:root {
+  --font-serif: 'Lora', serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 300; /* Light weight for the "future" feel */
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 500; /* A medium weight to feel substantial */
+  line-height: 1.25;
+  color: var(--c-charcoal);
+}
+Use code with caution.
+Css
+3. Layout & Spacing
+Aesthetic Choice & Reasoning:
+The layout is minimalist and structured, inspired by the clean OS interfaces and the organized office. We will use a consistent spacing scale to create rhythm and harmony. Long-form text will be contained in a narrow column for maximum readability and a book-like feel.
+CSS Implementation:
+A spacing scale in :root prevents "magic numbers" and ensures consistency. A simple .container class can be used to control the width of content sections.
+Generated css
+:root {
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 32px;
+  --space-xl: 64px;
+}
+
+.container {
+  width: 90%;
+  max-width: 1100px; /* For wide content like grids */
+  margin-left: auto;
+  margin-right: auto;
+  padding: var(--space-xl) 0;
+}
+
+.text-container {
+  max-width: 70ch; /* 'ch' unit is ideal for text line-length */
+  margin: var(--space-xl) auto;
+}
+Use code with caution.
+Css
+II. Core Components
+These are the reusable elements that build your pages.
+1. Cards (for Portfolio/Experience)
+Aesthetic Choice & Reasoning:
+Inspired by the office scene, cards are clean, structured, and organized. The interaction is subtle: a gentle lift and a warm glow on hover, making them feel responsive without being distracting. This is our "subtle cinematic" interactivity.
+CSS Implementation:
+Generated html
+<div class="card">
+  <h3>Taped Chinese</h3>
+  <p>A web application to help language learners study with subtitles...</p>
+  <a href="#">More Info</a>
+</div>
+Use code with caution.
+Html
+Generated css
+.card {
+  background-color: #FFFFFF; /* A slightly purer white to pop off the cream bg */
+  padding: var(--space-lg);
+  border: 1px solid #EAEAEA;
+  border-radius: var(--space-xs);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px -5px var(--c-glow-red);
+}
+
+.card h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+.card a {
+  font-weight: 400; /* Bolder for call to action */
+}
+Use code with caution.
+Css
+2. Buttons & Links
+Aesthetic Choice & Reasoning:
+Following the clean "OS" philosophy, we avoid heavy, skeuomorphic buttons. Most interactions will be simple text links. A primary button might have a subtle fill, but no hard borders or gradients.
+CSS Implementation:
+Generated html
+<a href="#">A standard link</a>
+<button class="btn btn-primary">Primary Action</button>
+Use code with caution.
+Html
+Generated css
+a {
+  color: var(--c-red);
+  text-decoration: none;
+  font-weight: 400;
+  transition: opacity 0.3s ease;
+}
+
+a:hover {
+  opacity: 0.7;
+}
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--c-red);
+  color: var(--c-cream);
+}
+
+.btn-primary:hover {
+  background-color: #C14431; /* A slightly darker red */
+  transform: translateY(-2px);
+}
+Use code with caution.
+Css
+III. Atmospherics & Effects
+This is where we inject the cinematic magic.
+1. Blur & Depth of Field
+Aesthetic Choice & Reasoning:
+This is the most direct cinematic translation, taken from the rooftop focus shots. We blur background images to create a sense of depth, drawing the user's eye to the foreground content and evoking a contemplative mood.
+CSS Implementation:
+This works best on a "hero" section or any container with a background image. A pseudo-element (::before or ::after) is often used for the background to keep it separate from the content.
+Generated html
+<section class="hero-section">
+  <div class="hero-background"></div>
+  <div class="hero-content">
+    <h1>Hello, I'm Larry.</h1>
+    <p>I live in Taipei, Taiwan...</p>
+  </div>
+</section>
+Use code with caution.
+Html
+Generated css
+.hero-section {
+  position: relative;
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Crucial for containing the blur */
+}
+
+.hero-background {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url('your-cityscape.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px) brightness(0.8);
+  /* Stretch the element to hide blurred edges */
+  transform: scale(1.1); 
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: var(--c-cream);
+}
+
+.hero-content h1, .hero-content p {
+  color: var(--c-cream);
+  /* The glow effect for text on a dark/blurry image */
+  text-shadow: 0 2px 15px rgba(0,0,0,0.5); 
+}
+Use code with caution.
+Css
+2. Transitions
+Aesthetic Choice & Reasoning:
+The film has a slow, deliberate pace. Our transitions should mirror this. All interactive elements should change state smoothly and gently over about 0.3-0.4 seconds. We'll favor opacity, transform, and box-shadow changes, as they are more performant and visually softer than changing width or height.
+CSS Implementation:
+A general rule can be set for common elements.
+Generated css
+a, button, .card {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+Use code with caution.

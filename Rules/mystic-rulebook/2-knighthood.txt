@@ -1,0 +1,38 @@
+Knighthood
+
+You are Knights, united by a common Oath and visions of the City. You may have dreams of glory, but every Knight must accept the risk of death.
+The Seers who knighted you have deemed that you travel as a Company. While some of you may rest, roam, or die, your collective journey will be as one.
+
+Knights have 3 Virtues. Roll a value for each in order. The Start that you chose for your Company determines the dice you roll. If unsure, roll d12+d6.
+
+VIGOUR
+Strong limbs, firm hands, powerful lungs.
+
+CLARITY
+Keen instinct, lucid mind, shrewd eyes.
+
+SPIRIT
+Charming tongue, iron will, fierce heart.
+
+Roll for Guard (GD), your skill at avoiding Wounds. The Start that you chose for your Company determines the dice you roll. If unsure, roll d6.
+
+Roll or choose a Knight (p26).
+This gives:
+Property: Items brought with you.
+Ability: A special talent unique to you.
+Passion: A special means you have to restore your Spirit.
+
+Every Knight has a dagger (d6), torches, rope, dry rations, and camping gear.
+Every Knight knows the three Feats (p10).
+Every Knight has sworn the Oath:
+SEEK THE MYTHS
+HONOUR THE SEERS
+PROTECT THE REALM
+
+SQUIRES
+Small Companies (2 Knights or fewer) may give each Knight a Squire. They serve as apprentices, and are not yet Knights, so cannot gain Glory or perform Feats.
+2d6 for each Virtue, 1GD.
+They ride a pony (VIG 7, CLA 7, SPI 2, 2GD) and carry a dagger (d6).
+Roll d6 for their extra equipment.
+1: Cudgel (d8 hefty), 2: Axe (d8 hefty), 3: Hatchet (d6), 4: Shortbow (d6 long), 5: Shield (d4, A1), 6: Three Javelins (d6).
+When Knighted they gain d6 in each Virtue.

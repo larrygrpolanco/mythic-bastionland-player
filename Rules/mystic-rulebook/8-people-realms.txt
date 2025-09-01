@@ -1,0 +1,68 @@
+
+People & Realms
+
+SERVICE
+Holdings house a range of people who can be called on for service. The larger the Holding, the more likely that a particular service is being offered there.
+Many will gladly offer their service to a Knight, but all have limits, after which they ask something in return or refuse entirely.
+As with trade, the key question comes down to “What can I offer that they would value?”.
+Common services are offered everywhere.
+Uncommon services require training.
+Rare services require a lifetime dedication.
+Roll their Virtues on d12+d6.
+
+COMMON
+Servant: 2GD
+Single duty with little expertise
+Guide: 4GD
+Handaxe (d6), javelin (d6), local knowledge
+Sentry: 3GD
+Billhook (d10 long), little appetite for combat
+
+UNCOMMON
+Herbalist: 2GD
+Knows treatments, not cures
+Soldier-at-Arms: 6GD
+A2 (helm, shield)
+Spear (d6 hefty), shield (d4), battle worn
+Archer: 3GD
+Shortbow (d6 long)
+
+RARE
+Sage: 2GD
+Holds immense knowledge in a particular area of expertise
+Alchemist: 2GD
+Creates poisons or quasi-medicinal potions
+Sellsword: 7GD
+A4 (coat, plates, helm, shield)
+Longsword (2d8 hefty), shield (d4)
+Generally only agrees to fights that they are confident they can win
+
+REALMS
+• The world is fractured into petty Realms, each ruled from a Seat of Power.
+• Smaller Holdings are walled settlements tended by Vassals, guarded by Knights.
+• Most that lies between is wilderness.
+
+MYTHS
+• Stories that became truths, or are destined to come to pass.
+• Nobody agrees on the details, but every version is true in some way.
+• There’s no such thing as “just a myth”.
+
+ROLES
+• Most fall into one of four roles: Vassal, Vagabond, Knight, or Seer. A web of seniority exists within and between each.
+• Vassals serve a ruler, typically a Knight, in return for protection.
+• Vagabonds roam, working for and protecting only themselves.
+
+SEERS
+• Those who understand the nature of Myth enough to glimpse into our future.
+• Their visions grant legitimacy and direction to a Knight’s quest.
+• They know when a Squire is ready to become a Knight, and when a Knight is ready to seek the City.
+
+KNIGHTS
+• Those who take the Oath are held in esteem, but expectations burden them.
+• They rely on their arms, but are expected to know the customs of peace.
+• Usually one Knight holds each title, passed on in retirement or death.
+
+FAITH
+• Some believe there is truth in the sky: the stars, moon, sun, positions, and motions.
+• Some look to nature: the turn of seasons, the sound of trees, the wisdom of beasts.
+• Some believe the sacred stories that weave into Myths, guiding us to the City.
