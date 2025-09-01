@@ -1,11 +1,14 @@
 <script>
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import Footer from '../components/Footer.svelte';
 
 	let displayText = $state('');
 	let currentIndex = $state(0);
 	let isTyping = $state(true);
 	let showButton = $state(false);
+	let showSkipButton = $state(true);
+	let timeoutId = $state(null);
 
 	const fullText = `The Ground Itself
 
@@ -19,7 +22,7 @@ Remember that places have memory— that what has happened here is always, in so
 
 Fundamentally, this is a game about the echoes and traces we leave for others after we are gone.`;
 
-	const typingSpeed = 30; // milliseconds per character
+	const typingSpeed = 25; // milliseconds per character (faster)
 
 	onMount(() => {
 		typeText();
@@ -29,15 +32,28 @@ Fundamentally, this is a game about the echoes and traces we leave for others af
 		if (currentIndex < fullText.length) {
 			displayText += fullText[currentIndex];
 			currentIndex++;
-			setTimeout(typeText, typingSpeed);
+			timeoutId = setTimeout(typeText, typingSpeed);
 		} else {
 			isTyping = false;
 			showButton = true;
+			showSkipButton = false;
 		}
 	}
 
 	function startGame() {
 		goto('/games/the-ground-itself/setup');
+	}
+
+	function skipIntro() {
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+			timeoutId = null;
+		}
+		displayText = fullText;
+		currentIndex = fullText.length;
+		isTyping = false;
+		showButton = true;
+		showSkipButton = false;
 	}
 </script>
 
@@ -137,6 +153,29 @@ Fundamentally, this is a game about the echoes and traces we leave for others af
 		box-shadow: 0 8px 25px rgba(74, 124, 89, 0.4);
 	}
 
+	.skip-button {
+		display: block;
+		margin: 0 auto var(--space-md);
+		padding: var(--space-sm) var(--space-lg);
+		background: transparent;
+		color: var(--c-charcoal);
+		border: 1px solid var(--c-mint);
+		border-radius: var(--space-sm);
+		font-family: var(--font-sans);
+		font-size: 0.9rem;
+		font-weight: 300;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		opacity: 0.7;
+	}
+
+	.skip-button:hover {
+		background: var(--c-mint);
+		color: var(--c-cream);
+		opacity: 1;
+		transform: translateY(-1px);
+	}
+
 	.fade-in {
 		opacity: 0;
 		animation: fadeIn 1s ease-in-out forwards;
@@ -160,6 +199,12 @@ Fundamentally, this is a game about the echoes and traces we leave for others af
 			{/if}
 		</div>
 
+		{#if showSkipButton}
+			<button class="skip-button fade-in" onclick={skipIntro}>
+				Skip Introduction
+			</button>
+		{/if}
+
 		{#if showButton}
 			<button class="begin-button fade-in" onclick={startGame}>
 				Begin
@@ -167,3 +212,5 @@ Fundamentally, this is a game about the echoes and traces we leave for others af
 		{/if}
 	</div>
 </main>
+
+<Footer />

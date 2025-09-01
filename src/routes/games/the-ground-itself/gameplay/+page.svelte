@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { gameStore, gameActions } from '../lib/gameStore.js';
 	import TimeViewport from '../components/TimeViewport.svelte';
+	import Footer from '../components/Footer.svelte';
 
 	let gameData = $state($gameStore);
 	let currentAnswer = $state('');
@@ -492,3 +493,5 @@
 		{/if}
 	</main>
 </div>
+
+<Footer />

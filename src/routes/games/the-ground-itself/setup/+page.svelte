@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { gameStore, gameActions } from '../lib/gameStore.js';
+	import Footer from '../components/Footer.svelte';
 
 	let placeName = $state('');
 	let placeDescription = $state('');
@@ -371,3 +372,5 @@
 		{/if}
 	</div>
 </main>
+
+<Footer />
