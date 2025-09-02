@@ -3,6 +3,13 @@
 	import { goto } from '$app/navigation';
 	import { gameStore, gameActions } from '../lib/gameStore.js';
 	import Footer from '../components/Footer.svelte';
+	import SetupHeader from '../components/SetupHeader.svelte';
+	import ProgressIndicator from '../components/ProgressIndicator.svelte';
+	import GuidanceSection from '../components/GuidanceSection.svelte';
+	import SettingSection from '../components/SettingSection.svelte';
+	import TimelineSection from '../components/TimelineSection.svelte';
+	import EstablishingSection from '../components/EstablishingSection.svelte';
+	import SetupCompleteSection from '../components/SetupCompleteSection.svelte';
 	import './+page.css';
 
 	let placeName = $state('');
@@ -98,6 +105,11 @@
 		}
 	}
 
+	function backToSetting() {
+		currentSection = 'setting';
+		if (showGuidance) typeText(sectionGuidance.setting);
+	}
+
 	function startGame() {
 		// Save final answers
 		if (currentFaceCard && faceCardAnswers[currentFaceCard.name]) {
@@ -160,23 +172,9 @@
 
 <main class="cosmic-bg" style="padding: var(--space-xl) 0;">
 	<div class="container mx-auto px-4 py-8 max-w-4xl">
-		<!-- Header -->
-		<header class="text-center mb-8">
-			<h1 class="text-3xl md:text-4xl mb-2" style="font-family: var(--font-serif); font-weight: 500; color: var(--c-green); line-height: 1.25;">
-				Establish Your Place
-			</h1>
-			<p style="color: var(--c-charcoal); font-family: var(--font-sans); font-weight: 300;">
-				Let's build the foundation of your story
-			</p>
-		</header>
+		<SetupHeader />
 
-		<!-- Progress Indicator -->
-		<div class="progress-indicator mb-8">
-			<div class="progress-step" class:active={currentSection === 'setting'}></div>
-			<div class="progress-step" class:active={currentSection === 'timeline'}></div>
-			<div class="progress-step" class:active={currentSection === 'establishing'}></div>
-			<div class="progress-step" class:active={setupComplete}></div>
-		</div>
+		<ProgressIndicator {currentSection} {setupComplete} />
 
 		<!-- Guidance Toggle -->
 		<div class="text-center mb-6">
@@ -188,58 +186,9 @@
 			</button>
 		</div>
 
-		<!-- Guidance Text -->
-		{#if showGuidance && !setupComplete}
-			<div class="guidance-card mb-8">
-				<div class="guidance-text">
-					{guidanceText}
-					{#if isTyping}
-						<span class="cursor"></span>
-					{/if}
-				</div>
-			</div>
-		{/if}
+		<GuidanceSection {showGuidance} {currentSection} {sectionGuidance} {setupComplete} />
 
-		<!-- Our Setting Section -->
-		{#if currentSection === 'setting'}
-			<div class="setup-card">
-				<h2 class="text-2xl mb-6" style="font-family: var(--font-serif); font-weight: 500; color: var(--c-green); line-height: 1.25;">Our Setting</h2>
-
-				<div class="space-y-4">
-					<div>
-						<label for="placeName" class="form-label">Place Name</label>
-						<input
-							id="placeName"
-							bind:value={placeName}
-							type="text"
-							placeholder="e.g., The Forgotten Valley, Crystal City, Ancient Oak Grove"
-							class="form-input"
-						/>
-					</div>
-
-					<div>
-						<label for="placeDescription" class="form-label">Place Description</label>
-						<textarea
-							id="placeDescription"
-							bind:value={placeDescription}
-							rows="3"
-							placeholder="Describe your place in a few sentences..."
-							class="form-input"
-						></textarea>
-					</div>
-				</div>
-
-				<div class="text-right mt-6">
-					<button
-						onclick={nextSection}
-						disabled={!placeName || !placeDescription}
-						class="btn-primary"
-					>
-						Continue to Timeline
-					</button>
-				</div>
-			</div>
-		{/if}
+		<SettingSection {currentSection} bind:placeName bind:placeDescription onNextSection={nextSection} />
 
 		<!-- Our Timeline Section -->
 		{#if currentSection === 'timeline'}

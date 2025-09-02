@@ -1,17 +1,5 @@
 <script>
-	import { goto } from '$app/navigation';
-	import { gameStore } from '../lib/gameStore.js';
-	import Footer from '../components/Footer.svelte';
-	import GamePlay from '../components/GamePlay.svelte';
-
-	let gameData = $state($gameStore);
-
-	// Check if setup is complete before allowing gameplay
-	$effect(() => {
-		if (!gameData.place.name || !gameData.timeline.unit) {
-			goto('/games/the-ground-itself/setup');
-		}
-	});
+	// Gutted functionality - UI structure preserved
 </script>
 
 <main class="cosmic-bg" style="padding: var(--space-xl) 0;">
@@ -22,7 +10,7 @@
 				The Story Unfolds
 			</h1>
 			<p style="color: var(--c-charcoal); font-family: var(--font-sans); font-weight: 300;">
-				Building {gameData.place.name} through time
+				Building The Ancient Oak Grove through time
 			</p>
 		</header>
 
