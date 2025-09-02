@@ -111,22 +111,27 @@ This game transforms a tabletop experience into a digital narrative tool. Unlike
 - Repositioned suit indicators above card titles
 - Fixed completion screen guidance bug
 - Refactored CSS into separate file for better organization
+- **PHASE 2C COMPLETE**: Enhanced gameplay with proper cycle transitions
+- Implemented cycle-based routing structure with dedicated cycle pages
+- Enhanced gameStore to track card instances (1st, 2nd, 3rd, 4th questions)
+- Created cycle-end page for time gap questions and place evolution
+- Updated GamePlay component for proper cycle transitions
+- Added navigation between gameplay and cycle pages
 
 **In Progress**:
-- Enhanced gameplay with proper cycle transitions
 - Image generation API integration (dummy implementation)
-- Cycle-end handling with place evolution questions
+- Testing and polishing cycle transitions
 
 **Known Issues**:
-- Need to create cycle-end and ending pages
 - Image generation API not yet implemented
 - Some minor styling inconsistencies
+- Accessibility warnings in setup page (unrelated to cycles)
 
 **Next Priorities**:
-1. Create cycle-end page for time gaps and place evolution
-2. Create ending page for game conclusion
-3. Implement dummy image generation API
-4. Add more polish and error handling
+1. Create ending page for game conclusion
+2. Implement dummy image generation API
+3. Add more polish and error handling
+4. Test cycle transitions thoroughly
 
 ## Core Ideas (Don't Forget)
 - **Camera stays on the place** - never follow characters outside the frame
