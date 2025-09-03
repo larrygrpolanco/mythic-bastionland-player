@@ -149,21 +149,86 @@ async function handleSubmitAnswer() {
 
 ```
 src/routes/games/the-ground-itself/
-├── +page.svelte              # UI only - uses services
-├── stores.js                 # State management
-├── data.js                   # Static game data
+├── +page.svelte              # ✅ Setup phases - UI only, uses services
+├── play/+page.svelte         # ⚠️ Main gameplay controller - NEEDS DEBUGGING
+├── stores.js                 # ✅ State management - working
+├── data.js                   # ✅ Static game data - complete
 ├── logic/
-│   ├── imageService.js       # 🔥 CENTRALIZED image generation
-│   ├── gameActions.js        # 🔥 CENTRALIZED game logic
-│   ├── promptBuilder.js      # AI prompt generation
-│   ├── dice.js              # Dice rolling utilities
-│   └── deck.js              # Card creation and management
+│   ├── imageService.js       # ✅ CENTRALIZED image generation - working
+│   ├── gameActions.js        # ⚠️ CENTRALIZED game logic - setup working, main gameplay untested
+│   ├── promptBuilder.js      # ✅ AI prompt generation - ready for main gameplay
+│   ├── dice.js              # ✅ Dice rolling utilities - working
+│   └── deck.js              # ✅ Card creation and management - working
 ├── components/
-│   └── setup/
-│       └── FaceCardSetup.svelte # UI only - uses services
+│   ├── setup/
+│   │   └── FaceCardSetup.svelte # ✅ UI only - uses services, working
+│   └── play/                # ⚠️ ALL COMPONENTS NEED DEBUGGING
+│       ├── DrawCardPrompt.svelte     # ⚠️ Card drawing - created, untested
+│       ├── TurnDecision.svelte       # ⚠️ Question display - created, untested
+│       ├── AnswerInput.svelte        # ⚠️ Answer submission - created, untested
+│       └── FocusedSituationMenu.svelte # ⚠️ Alternative paths - created, untested
 └── api/
     └── generate-image/
-        └── +server.js        # Server-side API endpoint
+        └── +server.js        # ✅ Server-side API endpoint - working with mock mode
+```
+
+## Phase 2 Implementation Status
+
+### ✅ **COMPLETED COMPONENTS (Need Debugging)**
+
+All Phase 2 main gameplay components have been implemented following clean architecture principles:
+
+#### Main Play Controller (`play/+page.svelte`)
+- **Purpose**: Orchestrates main gameplay flow
+- **Status**: ⚠️ Created, needs integration testing
+- **Features**: Dynamic component rendering based on `turnState`, persistent image display, game status
+
+#### Card Drawing (`DrawCardPrompt.svelte`)
+- **Purpose**: Handle numerical card drawing and deck management
+- **Status**: ⚠️ Created, needs testing
+- **Features**: Uses `deck.js`, detects "10" cards, manages game info display
+
+#### Turn Decision (`TurnDecision.svelte`)
+- **Purpose**: Display card and question, present choice options
+- **Status**: ⚠️ Created, needs testing
+- **Features**: Question lookup, card display, choice interface
+
+#### Answer Input (`AnswerInput.svelte`)
+- **Purpose**: Handle question answering and core game loop
+- **Status**: ⚠️ Created, needs testing
+- **Features**: Answer submission, count increment, image generation trigger
+
+#### Focused Situations (`FocusedSituationMenu.svelte`)
+- **Purpose**: Alternative narrative paths
+- **Status**: ⚠️ Created, needs testing
+- **Features**: 6 situation types, two-step interface, same core loop as answers
+
+### ⚠️ **CRITICAL DEBUGGING AREAS**
+
+#### 1. State Flow Integration
+```javascript
+// NEEDS VERIFICATION: Main gameplay state transitions
+turnState: 'drawing' → 'deciding' → 'answering'/'focusedSituation' → 'drawing'
+```
+
+#### 2. Card Rank Counting
+```javascript
+// NEEDS TESTING: Question progression logic
+cardRankCounts: { ace: 0, two: 0, ... } // Must increment correctly
+// Should show: 1st Ace, 2nd Ace, 3rd Ace, 4th Ace questions
+```
+
+#### 3. Answer Storage and Retrieval
+```javascript
+// NEEDS VERIFICATION: Unique key generation
+answerKey = `card_${rank}_${count + 1}` // e.g., "card_ace_1", "card_two_2"
+```
+
+#### 4. Image Generation Integration
+```javascript
+// NEEDS TESTING: Main gameplay image generation
+await generateImageWithContext(currentQuestion, answer);
+// Should work with numerical card answers, not just face cards
 ```
 
 ## Common Mistakes to Avoid

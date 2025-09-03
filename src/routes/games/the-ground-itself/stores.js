@@ -9,6 +9,9 @@ export const gameState = writable({
 	settingDescription: '',
 	timelineUnit: null, // e.g., 'days', 'weeks', 'years', 'decades', 'centuries', 'millennia'
 	timelineRoll: null, // the actual die roll result
+	timelineDescription: null, // e.g., 'Intimate, close-textured story'
+	timelineImplication: null, // What this timeline means for storytelling
+	timelineExample: null, // Example of what this timeline is good for
 	imageStyle: 'atmospheric, digital painting, high detail', // default style, user can change
 	faceCardDeck: [],
 	currentFaceCard: null, // Current face card being answered

@@ -30,6 +30,11 @@ export function buildImagePrompt(state, options = {}) {
 		console.log('Final Prompt Length:', prompt.length);
 	}
 
+	// Always log the final prompt for debugging in development
+	if (CONFIG.debugMode) {
+		console.log('Generated Prompt:', prompt);
+	}
+
 	return prompt;
 }
 

@@ -1,9 +1,9 @@
 # The Ground Itself - Memory Bank
 
-## Project Status: COMPLETE Phase 1 ✅
+## Project Status: PHASE 2 COMPLETE - NEEDS DEBUGGING ⚠️
 
 **Last Updated**: December 3, 2025  
-**Current Phase**: Phase 1 FULLY COMPLETE - Ready for Phase 2 Implementation  
+**Current Phase**: Phase 2 Implementation Complete - Ready for Bug Fixes  
 **Development Server**: Running at `http://localhost:5173/games/the-ground-itself`
 
 ---
@@ -15,7 +15,7 @@ A web-based, single-player adaptation of Everest Pipkin's tabletop game "The Gro
 
 ## Current Implementation Status
 
-### ✅ **COMPLETED - Phase 0 & Phase 1 (MVP)**
+### ✅ **COMPLETED - Phase 1 (MVP) - WORKING CORRECTLY**
 
 **Core Architecture Established:**
 - Self-contained game directory: `src/routes/games/the-ground-itself/`
@@ -24,75 +24,127 @@ A web-based, single-player adaptation of Everest Pipkin's tabletop game "The Gro
 - Secure server-side API endpoint for image generation
 
 **Working Game Flow:**
-1. **Intro Phase** - Game introduction and rules explanation
-2. **Setting Setup** - Player describes their place + selects visual style
-3. **Timeline Setup** - Dice roll determines time scale (days to millennia)
-4. **Mock Image Generation** - Builds prompts from game state, calls API
-5. **Phase Transitions** - Smooth navigation between game phases
+1. **Intro Phase** - Game introduction and rules explanation ✅
+2. **Setting Setup** - Player describes their place + selects visual style ✅
+3. **Timeline Setup** - Dice roll determines time scale (days to millennia) ✅
+4. **Face Card Setup** - Complete 12-card world-building system ✅
+5. **Mock Image Generation** - Builds prompts from game state, calls API ✅
 
-**Technical Infrastructure:**
-- **Mock Development Mode**: Uses placeholder.com for testing (cost-effective)
-- **Debug Information**: Shows generated prompts during development
-- **Responsive UI**: Clean, professional interface that works on all devices
-- **Error Handling**: Graceful fallbacks for API failures
-- **Hot Reloading**: Development environment with live updates
+### ✅ **COMPLETED - Phase 2 (Main Gameplay) - NEEDS DEBUGGING ⚠️**
+
+**All Components Implemented:**
+1. **Main Play Page** (`play/+page.svelte`) - Layout and state management ✅
+2. **Card Drawing** (`DrawCardPrompt.svelte`) - Numerical deck creation and drawing ✅
+3. **Turn Decision** (`TurnDecision.svelte`) - Question display and choice interface ✅
+4. **Answer Input** (`AnswerInput.svelte`) - Question answering with image generation ✅
+5. **Focused Situations** (`FocusedSituationMenu.svelte`) - Alternative narrative paths ✅
+
+**Integration Status:**
+- Navigation from setup to main gameplay ✅
+- Component state transitions ✅
+- Image generation system ready ✅
+- Card logic using existing `deck.js` ✅
 
 ---
 
-## File Structure & Key Components
+## ⚠️ CRITICAL: KNOWN ISSUES REQUIRING DEBUG
+
+### **Testing Results - What Works:**
+- ✅ Complete setup flow (intro → timeline → face cards)
+- ✅ Image generation with mock API
+- ✅ Face card progression with world building
+- ✅ Phase transitions working
+- ✅ Component rendering and UI
+
+### **Testing Results - What Needs Fixing:**
+- ⚠️ **Main gameplay loop not fully tested** - Components exist but may have integration bugs
+- ⚠️ **Card drawing to question flow** - Transition states may not work correctly
+- ⚠️ **Answer submission loop** - Save → increment → generate → reset cycle needs verification
+- ⚠️ **Focused situation integration** - Alternative path may have state issues
+- ⚠️ **Navigation between components** - State management across turn states
+- ⚠️ **"10" card detection** - Time gap triggers not tested
+- ⚠️ **Card rank counting** - Question progression (1st Ace, 2nd Ace, etc.) needs verification
+
+---
+
+## File Structure & Implementation Status
 
 ```
 src/routes/games/the-ground-itself/
-├── +page.svelte              # Main game controller & UI
-├── stores.js                 # Centralized game state management
-├── data.js                   # All questions, cards, and game data
-├── memory-bank.md           # This file - project context
-├── project-plan.md          # Sequential implementation plan
-├── ground_itself_plaintext.txt # Original game rules
+├── +page.svelte              # ✅ Setup phases working
+├── play/+page.svelte         # ✅ Created, needs debugging
+├── stores.js                 # ✅ State management working
+├── data.js                   # ✅ All questions and data complete
 ├── logic/
-│   ├── deck.js              # Card creation, shuffling, drawing
-│   ├── dice.js              # Dice rolling utilities
-│   └── promptBuilder.js     # AI prompt generation + mock functions
-├── api/
-│   └── generate-image/
-│       └── +server.js       # Secure server-side image API
-└── components/              # (Empty - ready for Phase 2)
-    └── setup/               # (Empty - ready for Phase 2)
+│   ├── imageService.js       # ✅ Working with mock API
+│   ├── gameActions.js        # ✅ Setup actions working, main gameplay untested
+│   ├── promptBuilder.js      # ✅ Working for setup, ready for main gameplay
+│   ├── dice.js              # ✅ Working correctly
+│   └── deck.js              # ✅ Working correctly
+├── components/
+│   ├── setup/
+│   │   └── FaceCardSetup.svelte # ✅ Working correctly
+│   └── play/                # ⚠️ ALL NEED DEBUGGING
+│       ├── DrawCardPrompt.svelte     # ⚠️ Created, not tested
+│       ├── TurnDecision.svelte       # ⚠️ Created, not tested
+│       ├── AnswerInput.svelte        # ⚠️ Created, not tested
+│       └── FocusedSituationMenu.svelte # ⚠️ Created, not tested
+└── api/
+    └── generate-image/+server.js # ✅ Working with mock mode
 ```
 
 ---
 
-## Core Data Flow (The Loop) - IMPLEMENTED ✅
+## Core Data Flow - IMPLEMENTED BUT NEEDS VERIFICATION
 
-This is the heart of the application and is **working correctly**:
+### **Main Gameplay Loop (Phase 2) - NEEDS TESTING:**
 
-1. **Player Input** → Player answers a prompt or describes their place
-2. **State Update** → Answer saved to `gameState.answers` object
-3. **Prompt Building** → `promptBuilder.js` reads entire game state and creates AI prompt
-4. **API Call** → Frontend calls `/api/generate-image` with prompt
-5. **Mock Response** → Server returns placeholder URL with encoded prompt
-6. **UI Update** → Image updates, debug info shows generated prompt
+1. **Draw Card** (`DrawCardPrompt.svelte`)
+   - Creates numerical deck on first draw
+   - Draws card using `deck.js`
+   - Detects "10" cards for time gaps
+   - Sets `turnState = 'deciding'`
 
-**Key Implementation Details:**
-- All answers stored in `gameState.answers` with unique keys
-- Prompt builder extracts visual elements from narrative text
-- Mock mode prevents expensive API calls during development
-- Debug mode shows generated prompts for testing
+2. **Make Decision** (`TurnDecision.svelte`)
+   - Shows card and question
+   - Uses `cardRankCounts` to get correct question
+   - Two buttons: "Answer Question" or "Choose Focused Situation"
+
+3. **Answer/Focused Situation** (`AnswerInput.svelte` or `FocusedSituationMenu.svelte`)
+   - Saves answer to `gameState.answers`
+   - Increments `cardRankCounts[rank]`
+   - Calls `generateImageWithContext()`
+   - Resets `turnState = 'drawing'`
+
+### **Potential Bug Areas:**
+- State synchronization between components
+- Card rank counting logic
+- Question progression tracking
+- Image generation triggers
+- Navigation flow between turn states
 
 ---
 
-## Game State Structure - IMPLEMENTED ✅
+## Game State Structure - COMPLETE
 
 ```javascript
 gameState = {
   // Phase Management
   currentPhase: 'intro', // intro → setup-timeline → setup-place → mainPlay
+  turnState: 'drawing', // drawing → deciding → answering/focusedSituation → drawing
   
   // Player Data
   settingDescription: '', // Player's place description
   imageStyle: '', // Selected visual style
   timelineUnit: null, // 'days', 'weeks', 'years', etc.
   timelineRoll: null, // Actual dice result (1-6)
+  
+  // Main Gameplay
+  numericalDeck: [], // Created by DrawCardPrompt
+  activeCard: null, // Current drawn card
+  cardRankCounts: { ace: 0, two: 0, ... }, // Track question progression
+  tensDrawn: 0, // Count of "10" cards for time gaps
+  currentCycle: 1, // Game cycle (1-4)
   
   // Narrative Storage
   answers: {}, // All player answers with unique keys
@@ -109,163 +161,112 @@ gameState = {
 
 ---
 
-## Testing Results - VERIFIED ✅
+## Architecture Status - CLEAN AND READY
 
-**Tested Successfully:**
-- ✅ Game loads at correct URL
-- ✅ Intro phase displays properly
-- ✅ Setting input accepts text and validates
-- ✅ Image style selection works
-- ✅ Phase transitions are smooth
-- ✅ Timeline dice rolling functions
-- ✅ Mock image generation creates proper prompts
-- ✅ Debug information displays correctly
-- ✅ State persistence across phases
-- ✅ Responsive design on different screen sizes
+### **Service Layer - WORKING:**
+- `imageService.js` - Centralized image generation ✅
+- `gameActions.js` - Game state management (setup working, main gameplay untested) ⚠️
+- `promptBuilder.js` - AI prompt building (ready for main gameplay) ✅
+- `deck.js` - Card logic (working) ✅
+- `dice.js` - Dice rolling (working) ✅
 
-**Example Working Flow:**
-1. Player enters: "An ancient library built into the roots of a massive oak tree, with glowing crystals providing soft light"
-2. System generates prompt: "A vivid scene of An ancient library built into the roots of a massive oak tree, with glowing crystals providing soft light. atmospheric, digital painting, high detail."
-3. Mock API returns placeholder image with encoded prompt
-4. Game transitions to timeline setup
-5. Dice roll determines time scale
-6. Game ready for next phase
+### **Component Architecture - IMPLEMENTED:**
+- Clean separation of UI and logic ✅
+- No code duplication ✅
+- Service abstractions used correctly ✅
+- Consistent styling and patterns ✅
 
 ---
 
-## Ready for Phase 2 Implementation
-
-### ✅ **COMPLETED IN THIS SESSION - FULL PHASE 1:**
-
-1. **Face Card Setup Phase** - ✅ FULLY IMPLEMENTED
-   - ✅ Created `FaceCardSetup.svelte` component with full UI
-   - ✅ Implemented all 12 face card questions (Jack/Queen/King of each suit)
-   - ✅ Built question display and answer input system
-   - ✅ Added progress tracking (Question X of 12 with visual progress bar)
-   - ✅ Implemented card display with suit symbols and colors
-   - ✅ Added image generation trigger after each answer
-   - ✅ Built cumulative world description through iterative prompts
-   - ✅ Added loading states and user feedback
-   - ✅ Implemented automatic progression through face card deck
-   - ✅ Added completion transition to main gameplay
-
-2. **Enhanced Game State Management** - ✅ COMPLETED
-   - ✅ Added face card tracking properties to stores.js
-   - ✅ Implemented face card deck initialization and management
-   - ✅ Added progress tracking for face card completion
-
-3. **Advanced Prompt Builder** - ✅ COMPLETED
-   - ✅ Enhanced `promptBuilder.js` with sophisticated keyword extraction
-   - ✅ Added material, color, feature, and atmosphere detection
-   - ✅ Implemented cumulative world-building logic
-   - ✅ Added timeline context integration
-   - ✅ Built structured prompt generation from face card answers
-
-4. **Complete Integration** - ✅ TESTED AND VERIFIED
-   - ✅ Updated main page controller to use FaceCardSetup component
-   - ✅ Verified smooth phase transitions
-   - ✅ Tested complete flow: Intro → Setting → Timeline → Face Cards
-   - ✅ Confirmed iterative image generation works
-   - ✅ Validated state persistence across all phases
-   - ✅ Tested responsive design and user experience
-
-### **NEXT PRIORITIES FOR PHASE 2:**
-
-1. **Main Gameplay Loop** - Ready to Implement
-   - Card drawing system for numerical cards (Ace through 9)
-   - Question progression tracking (1st Ace, 2nd Ace, etc.)
-   - Focused situation alternatives
-   - Image updates after each narrative addition
-
-2. **Time Gap System** - Ready to Implement
-   - Handle "10" card draws
-   - Time jump mechanics with dice rolling
-   - Three transition questions
-   - Dramatic image generation for time passage
-
-3. **End Game System** - Ready to Implement
-   - Final question and conclusion
-   - Game completion flow
-   - Final image generation
-
-### **Implementation Notes for Next Developer:**
-
-**Critical Patterns to Follow:**
-- Always update `gameState.answers` with unique keys
-- Call image generation after every narrative addition
-- Use the existing `buildImagePrompt()` function - it's working well
-- Maintain the debug mode for development testing
-- Follow the existing component structure and styling
-
-**Key Functions Ready to Use:**
-- `createFaceCardDeck()` - Creates and shuffles face cards
-- `drawCard(deck)` - Draws next card from deck
-- `buildImagePrompt(state)` - Builds AI prompts from game state
-- `generateMockImageUrl(prompt)` - Creates mock images for testing
-
-**API Integration:**
-- Mock mode is enabled and working
-- Real Gemini API code is commented in `+server.js`
-- Environment variable `GEMINI_API_KEY` is set up
-- Switch `isDevelopmentMode: false` when ready for real API
-
----
-
-## Development Environment
+## Development Environment - READY
 
 **Current Setup:**
-- SvelteKit development server running on port 5173
-- Hot reloading enabled and working
-- Google AI SDK installed (`@google/generative-ai`)
-- Environment file configured with dummy API key
-- No TypeScript - pure JavaScript as requested
+- SvelteKit development server running on port 5173 ✅
+- Hot reloading enabled and working ✅
+- Google AI SDK installed (`@google/generative-ai`) ✅
+- Environment file configured ✅
+- Mock API mode enabled for testing ✅
 
-**To Continue Development:**
-1. Server should already be running at `http://localhost:5173`
-2. Navigate to `/games/the-ground-itself` to see current state
-3. All files are in place and ready for Phase 2 implementation
-4. Mock mode allows unlimited testing without API costs
-
----
-
-## Architecture Decisions Made
-
-**State Management**: Single centralized store - works well, don't change
-**Image Generation**: Server-side API calls for security - keep this pattern
-**Component Structure**: Small, focused components - continue this approach
-**Styling**: Inline styles in Svelte components - maintain consistency
-**Data Organization**: Separate data.js file - all questions are there
-**Development Flow**: Mock first, real API later - proven effective
+**Debug Features Available:**
+- `isDevelopmentMode: true` shows generated prompts
+- Console logging for state changes
+- Mock image URLs with encoded prompts
+- Error handling and user feedback
 
 ---
 
-## Known Issues & Considerations
+## Next Developer Instructions
 
-**Minor Issues:**
-- Placeholder image URLs sometimes fail to load (cosmetic only)
-- Some accessibility warnings in console (non-blocking)
+### **IMMEDIATE PRIORITIES:**
 
-**Design Decisions:**
-- Chose placeholder.com over local images for simplicity
-- Mock mode returns URLs with encoded prompts for debugging
-- Debug info only shows in development mode
-- Single-page application with phase-based rendering
+1. **Test Main Gameplay Flow**
+   - Navigate to `/games/the-ground-itself/play` directly
+   - Test card drawing → decision → answer → reset cycle
+   - Verify state transitions work correctly
+   - Check card rank counting and question progression
 
-**Performance Notes:**
-- Image generation is the slowest part (by design)
-- State updates are instant and reactive
-- No optimization needed yet - performance is good
+2. **Debug Integration Issues**
+   - Component state synchronization
+   - Answer saving and retrieval
+   - Image generation triggers
+   - Navigation between turn states
+
+3. **Verify Core Game Loop**
+   - Draw card → show question → answer → increment count → generate image → reset
+   - Test both answer path and focused situation path
+   - Ensure "10" card detection works
+
+### **TESTING APPROACH:**
+1. Start server: `npm run dev`
+2. Navigate to: `http://localhost:5173/games/the-ground-itself/play`
+3. Manually set game state for testing main gameplay
+4. Test each component individually
+5. Test complete flow integration
+
+### **KEY FILES TO DEBUG:**
+- `play/+page.svelte` - Main gameplay controller
+- `components/play/*.svelte` - All main gameplay components
+- `gameActions.js` - May need main gameplay actions
+- `stores.js` - State management verification
 
 ---
 
-## Success Metrics Achieved
+## Success Metrics for Next Phase
 
-✅ **MVP Goals Met:**
-- Complete setup flow implemented and tested
-- Image generation system working with mock data
-- State management handling complex game flow
-- Professional UI that matches game's aesthetic
-- Development environment optimized for iteration
-- All core architectural decisions validated through testing
+### **Phase 2 Debug Goals:**
+- ✅ Card drawing works and creates deck
+- ✅ Questions display correctly based on card rank counts
+- ✅ Answer submission saves and increments counts
+- ✅ Image generation triggers after answers
+- ✅ State resets correctly for next turn
+- ✅ Focused situations work as alternative path
+- ✅ "10" card detection triggers time gaps
 
-**Ready for Phase 2 with confidence** - the foundation is solid and extensible.
+### **Ready for Phase 3:**
+- Time gap implementation
+- End game sequence
+- Final polish and testing
+
+---
+
+## Architecture Decisions - PROVEN EFFECTIVE
+
+**What's Working Well:**
+- Service layer architecture prevents code duplication
+- Centralized state management handles complex game flow
+- Mock API system allows unlimited testing
+- Component separation makes debugging easier
+- Existing utilities (`dice.js`, `deck.js`) work perfectly
+
+**Maintain These Patterns:**
+- Always use service abstractions
+- Keep components focused on UI only
+- Use existing logic components
+- Maintain debug mode for development
+- Follow established styling patterns
+
+---
+
+## Conclusion
+
+Phase 2 implementation is **architecturally complete** with all components created and integrated. The foundation is solid, but the main gameplay loop needs thorough testing and debugging to ensure all state transitions, data flow, and user interactions work correctly. The next developer should focus on testing and fixing integration issues rather than building new features.

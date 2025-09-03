@@ -16,8 +16,8 @@
  */
 
 import { gameState } from '../stores.js';
-import { rollD6, getTimelineUnit } from './dice.js';
-import { createFaceCardDeck, drawCard } from './deck.js';
+import { rollD6, getTimelineUnit, rollTimelineWithInfo, getTimelineInfo } from './dice.js';
+import { createFaceCardDeck, createNumericalDeck, drawCard } from './deck.js';
 import { generateImage, generateImageWithContext } from './imageService.js';
 
 /**
@@ -59,15 +59,53 @@ export function rollTimeline() {
 	const roll = rollD6();
 	const timeUnit = getTimelineUnit(roll);
 
-	// Update game state
+	// Update game state - but don't advance phase yet (for reroll option)
 	gameState.update(state => ({
 		...state,
 		timelineRoll: roll,
-		timelineUnit: timeUnit,
-		currentPhase: 'setup-place'
+		timelineUnit: timeUnit
 	}));
 
 	return { roll, timeUnit };
+}
+
+/**
+ * Roll timeline with full information for enhanced setup
+ * @returns {Object} - Complete timeline information including descriptions
+ */
+export function rollTimelineWithDetails() {
+	const timelineData = rollTimelineWithInfo();
+	
+	// Update game state with full timeline information
+	gameState.update(state => ({
+		...state,
+		timelineRoll: timelineData.roll,
+		timelineUnit: timelineData.unit,
+		timelineDescription: timelineData.description,
+		timelineImplication: timelineData.implication,
+		timelineExample: timelineData.example
+	}));
+
+	return timelineData;
+}
+
+/**
+ * Accept the current timeline and proceed to place setup
+ */
+export function acceptTimeline() {
+	gameState.update(state => ({
+		...state,
+		currentPhase: 'setup-place'
+	}));
+}
+
+/**
+ * Reroll the timeline (as allowed by original game rules)
+ * @returns {Object} - New timeline information
+ */
+export function rerollTimeline() {
+	console.log('Rerolling timeline as per original game rules');
+	return rollTimelineWithDetails();
 }
 
 /**
@@ -179,4 +217,199 @@ export function getCurrentGameState() {
 			unsubscribe();
 		});
 	});
+}
+
+// ===== MAIN GAMEPLAY ACTIONS =====
+
+/**
+ * Draw a numerical card for main gameplay
+ * Creates deck on first draw, handles "10" cards for time gaps
+ * @returns {Promise<Object>} - Card info and next action
+ */
+export async function drawNumericalCard() {
+	let currentState;
+	gameState.subscribe(state => {
+		currentState = state;
+	})();
+
+	// Create numerical deck on first draw
+	let deck = currentState.numericalDeck;
+	if (deck.length === 0) {
+		deck = createNumericalDeck();
+		console.log('Created numerical deck:', deck.length, 'cards');
+	}
+
+	// Draw card using existing deck logic
+	const { card, remainingDeck } = drawCard(deck);
+	
+	if (!card) {
+		console.error('No more cards in deck!');
+		return { success: false, error: 'No more cards' };
+	}
+
+	console.log('Drew card:', card);
+
+	// Update game state with drawn card
+	gameState.update(state => ({
+		...state,
+		numericalDeck: remainingDeck,
+		activeCard: card
+	}));
+
+	// Check if it's a "10" card (time gap/end game)
+	if (card.rank === 'ten') {
+		// Handle time gap logic
+		gameState.update(state => ({
+			...state,
+			tensDrawn: state.tensDrawn + 1
+		}));
+
+		// Check if this is the 4th ten (game end)
+		if (currentState.tensDrawn + 1 >= 4) {
+			gameState.update(state => ({
+				...state,
+				currentPhase: 'end'
+			}));
+			return { success: true, action: 'endGame', card };
+		} else {
+			gameState.update(state => ({
+				...state,
+				currentPhase: 'timeGap'
+			}));
+			return { success: true, action: 'timeGap', card };
+		}
+	} else {
+		// Regular card - move to decision phase
+		gameState.update(state => ({
+			...state,
+			turnState: 'deciding'
+		}));
+		return { success: true, action: 'decide', card };
+	}
+}
+
+/**
+ * Submit an answer for a numerical card question
+ * @param {string} answer - User's answer
+ * @param {string} currentQuestion - The question being answered
+ * @returns {Promise<boolean>} - Success/failure
+ */
+export async function submitNumericalCardAnswer(answer, currentQuestion) {
+	let currentState;
+	gameState.subscribe(state => {
+		currentState = state;
+	})();
+
+	const activeCard = currentState.activeCard;
+	if (!activeCard || !answer.trim()) {
+		return false;
+	}
+
+	try {
+		// Create unique key for this answer
+		const currentCount = currentState.cardRankCounts[activeCard.rank] || 0;
+		const answerKey = `card_${activeCard.rank}_${currentCount + 1}`;
+
+		// Save answer to game state
+		gameState.update(state => ({
+			...state,
+			answers: {
+				...state.answers,
+				[answerKey]: answer.trim()
+			}
+		}));
+
+		// Increment the card rank count
+		gameState.update(state => ({
+			...state,
+			cardRankCounts: {
+				...state.cardRankCounts,
+				[activeCard.rank]: (state.cardRankCounts[activeCard.rank] || 0) + 1
+			}
+		}));
+
+		// Generate image with the new answer using centralized service
+		await generateImageWithContext(currentQuestion, answer.trim());
+
+		// Reset for next turn
+		gameState.update(state => ({
+			...state,
+			turnState: 'drawing',
+			activeCard: null
+		}));
+
+		return true;
+	} catch (error) {
+		console.error('Error submitting numerical card answer:', error);
+		return false;
+	}
+}
+
+/**
+ * Submit a focused situation response
+ * @param {Object} situation - The selected focused situation
+ * @param {string} response - User's response
+ * @returns {Promise<boolean>} - Success/failure
+ */
+export async function submitFocusedSituation(situation, response) {
+	let currentState;
+	gameState.subscribe(state => {
+		currentState = state;
+	})();
+
+	const activeCard = currentState.activeCard;
+	if (!activeCard || !situation || !response.trim()) {
+		return false;
+	}
+
+	try {
+		// Create unique key for this focused situation response
+		const currentCount = currentState.cardRankCounts[activeCard.rank] || 0;
+		const answerKey = `focused_${activeCard.rank}_${currentCount + 1}`;
+
+		// Save response to game state
+		gameState.update(state => ({
+			...state,
+			answers: {
+				...state.answers,
+				[answerKey]: `${situation.name}: ${response.trim()}`
+			}
+		}));
+
+		// Increment the card rank count (same as answering the question)
+		gameState.update(state => ({
+			...state,
+			cardRankCounts: {
+				...state.cardRankCounts,
+				[activeCard.rank]: (state.cardRankCounts[activeCard.rank] || 0) + 1
+			}
+		}));
+
+		// Generate image with the focused situation response
+		const contextQuestion = `Focused Situation: ${situation.name}`;
+		await generateImageWithContext(contextQuestion, response.trim());
+
+		// Reset for next turn
+		gameState.update(state => ({
+			...state,
+			turnState: 'drawing',
+			activeCard: null
+		}));
+
+		return true;
+	} catch (error) {
+		console.error('Error submitting focused situation:', error);
+		return false;
+	}
+}
+
+/**
+ * Set turn state for main gameplay flow
+ * @param {string} turnState - The turn state to set
+ */
+export function setTurnState(turnState) {
+	gameState.update(state => ({
+		...state,
+		turnState
+	}));
 }

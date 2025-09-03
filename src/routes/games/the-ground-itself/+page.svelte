@@ -15,7 +15,7 @@
 	
 	import { gameState } from './stores.js';
 	import { imageStyleOptions } from './data.js';
-	import { startGame, rollTimeline, navigateToPhase } from './logic/gameActions.js';
+	import { startGame, rollTimeline, rollTimelineWithDetails, acceptTimeline, rerollTimeline, navigateToPhase } from './logic/gameActions.js';
 	import FaceCardSetup from './components/setup/FaceCardSetup.svelte';
 
 	// UI state only - no game logic here
@@ -42,12 +42,24 @@
 	}
 
 	/**
-	 * Handle timeline roll - uses existing dice.js logic
-	 * NO dice logic here - that's what dice.js is for!
+	 * Handle enhanced timeline roll with full details
 	 */
-	function handleRollTimeline() {
-		// Use the centralized game action that properly uses dice.js
-		rollTimeline();
+	function handleRollTimelineWithDetails() {
+		rollTimelineWithDetails();
+	}
+
+	/**
+	 * Handle accepting the current timeline
+	 */
+	function handleAcceptTimeline() {
+		acceptTimeline();
+	}
+
+	/**
+	 * Handle rerolling the timeline
+	 */
+	function handleRerollTimeline() {
+		rerollTimeline();
 	}
 
 	/**
@@ -133,28 +145,66 @@
 
 				{#if $gameState.timelineRoll}
 					<div class="timeline-result">
-						<h3>You rolled: {$gameState.timelineRoll}</h3>
-						<p>Your story will unfold over <strong>{$gameState.timelineUnit}</strong>.</p>
-						<p>This means each cycle will be separated by gaps measured in {$gameState.timelineUnit}.</p>
-						
-						<button on:click={() => handleNavigateToPhase('setup-place')} class="continue-button">
-							Continue to Place Setup
-						</button>
+						<div class="roll-display">
+							<h3>🎲 You rolled: {$gameState.timelineRoll}</h3>
+							<div class="timeline-unit">
+								<strong>{$gameState.timelineUnit}</strong>
+							</div>
+						</div>
+
+						{#if $gameState.timelineDescription}
+							<div class="timeline-details">
+								<div class="timeline-description">
+									<h4>What this means:</h4>
+									<p><strong>{$gameState.timelineDescription}</strong></p>
+									<p class="implication">{$gameState.timelineImplication}</p>
+									<p class="example"><em>Example: {$gameState.timelineExample}</em></p>
+								</div>
+
+								<div class="timeline-choice">
+									<p class="choice-text">
+										<strong>From the original rules:</strong> "If the collective group feels that the given timeline is antagonistic to the story that you would like to tell, you may re-roll."
+									</p>
+									
+									<div class="choice-buttons">
+										<button on:click={handleAcceptTimeline} class="accept-button">
+											✓ Accept This Timeline
+										</button>
+										<button on:click={handleRerollTimeline} class="reroll-button">
+											🎲 Reroll Timeline
+										</button>
+									</div>
+								</div>
+							</div>
+						{:else}
+							<div class="simple-result">
+								<p>Your story will unfold over <strong>{$gameState.timelineUnit}</strong>.</p>
+								<p>This means each cycle will be separated by gaps measured in {$gameState.timelineUnit}.</p>
+								
+								<button on:click={handleAcceptTimeline} class="continue-button">
+									Continue to Place Setup
+								</button>
+							</div>
+						{/if}
 					</div>
 				{:else}
-					<button on:click={handleRollTimeline} class="roll-button">
-						Roll for Timeline
-					</button>
+					<div class="roll-section">
+						<button on:click={handleRollTimelineWithDetails} class="roll-button">
+							🎲 Roll for Timeline
+						</button>
+						<p class="roll-hint">Click to discover the time scale of your story</p>
+					</div>
 				{/if}
 			</div>
 		{:else if $gameState.currentPhase === 'setup-place'}
 			<FaceCardSetup />
 		{:else if $gameState.currentPhase === 'mainPlay'}
-			<div class="main-play">
-				<h2>Main Gameplay</h2>
-				<p>The main gameplay loop will be implemented here.</p>
-				<p>Current cycle: {$gameState.currentCycle}</p>
-				<p>Timeline unit: {$gameState.timelineUnit}</p>
+			<div class="main-play-redirect">
+				<h2>Entering Main Gameplay</h2>
+				<p>Your world has been established. Time to begin the main story...</p>
+				<button on:click={() => window.location.href = '/games/the-ground-itself/play'} class="play-button">
+					Begin Playing
+				</button>
 			</div>
 		{/if}
 	</div>
@@ -282,7 +332,7 @@
 		background: white;
 	}
 
-	.start-button, .continue-button, .roll-button {
+	.start-button, .continue-button, .roll-button, .play-button {
 		background: #4299e1;
 		color: white;
 		border: none;
@@ -293,8 +343,27 @@
 		transition: background-color 0.2s;
 	}
 
-	.start-button:hover, .continue-button:hover, .roll-button:hover {
+	.start-button:hover, .continue-button:hover, .roll-button:hover, .play-button:hover {
 		background: #3182ce;
+	}
+
+	.main-play-redirect {
+		text-align: center;
+		background: #f7fafc;
+		padding: 2rem;
+		border-radius: 8px;
+		border: 1px solid #e2e8f0;
+	}
+
+	.main-play-redirect h2 {
+		color: #2d3748;
+		margin-bottom: 1rem;
+	}
+
+	.main-play-redirect p {
+		color: #4a5568;
+		margin-bottom: 2rem;
+		font-size: 1.1rem;
 	}
 
 	.start-button:disabled {
@@ -326,6 +395,138 @@
 		margin-bottom: 0.5rem;
 	}
 
+	/* Enhanced Timeline Styles */
+	.roll-section {
+		text-align: center;
+		margin-top: 2rem;
+	}
+
+	.roll-hint {
+		color: #718096;
+		font-style: italic;
+		margin-top: 0.5rem;
+		font-size: 0.9rem;
+	}
+
+	.roll-display {
+		text-align: center;
+		margin-bottom: 1.5rem;
+	}
+
+	.roll-display h3 {
+		font-size: 1.5rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.timeline-unit {
+		font-size: 2rem;
+		color: #2f855a;
+		font-weight: bold;
+		text-transform: capitalize;
+		margin-bottom: 1rem;
+	}
+
+	.timeline-details {
+		margin-top: 1.5rem;
+	}
+
+	.timeline-description {
+		background: white;
+		padding: 1.5rem;
+		border-radius: 8px;
+		border: 1px solid #e2e8f0;
+		margin-bottom: 1.5rem;
+	}
+
+	.timeline-description h4 {
+		color: #2d3748;
+		margin-top: 0;
+		margin-bottom: 1rem;
+		font-size: 1.1rem;
+	}
+
+	.timeline-description p {
+		margin-bottom: 0.75rem;
+		line-height: 1.6;
+	}
+
+	.implication {
+		color: #4a5568;
+		font-style: italic;
+	}
+
+	.example {
+		color: #718096;
+		font-size: 0.9rem;
+	}
+
+	.timeline-choice {
+		background: #fef5e7;
+		padding: 1.5rem;
+		border-radius: 8px;
+		border: 1px solid #f6ad55;
+	}
+
+	.choice-text {
+		color: #744210;
+		margin-bottom: 1.5rem;
+		line-height: 1.6;
+		font-size: 0.95rem;
+	}
+
+	.choice-buttons {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+
+	.accept-button {
+		background: #48bb78;
+		color: white;
+		border: none;
+		padding: 0.75rem 1.5rem;
+		font-size: 1rem;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.accept-button:hover {
+		background: #38a169;
+	}
+
+	.reroll-button {
+		background: #ed8936;
+		color: white;
+		border: none;
+		padding: 0.75rem 1.5rem;
+		font-size: 1rem;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.reroll-button:hover {
+		background: #dd6b20;
+	}
+
+	.simple-result {
+		text-align: center;
+		margin-top: 1rem;
+	}
+
+	.simple-result p {
+		margin-bottom: 1rem;
+		color: #4a5568;
+		line-height: 1.6;
+	}
+
 	@media (max-width: 768px) {
 		.game-container {
 			grid-template-columns: 1fr;
@@ -336,6 +537,18 @@
 		.image-section {
 			position: relative;
 			top: 0;
+		}
+
+		.choice-buttons {
+			flex-direction: column;
+		}
+
+		.accept-button, .reroll-button {
+			justify-content: center;
+		}
+
+		.timeline-unit {
+			font-size: 1.5rem;
 		}
 	}
 </style>
