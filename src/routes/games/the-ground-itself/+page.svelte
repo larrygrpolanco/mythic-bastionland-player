@@ -1,21 +1,28 @@
 <script>
 	/**
 	 * MAIN GAME PAGE - REFACTORED FOR CLEAN ARCHITECTURE
-	 * 
+	 *
 	 * This component ONLY handles UI rendering and user interactions.
 	 * ALL game logic has been moved to service layers:
 	 * - gameActions.js: Game state changes and business logic
 	 * - imageService.js: Image generation
 	 * - dice.js: Dice rolling (DO NOT reimplement here)
 	 * - deck.js: Card logic (DO NOT reimplement here)
-	 * 
+	 *
 	 * IMPORTANT: Do not add game logic to this component!
 	 * Always use the service abstractions instead.
 	 */
-	
+
 	import { gameState } from './stores.js';
 	import { imageStyleOptions } from './data.js';
-	import { startGame, rollTimeline, rollTimelineWithDetails, acceptTimeline, rerollTimeline, navigateToPhase } from './logic/gameActions.js';
+	import {
+		startGame,
+		rollTimeline,
+		rollTimelineWithDetails,
+		acceptTimeline,
+		rerollTimeline,
+		navigateToPhase
+	} from './logic/gameActions.js';
 	import { goto } from '$app/navigation';
 	import FaceCardSetup from './components/setup/FaceCardSetup.svelte';
 
@@ -31,7 +38,7 @@
 	 */
 	async function handleStartGame() {
 		if (isSubmitting) return;
-		
+
 		try {
 			isSubmitting = true;
 			// Use the centralized game action - no logic duplication!
@@ -83,10 +90,11 @@
 		{:else}
 			<img src={$gameState.currentImageUrl} alt="Your place" class="world-image" />
 		{/if}
-		
+
 		{#if $gameState.isDevelopmentMode && $gameState.lastGeneratedPrompt}
 			<div class="debug-info">
-				<strong>Last Prompt:</strong> {$gameState.lastGeneratedPrompt}
+				<strong>Last Prompt:</strong>
+				{$gameState.lastGeneratedPrompt}
 			</div>
 		{/if}
 	</div>
@@ -96,20 +104,34 @@
 			<div class="intro-content">
 				<h1>The Ground Itself</h1>
 				<p class="subtitle">A game about places over time</p>
-				
+
 				<div class="intro-text">
-					<p>This is a game about places over time. Think about places that have been important to you; your childhood fort under the rosebush; your first apartment, the one with the view; the town where your grandmother spent her last few years.</p>
-					
-					<p>Our camera is anchored to our place, and may not pivot or stray. Remember that places have memory— that what has happened here is always, in some small or big way, written into the walls, the stones, or the future of the people who continue to live here.</p>
-					
-					<p>Fundamentally, this is a game about the echoes and traces we leave for others after we are gone.</p>
+					<p>
+						This is a game about places over time. Think about places that have been important to
+						you; your childhood fort under the rosebush; your first apartment, the one with the
+						view; the town where your grandmother spent her last few years.
+					</p>
+
+					<p>
+						Our camera is anchored to our place, and may not pivot or stray. Remember that places
+						have memory— that what has happened here is always, in some small or big way, written
+						into the walls, the stones, or the future of the people who continue to live here.
+					</p>
+
+					<p>
+						Fundamentally, this is a game about the echoes and traces we leave for others after we
+						are gone.
+					</p>
 				</div>
 
 				<div class="setup-form">
 					<h2>Describe Your Place</h2>
-					<p>Begin by describing the place where your story will unfold. This can be anywhere - real or imagined, past, present, or future.</p>
-					
-					<textarea 
+					<p>
+						Begin by describing the place where your story will unfold. This can be anywhere - real
+						or imagined, past, present, or future.
+					</p>
+
+					<textarea
 						bind:value={settingInput}
 						placeholder="A small coastal village with weathered stone houses... An abandoned space station drifting between stars... A grove of ancient oak trees in the heart of a modern city..."
 						rows="4"
@@ -123,44 +145,44 @@
 								<option value={style}>{style}</option>
 							{/each}
 						</select>
-						
+
 						<div class="custom-style-section">
 							<h4>Or describe your own style:</h4>
-							<input 
-								type="text" 
+							<input
+								type="text"
 								bind:value={customStyleInput}
 								placeholder="e.g., watercolor painting, soft pastels, dreamy atmosphere..."
 								class="custom-style-input"
 							/>
-							<p class="style-hint">Leave blank to use the selected style above, or write your own description</p>
+							<p class="style-hint">
+								Leave blank to use the selected style above, or write your own description
+							</p>
 						</div>
 					</div>
 
-					<button on:click={handleStartGame} class="start-button" disabled={isSubmitting || $gameState.isGeneratingImage}>
-						{isSubmitting || $gameState.isGeneratingImage ? 'Creating Your World...' : 'Begin Your Story'}
+					<button
+						on:click={handleStartGame}
+						class="start-button"
+						disabled={isSubmitting || $gameState.isGeneratingImage}
+					>
+						{isSubmitting || $gameState.isGeneratingImage
+							? 'Creating Your World...'
+							: 'Begin Your Story'}
 					</button>
 				</div>
 			</div>
 		{:else if $gameState.currentPhase === 'setup-timeline'}
 			<div class="timeline-setup">
 				<h2>Establish Your Timeline</h2>
-				<p>This game is played in 4 cycles, separated by gaps in time. Roll the die to determine the unit of time that will measure these gaps.</p>
-				
-				<div class="timeline-info">
-					<ul>
-						<li><strong>1 = days</strong> - intimate, close-textured story</li>
-						<li><strong>2 = weeks</strong> - short-term changes</li>
-						<li><strong>3 = years</strong> - seasonal cycles, growth</li>
-						<li><strong>4 = decades</strong> - generational changes</li>
-						<li><strong>5 = centuries</strong> - historical epochs</li>
-						<li><strong>6 = millennia</strong> - geological time</li>
-					</ul>
-				</div>
+				<p>
+					This game is played in 4 cycles, separated by gaps in time. Roll to determine the unit of
+					time that will measure these gaps.
+				</p>
 
 				{#if $gameState.timelineRoll}
 					<div class="timeline-result">
 						<div class="roll-display">
-							<h3>🎲 You rolled: {$gameState.timelineRoll}</h3>
+							<h3>🎲 You rolled {$gameState.timelineRoll}:</h3>
 							<div class="timeline-unit">
 								<strong>{$gameState.timelineUnit}</strong>
 							</div>
@@ -176,25 +198,28 @@
 								</div>
 
 								<div class="timeline-choice">
-									<p class="choice-text">
-										<strong>From the original rules:</strong> "If the collective group feels that the given timeline is antagonistic to the story that you would like to tell, you may re-roll."
-									</p>
-									
 									<div class="choice-buttons">
 										<button on:click={handleAcceptTimeline} class="accept-button">
-											✓ Accept This Timeline
+											Accept This Timeline
 										</button>
 										<button on:click={handleRerollTimeline} class="reroll-button">
-											🎲 Reroll Timeline
+											Reroll Timeline
 										</button>
 									</div>
+
+									<p class="choice-text">
+										If the collective group feels that the given timeline is antagonistic to the
+										story that you would like to tell, you may re-roll.
+									</p>
 								</div>
 							</div>
 						{:else}
 							<div class="simple-result">
 								<p>Your story will unfold over <strong>{$gameState.timelineUnit}</strong>.</p>
-								<p>This means each cycle will be separated by gaps measured in {$gameState.timelineUnit}.</p>
-								
+								<p>
+									This means each cycle will be separated by gaps measured in {$gameState.timelineUnit}.
+								</p>
+
 								<button on:click={handleAcceptTimeline} class="continue-button">
 									Continue to Place Setup
 								</button>
@@ -204,11 +229,13 @@
 				{:else}
 					<div class="roll-section">
 						<button on:click={handleRollTimelineWithDetails} class="roll-button">
-							🎲 Roll for Timeline
+							Roll for Timeline
 						</button>
 						<p class="roll-hint">Click to discover the time scale of your story</p>
 					</div>
 				{/if}
+
+				
 			</div>
 		{:else if $gameState.currentPhase === 'setup-place'}
 			<FaceCardSetup />
@@ -273,8 +300,12 @@
 	}
 
 	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 
 	.debug-info {
@@ -380,7 +411,10 @@
 		margin: 0;
 	}
 
-	.start-button, .continue-button, .roll-button, .play-button {
+	.start-button,
+	.continue-button,
+	.roll-button,
+	.play-button {
 		background: #4299e1;
 		color: white;
 		border: none;
@@ -391,7 +425,10 @@
 		transition: background-color 0.2s;
 	}
 
-	.start-button:hover, .continue-button:hover, .roll-button:hover, .play-button:hover {
+	.start-button:hover,
+	.continue-button:hover,
+	.roll-button:hover,
+	.play-button:hover {
 		background: #3182ce;
 	}
 
@@ -419,16 +456,6 @@
 		cursor: not-allowed;
 	}
 
-	.timeline-info ul {
-		list-style: none;
-		padding: 0;
-		margin: 1.5rem 0;
-	}
-
-	.timeline-info li {
-		padding: 0.5rem 0;
-		border-bottom: 1px solid #e2e8f0;
-	}
 
 	.timeline-result {
 		background: #f0fff4;
@@ -517,9 +544,9 @@
 
 	.choice-text {
 		color: #744210;
-		margin-bottom: 1.5rem;
+		margin-top: 1.5rem;
 		line-height: 1.6;
-		font-size: 0.95rem;
+		font-size: 0.8rem;
 	}
 
 	.choice-buttons {
@@ -591,7 +618,8 @@
 			flex-direction: column;
 		}
 
-		.accept-button, .reroll-button {
+		.accept-button,
+		.reroll-button {
 			justify-content: center;
 		}
 

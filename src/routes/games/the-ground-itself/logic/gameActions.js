@@ -190,8 +190,10 @@ export async function submitFaceCardAnswer(answer, currentQuestion) {
 		const answeredCount = currentState.answeredQuestionCount;
 		const isMultipleOfThree = answeredCount % 3 === 0;
 		const hasAnswers = answeredCount > 0;
+		const hasUnprocessedAnswers = answeredCount % 3 !== 0; // There are answers since last image generation
 		
-		shouldGenerateImage = (isMultipleOfThree && hasAnswers) || (isLastCard && hasAnswers);
+		// Generate if it's a multiple of 3, OR if it's the last card AND there are unprocessed answers
+		shouldGenerateImage = (isMultipleOfThree && hasAnswers) || (isLastCard && hasAnswers && hasUnprocessedAnswers);
 		
 		// Generate image if conditions are met
 		if (shouldGenerateImage) {
