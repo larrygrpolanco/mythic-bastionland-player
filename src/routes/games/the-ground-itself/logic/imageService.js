@@ -109,3 +109,16 @@ export async function generateTimeGapImage(timeGapInfo, timeGapAnswers) {
 		}
 	});
 }
+
+/**
+ * Generate image with multiple question/answer pairs (for setup phase)
+ * @param {Array} questionAnswerPairs - Array of {question, answer} objects
+ * @returns {Promise<boolean>} - Success/failure of image generation
+ */
+export async function generateImageWithMultipleAnswers(questionAnswerPairs) {
+	return await generateImage({
+		currentContext: {
+			multipleAnswers: questionAnswerPairs
+		}
+	});
+}

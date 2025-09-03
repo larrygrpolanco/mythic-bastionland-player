@@ -18,6 +18,11 @@ export const gameState = writable({
 	currentFaceCard: null, // Current face card being answered
 	faceCardIndex: 0, // Progress through face cards (0-11)
 	faceCardsComplete: false, // Flag for completion
+	
+	// Enhanced Answer Tracking for Image Generation
+	answeredQuestionCount: 0, // Count of actually answered questions (not skipped)
+	recentAnswers: [], // Last 3 answered question/answer pairs for image generation
+	setupAnswers: [], // All setup answers for reference
 
 	// Core Gameplay Data
 	numericalDeck: [],

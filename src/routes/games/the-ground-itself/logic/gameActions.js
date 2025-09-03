@@ -18,7 +18,7 @@
 import { gameState } from '../stores.js';
 import { rollD6, getTimelineUnit, rollTimelineWithInfo, getTimelineInfo } from './dice.js';
 import { createFaceCardDeck, createNumericalDeck, drawCard } from './deck.js';
-import { generateImage, generateImageWithContext } from './imageService.js';
+import { generateImage, generateImageWithContext, generateImageWithMultipleAnswers } from './imageService.js';
 
 /**
  * Start the game with user's place description and style
@@ -129,6 +129,7 @@ export function initializeFaceCardSetup() {
 
 /**
  * Submit a face card answer and progress to next card
+ * Enhanced to generate images every 3 answered questions with all 3 answers included
  * @param {string} answer - User's answer to the current face card question
  * @param {string} currentQuestion - The question being answered
  * @returns {Promise<Object>} - Information about progression (isComplete, etc.)
@@ -140,21 +141,73 @@ export async function submitFaceCardAnswer(answer, currentQuestion) {
 	})();
 
 	const isLastCard = currentState.faceCardIndex === 11; // 12 cards total (0-11)
+	let shouldGenerateImage = false;
+	let imageGenerated = false;
 
-	// Store the answer if provided
+	// Handle answered questions (not skipped)
 	if (answer.trim()) {
 		const answerKey = `setup_${currentState.currentFaceCard.rank}_${currentState.currentFaceCard.suit}`;
+		const questionAnswerPair = { 
+			question: currentQuestion, 
+			answer: answer.trim() 
+		};
 		
-		gameState.update(state => ({
-			...state,
-			answers: {
+		// Update state with answer and tracking
+		gameState.update(state => {
+			// Store the answer
+			const newAnswers = {
 				...state.answers,
 				[answerKey]: answer.trim()
+			};
+			
+			// Add to recent answers (keep last 3)
+			const newRecentAnswers = [...state.recentAnswers, questionAnswerPair];
+			if (newRecentAnswers.length > 3) {
+				newRecentAnswers.shift(); // Remove oldest
 			}
-		}));
+			
+			// Add to all setup answers
+			const newSetupAnswers = [...state.setupAnswers, questionAnswerPair];
+			
+			// Increment answered question count
+			const newAnsweredCount = state.answeredQuestionCount + 1;
+			
+			return {
+				...state,
+				answers: newAnswers,
+				recentAnswers: newRecentAnswers,
+				setupAnswers: newSetupAnswers,
+				answeredQuestionCount: newAnsweredCount
+			};
+		});
 
-		// Generate image with the new answer using centralized service
-		await generateImageWithContext(currentQuestion, answer.trim());
+		// Get updated state for image generation logic
+		gameState.subscribe(state => {
+			currentState = state;
+		})();
+
+		// Determine if we should generate an image
+		const answeredCount = currentState.answeredQuestionCount;
+		const isMultipleOfThree = answeredCount % 3 === 0;
+		const hasAnswers = answeredCount > 0;
+		
+		shouldGenerateImage = (isMultipleOfThree && hasAnswers) || (isLastCard && hasAnswers);
+		
+		// Generate image if conditions are met
+		if (shouldGenerateImage) {
+			try {
+				if (currentState.recentAnswers.length > 1) {
+					// Use multiple answers template
+					await generateImageWithMultipleAnswers(currentState.recentAnswers);
+				} else {
+					// Fallback to single answer for first image
+					await generateImageWithContext(currentQuestion, answer.trim());
+				}
+				imageGenerated = true;
+			} catch (error) {
+				console.error('Error generating image:', error);
+			}
+		}
 	}
 
 	// Progress to next card or complete setup
@@ -166,7 +219,11 @@ export async function submitFaceCardAnswer(answer, currentQuestion) {
 			currentPhase: 'mainPlay'
 		}));
 		
-		return { isComplete: true };
+		return { 
+			isComplete: true, 
+			imageGenerated,
+			answeredCount: currentState.answeredQuestionCount 
+		};
 	} else {
 		// Draw next card using existing deck logic
 		const { card: nextCard, remainingDeck } = drawCard(currentState.faceCardDeck);
@@ -178,7 +235,12 @@ export async function submitFaceCardAnswer(answer, currentQuestion) {
 			faceCardIndex: state.faceCardIndex + 1
 		}));
 		
-		return { isComplete: false, nextCard };
+		return { 
+			isComplete: false, 
+			nextCard, 
+			imageGenerated,
+			answeredCount: currentState.answeredQuestionCount 
+		};
 	}
 }
 

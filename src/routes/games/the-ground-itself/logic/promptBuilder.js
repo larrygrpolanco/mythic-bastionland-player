@@ -35,13 +35,17 @@ export function buildImagePrompt(state, options = {}) {
 		prompt = buildInitialSetupPrompt(location, style);
 		
 	} else if (state.currentPhase === 'setup-place') {
-		// Face card setup phase
-		prompt = buildSetupPhasePrompt(
-			location, 
-			style, 
-			currentContext.currentQuestion, 
-			currentContext.currentAnswer
-		);
+		// Face card setup phase - handle both single and multiple answers
+		if (currentContext.multipleAnswers) {
+			prompt = buildSetupPhasePromptMultiple(location, style, currentContext.multipleAnswers);
+		} else {
+			prompt = buildSetupPhasePrompt(
+				location, 
+				style, 
+				currentContext.currentQuestion, 
+				currentContext.currentAnswer
+			);
+		}
 		
 	} else if (state.currentPhase === 'mainPlay') {
 		// Main gameplay
@@ -98,9 +102,9 @@ export function buildImagePrompt(state, options = {}) {
  * Used when first establishing the place with just a stock image
  */
 function buildInitialSetupPrompt(location, style) {
-	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+	return `This is "The Ground Itself" a storytelling game about a single place over time. Your job is to make these stories come to life by creating the images to these stories visual just provide images no text responses just images. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
 
-The location is ${location}. This image should just be in this style: ${style}.`;
+Bring this location to life: ${location}. This image should just be in this style: ${style}.`;
 }
 
 /**
@@ -119,6 +123,31 @@ The player is establishing this place. Take this image and modify it while keepi
 
 Question: ${questionText}
 Answer: ${answerText}`;
+}
+
+/**
+ * Template 2b: Setup Phase with Multiple Answers
+ * Used when generating images every 3 answered questions during setup
+ */
+function buildSetupPhasePromptMultiple(location, style, questionAnswerPairs) {
+	let prompt = `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is ${location}. This image should just be in this style: ${style}.
+
+The player is establishing this place. Take this image and modify it while keeping the location consistent according to these recent developments:
+
+`;
+	
+	// Add each question/answer pair
+	questionAnswerPairs.forEach((qa, index) => {
+		if (qa && qa.question && qa.answer) {
+			prompt += `${index + 1}. Question: ${qa.question}\n   Answer: ${qa.answer}\n\n`;
+		}
+	});
+	
+	prompt += `Incorporate all these elements into the evolving image of this place.`;
+	
+	return prompt;
 }
 
 /**
