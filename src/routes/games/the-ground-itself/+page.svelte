@@ -1,93 +1,60 @@
 <script>
+	/**
+	 * MAIN GAME PAGE - REFACTORED FOR CLEAN ARCHITECTURE
+	 * 
+	 * This component ONLY handles UI rendering and user interactions.
+	 * ALL game logic has been moved to service layers:
+	 * - gameActions.js: Game state changes and business logic
+	 * - imageService.js: Image generation
+	 * - dice.js: Dice rolling (DO NOT reimplement here)
+	 * - deck.js: Card logic (DO NOT reimplement here)
+	 * 
+	 * IMPORTANT: Do not add game logic to this component!
+	 * Always use the service abstractions instead.
+	 */
+	
 	import { gameState } from './stores.js';
 	import { imageStyleOptions } from './data.js';
-	import { buildImagePrompt } from './logic/promptBuilder.js';
+	import { startGame, rollTimeline, navigateToPhase } from './logic/gameActions.js';
 	import FaceCardSetup from './components/setup/FaceCardSetup.svelte';
 
+	// UI state only - no game logic here
 	let settingInput = '';
 	let selectedImageStyle = $gameState.imageStyle;
-	let isGenerating = false;
+	let isSubmitting = false;
 
-	async function generateImage(prompt) {
+	/**
+	 * Handle game start - uses centralized game actions
+	 * NO game logic here - just UI handling and service calls
+	 */
+	async function handleStartGame() {
+		if (isSubmitting) return;
+		
 		try {
-			const response = await fetch('/games/the-ground-itself/api/generate-image', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					prompt: prompt,
-					isDevelopmentMode: $gameState.isDevelopmentMode
-				})
-			});
-
-			const result = await response.json();
-			
-			if (result.success) {
-				gameState.update(state => ({
-					...state,
-					currentImageUrl: result.imageUrl,
-					lastGeneratedPrompt: result.prompt,
-					isGeneratingImage: false
-				}));
-			} else {
-				console.error('Image generation failed:', result.error);
-				gameState.update(state => ({
-					...state,
-					isGeneratingImage: false
-				}));
-			}
+			isSubmitting = true;
+			// Use the centralized game action - no logic duplication!
+			await startGame(settingInput, selectedImageStyle);
 		} catch (error) {
-			console.error('Error calling image API:', error);
-			gameState.update(state => ({
-				...state,
-				isGeneratingImage: false
-			}));
+			alert(error.message);
+		} finally {
+			isSubmitting = false;
 		}
 	}
 
-	async function startGame() {
-		if (!settingInput.trim()) {
-			alert('Please describe your place before continuing.');
-			return;
-		}
-
-		// Update the game state
-		gameState.update(state => ({
-			...state,
-			settingDescription: settingInput.trim(),
-			imageStyle: selectedImageStyle,
-			currentPhase: 'setup-timeline',
-			isGeneratingImage: true
-		}));
-
-		// Generate the first image
-		const prompt = buildImagePrompt({
-			...$gameState,
-			settingDescription: settingInput.trim(),
-			imageStyle: selectedImageStyle
-		});
-
-		await generateImage(prompt);
+	/**
+	 * Handle timeline roll - uses existing dice.js logic
+	 * NO dice logic here - that's what dice.js is for!
+	 */
+	function handleRollTimeline() {
+		// Use the centralized game action that properly uses dice.js
+		rollTimeline();
 	}
 
-	function rollTimeline() {
-		const roll = Math.floor(Math.random() * 6) + 1;
-		const units = {
-			1: 'days',
-			2: 'weeks',
-			3: 'years',
-			4: 'decades',
-			5: 'centuries',
-			6: 'millennia'
-		};
-
-		gameState.update(state => ({
-			...state,
-			timelineRoll: roll,
-			timelineUnit: units[roll],
-			currentPhase: 'setup-place'
-		}));
+	/**
+	 * Handle phase navigation - uses centralized actions
+	 */
+	function handleNavigateToPhase(phase) {
+		navigateToPhase(phase);
 	}
 </script>
 
@@ -143,8 +110,8 @@
 						</select>
 					</div>
 
-					<button on:click={startGame} class="start-button" disabled={isGenerating}>
-						{isGenerating ? 'Creating Your World...' : 'Begin Your Story'}
+					<button on:click={handleStartGame} class="start-button" disabled={isSubmitting || $gameState.isGeneratingImage}>
+						{isSubmitting || $gameState.isGeneratingImage ? 'Creating Your World...' : 'Begin Your Story'}
 					</button>
 				</div>
 			</div>
@@ -170,12 +137,12 @@
 						<p>Your story will unfold over <strong>{$gameState.timelineUnit}</strong>.</p>
 						<p>This means each cycle will be separated by gaps measured in {$gameState.timelineUnit}.</p>
 						
-						<button on:click={() => gameState.update(state => ({ ...state, currentPhase: 'setup-place' }))} class="continue-button">
+						<button on:click={() => handleNavigateToPhase('setup-place')} class="continue-button">
 							Continue to Place Setup
 						</button>
 					</div>
 				{:else}
-					<button on:click={rollTimeline} class="roll-button">
+					<button on:click={handleRollTimeline} class="roll-button">
 						Roll for Timeline
 					</button>
 				{/if}

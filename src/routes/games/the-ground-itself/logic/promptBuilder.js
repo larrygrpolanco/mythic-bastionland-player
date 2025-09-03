@@ -1,133 +1,288 @@
 // src/routes/games/the-ground-itself/logic/promptBuilder.js
 
-export function buildImagePrompt(state) {
-	let prompt = '';
+// Configuration for easy testing and adaptation
+const CONFIG = {
+	maxPromptLength: 800, // Increased for better AI instruction following
+	placeDescriptionLimit: 200, // Word limit for core place description
+	recentNarrativeLimit: 300, // Space for recent user answers
+	debugMode: true // Set to false in production
+};
 
-	// Start with the basic setting
-	if (state.settingDescription) {
-		prompt += `A vivid scene of ${state.settingDescription}. `;
-	}
+/**
+ * Main prompt building function - uses phase-based approach
+ * Preserves user voice while providing AI with game context
+ */
+export function buildImagePrompt(state, options = {}) {
+	const sections = {
+		gameContext: getGameContext(),
+		placeFoundation: getPlaceFoundation(state),
+		currentNarrative: getCurrentNarrative(state, options),
+		styleInstructions: getStyleInstructions(state),
+		timeContext: getTimeContext(state, options)
+	};
 
-	// Process face card answers in a structured way
-	const setupAnswers = [];
-	const faceCardOrder = [
-		'setup_jack_clubs', 'setup_queen_clubs', 'setup_king_clubs',
-		'setup_jack_hearts', 'setup_queen_hearts', 'setup_king_hearts', 
-		'setup_jack_diamonds', 'setup_queen_diamonds', 'setup_king_diamonds',
-		'setup_jack_spades', 'setup_queen_spades', 'setup_king_spades'
-	];
-
-	// Collect setup answers in order
-	faceCardOrder.forEach(key => {
-		if (state.answers[key]) {
-			setupAnswers.push(state.answers[key]);
-		}
-	});
-
-	if (setupAnswers.length > 0) {
-		// Extract different types of visual elements
-		const allSetupText = setupAnswers.join(' ').toLowerCase();
-		
-		// Materials and textures
-		const materials = allSetupText.match(/\b(?:stone|wood|metal|crystal|glass|brick|marble|granite|oak|pine|iron|gold|silver|bronze|copper|clay|sand|coral|bone|leather|fabric|silk|wool|concrete|steel|bamboo|jade|obsidian)\w*\b/g);
-		
-		// Colors and lighting
-		const colors = allSetupText.match(/\b(?:red|blue|green|yellow|purple|orange|pink|brown|black|white|gray|grey|golden|silver|crimson|azure|emerald|amber|violet|scarlet|ivory|ebony|pearl|copper|bronze|rust|faded|bright|dark|pale|vivid|muted|glowing|shimmering|gleaming)\w*\b/g);
-		
-		// Architectural and natural features
-		const features = allSetupText.match(/\b(?:tower|spire|dome|arch|pillar|column|wall|gate|bridge|fountain|garden|courtyard|plaza|street|alley|market|temple|shrine|palace|cottage|hut|cave|cliff|hill|valley|river|lake|forest|grove|meadow|field|mountain|peak|shore|harbor|dock|lighthouse|windmill|waterfall|spring|pond)\w*\b/g);
-		
-		// Atmospheric elements
-		const atmosphere = allSetupText.match(/\b(?:mist|fog|smoke|steam|dust|rain|snow|wind|storm|lightning|thunder|sunshine|moonlight|starlight|shadow|darkness|twilight|dawn|dusk|noon|midnight|cloudy|clear|overcast|humid|dry|warm|cold|hot|cool|peaceful|bustling|quiet|noisy|ancient|timeless|weathered|worn|pristine|new|old|crumbling|sturdy)\w*\b/g);
-
-		// Build descriptive elements
-		let descriptiveElements = [];
-		
-		if (materials && materials.length > 0) {
-			descriptiveElements.push(`built from ${materials.slice(0, 3).join(', ')}`);
-		}
-		
-		if (colors && colors.length > 0) {
-			descriptiveElements.push(`with ${colors.slice(0, 3).join(', ')} tones`);
-		}
-		
-		if (features && features.length > 0) {
-			descriptiveElements.push(`featuring ${features.slice(0, 3).join(', ')}`);
-		}
-		
-		if (atmosphere && atmosphere.length > 0) {
-			descriptiveElements.push(`${atmosphere.slice(0, 2).join(', ')} atmosphere`);
-		}
-
-		if (descriptiveElements.length > 0) {
-			prompt += `${descriptiveElements.slice(0, 3).join(', ')}. `;
-		}
-
-		// Add specific details from recent answers
-		if (setupAnswers.length > 0) {
-			const recentAnswers = setupAnswers.slice(-2); // Last 2 face card answers
-			const specificDetails = recentAnswers.join(' ').match(/\b(?:carved|painted|decorated|adorned|surrounded|filled|crowned|lined|bordered|covered|draped|hung|suspended|embedded|inlaid|engraved|etched|inscribed)\s+(?:with|by|in)\s+[^.!?]*[.!?]/gi);
-			
-			if (specificDetails && specificDetails.length > 0) {
-				const cleanDetail = specificDetails[0].replace(/[.!?]+$/, '');
-				prompt += `${cleanDetail}. `;
-			}
-		}
-	}
-
-	// Add details from main gameplay answers
-	const gameplayAnswers = [];
-	Object.entries(state.answers).forEach(([key, answer]) => {
-		if (key.startsWith('card_') || key.startsWith('focused_')) {
-			gameplayAnswers.push(answer);
-		}
-	});
-
-	if (gameplayAnswers.length > 0) {
-		// Extract recent narrative elements
-		const recentAnswers = gameplayAnswers.slice(-3); // Last 3 answers
-		const narrativeElements = recentAnswers
-			.join(' ')
-			.toLowerCase()
-			.match(/\b(?:built|destroyed|planted|harvested|discovered|created|abandoned|restored|changed|transformed|grew|withered|flourished|decayed|emerged|vanished|appeared|disappeared|constructed|demolished|established|founded|ruined|renovated)\w*\b/g);
-		
-		if (narrativeElements && narrativeElements.length > 0) {
-			prompt += `Recently ${narrativeElements.slice(0, 3).join(', ')}. `;
-		}
-	}
-
-	// Add time period context if we have timeline info
-	if (state.timelineUnit) {
-		const timeContext = {
-			'days': 'captured in a single moment, immediate and present',
-			'weeks': 'showing recent changes and short-term evolution',
-			'years': 'displaying seasonal cycles, growth and natural wear',
-			'decades': 'revealing architectural changes and generational shifts',
-			'centuries': 'layered with historical depth, ancient and new elements',
-			'millennia': 'shaped by geological time, deep history and transformation'
-		};
-		prompt += `${timeContext[state.timelineUnit]}. `;
-	}
-
-	// Add the artistic style
-	if (state.imageStyle) {
-		prompt += `Rendered in ${state.imageStyle} style.`;
-	}
-
-	// Clean up the prompt
-	prompt = prompt.trim();
+	// Combine sections with smart length management
+	let prompt = buildPromptFromSections(sections);
 	
-	// Ensure it's not too long (most AI models have token limits)
-	if (prompt.length > 600) {
-		prompt = prompt.substring(0, 600) + '...';
+	// Debug output for testing
+	if (CONFIG.debugMode && options.debug) {
+		console.log('Prompt Sections:', sections);
+		console.log('Final Prompt Length:', prompt.length);
 	}
 
 	return prompt;
 }
 
-// Mock function for development - generates fake image URLs
+/**
+ * Game context - explains the core rule about fixed location
+ * This helps AI understand the constraint and create coherent images
+ */
+function getGameContext() {
+	return `This is "The Ground Itself" - a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.`;
+}
+
+/**
+ * Core place description - always preserved, user's exact words
+ * This is the foundation that should appear in every image
+ */
+function getPlaceFoundation(state) {
+	if (!state.settingDescription) return '';
+	
+	// Keep user's exact words, just manage length
+	let description = state.settingDescription.trim();
+	
+	// If too long, intelligently truncate while preserving meaning
+	if (description.length > CONFIG.placeDescriptionLimit) {
+		// Find last complete sentence within limit
+		const truncated = description.substring(0, CONFIG.placeDescriptionLimit);
+		const lastSentence = truncated.lastIndexOf('.');
+		if (lastSentence > CONFIG.placeDescriptionLimit * 0.7) {
+			description = truncated.substring(0, lastSentence + 1);
+		} else {
+			description = truncated + '...';
+		}
+	}
+	
+	return description;
+}
+
+/**
+ * Current narrative - phase-specific content management
+ * Prioritizes recent user input while maintaining context
+ */
+function getCurrentNarrative(state, options = {}) {
+	const phase = state.currentPhase;
+	const currentContext = options.currentContext || {};
+	
+	switch (phase) {
+		case 'setup-place':
+			return getFaceCardNarrative(state, currentContext);
+		
+		case 'mainPlay':
+			return getMainGameplayNarrative(state, currentContext);
+		
+		case 'timeGap':
+			return getTimeGapNarrative(state, currentContext);
+		
+		default:
+			return getRecentAnswers(state, 2); // Fallback: last 2 answers
+	}
+}
+
+/**
+ * Face card phase - builds world iteratively
+ * Each answer adds to the place without losing previous context
+ */
+function getFaceCardNarrative(state, context) {
+	let narrative = '';
+	
+	// If we have a current question and answer, prioritize it
+	if (context.currentQuestion && context.currentAnswer) {
+		narrative += `Currently: ${context.currentQuestion} Answer: ${context.currentAnswer}. `;
+	}
+	
+	// Add recent face card answers for context
+	const recentFaceCardAnswers = getRecentFaceCardAnswers(state, 2);
+	if (recentFaceCardAnswers.length > 0) {
+		narrative += `Recent details: ${recentFaceCardAnswers.join(' ')} `;
+	}
+	
+	return narrative;
+}
+
+/**
+ * Main gameplay - focuses on recent narrative developments
+ * Preserves user's latest input while maintaining place continuity
+ */
+function getMainGameplayNarrative(state, context) {
+	let narrative = '';
+	
+	// Current question and answer get top priority
+	if (context.currentQuestion && context.currentAnswer) {
+		narrative += `Current event: ${context.currentQuestion} ${context.currentAnswer}. `;
+	}
+	
+	// Add recent gameplay answers for continuity
+	const recentAnswers = getRecentGameplayAnswers(state, 2);
+	if (recentAnswers.length > 0) {
+		narrative += `Recent developments: ${recentAnswers.join(' ')} `;
+	}
+	
+	return narrative;
+}
+
+/**
+ * Time gap phase - handles dramatic transitions
+ * This is where images can change the most dramatically
+ */
+function getTimeGapNarrative(state, context) {
+	let narrative = '';
+	
+	// Time gap gets special dramatic instructions
+	if (context.timeGapInfo) {
+		const { timeAmount, timeUnit, direction } = context.timeGapInfo;
+		narrative += `DRAMATIC TIME TRANSITION: ${timeAmount} ${timeUnit} have passed `;
+		narrative += direction === 'backward' ? 'into the past. ' : 'into the future. ';
+		
+		// Add the time gap questions if answered
+		if (context.timeGapAnswers) {
+			narrative += `Changes: ${context.timeGapAnswers.join(' ')} `;
+		}
+	}
+	
+	return narrative;
+}
+
+/**
+ * Time context - provides temporal framing for the AI
+ */
+function getTimeContext(state, options = {}) {
+	if (!state.timelineUnit) return '';
+	
+	const timeScales = {
+		'days': 'immediate, present moment, detailed and intimate',
+		'weeks': 'short-term changes, seasonal shifts, recent developments',
+		'years': 'natural cycles, growth and wear, moderate changes',
+		'decades': 'generational shifts, architectural changes, cultural evolution',
+		'centuries': 'historical depth, ancient and new elements layered',
+		'millennia': 'geological time, deep transformation, epic scope'
+	};
+	
+	let context = `Time scale: ${timeScales[state.timelineUnit]}.`;
+	
+	// Add cycle information if available
+	if (state.currentCycle && state.currentCycle > 1) {
+		context += ` This is cycle ${state.currentCycle} of the story.`;
+	}
+	
+	return context;
+}
+
+/**
+ * Style instructions - simple, AI-friendly guidance
+ */
+function getStyleInstructions(state) {
+	let instructions = '';
+	
+	if (state.imageStyle) {
+		instructions += `Style: ${state.imageStyle}. `;
+	}
+	
+	// Add quality and mood instructions
+	instructions += 'High detail, atmospheric, immersive. Focus on the place itself rather than individual people.';
+	
+	return instructions;
+}
+
+/**
+ * Smart prompt assembly with length management
+ */
+function buildPromptFromSections(sections) {
+	// Priority order for length management
+	const priorities = [
+		{ key: 'gameContext', essential: true },
+		{ key: 'placeFoundation', essential: true },
+		{ key: 'currentNarrative', essential: false },
+		{ key: 'timeContext', essential: false },
+		{ key: 'styleInstructions', essential: true }
+	];
+	
+	let prompt = '';
+	let remainingLength = CONFIG.maxPromptLength;
+	
+	// First pass: add essential sections
+	priorities.forEach(({ key, essential }) => {
+		if (essential && sections[key]) {
+			const section = sections[key] + ' ';
+			if (section.length <= remainingLength) {
+				prompt += section;
+				remainingLength -= section.length;
+			}
+		}
+	});
+	
+	// Second pass: add non-essential sections if space allows
+	priorities.forEach(({ key, essential }) => {
+		if (!essential && sections[key]) {
+			const section = sections[key] + ' ';
+			if (section.length <= remainingLength) {
+				prompt += section;
+				remainingLength -= section.length;
+			}
+		}
+	});
+	
+	return prompt.trim();
+}
+
+/**
+ * Helper functions for extracting recent answers
+ */
+function getRecentFaceCardAnswers(state, count = 2) {
+	const faceCardKeys = Object.keys(state.answers).filter(key => key.startsWith('setup_'));
+	return faceCardKeys
+		.slice(-count)
+		.map(key => state.answers[key])
+		.filter(answer => answer && answer.trim());
+}
+
+function getRecentGameplayAnswers(state, count = 2) {
+	const gameplayKeys = Object.keys(state.answers).filter(key => 
+		key.startsWith('card_') || key.startsWith('focused_')
+	);
+	return gameplayKeys
+		.slice(-count)
+		.map(key => state.answers[key])
+		.filter(answer => answer && answer.trim());
+}
+
+function getRecentAnswers(state, count = 2) {
+	const allKeys = Object.keys(state.answers);
+	return allKeys
+		.slice(-count)
+		.map(key => state.answers[key])
+		.filter(answer => answer && answer.trim());
+}
+
+/**
+ * Mock function for development - generates fake image URLs
+ * Enhanced to show more of the prompt for better debugging
+ */
 export function generateMockImageUrl(prompt) {
-	// In development, we'll return a placeholder with the prompt encoded
-	const encodedPrompt = encodeURIComponent(prompt.substring(0, 100));
+	// In development, encode more of the prompt for debugging
+	const encodedPrompt = encodeURIComponent(prompt.substring(0, 150));
 	return `https://via.placeholder.com/800x600/4a5568/ffffff?text=${encodedPrompt}`;
+}
+
+/**
+ * Utility function for manual prompt testing
+ * Useful during development and testing phases
+ */
+export function testPromptBuilder(state, options = {}) {
+	const prompt = buildImagePrompt(state, { ...options, debug: true });
+	console.log('=== PROMPT BUILDER TEST ===');
+	console.log('Final Prompt:', prompt);
+	console.log('Length:', prompt.length);
+	console.log('========================');
+	return prompt;
 }

@@ -1,28 +1,27 @@
 <script>
+	/**
+	 * FACE CARD SETUP COMPONENT - REFACTORED FOR CLEAN ARCHITECTURE
+	 * 
+	 * This component ONLY handles UI for face card setup.
+	 * ALL game logic has been moved to service layers:
+	 * - gameActions.js: Face card progression and state management
+	 * - imageService.js: Image generation
+	 * - deck.js: Card logic (DO NOT reimplement here)
+	 * 
+	 * IMPORTANT: Do not add game logic to this component!
+	 * Always use the service abstractions instead.
+	 */
+	
 	import { gameState } from '../../stores.js';
 	import { faceCardQuestions } from '../../data.js';
-	import { createFaceCardDeck, drawCard } from '../../logic/deck.js';
-	import { buildImagePrompt } from '../../logic/promptBuilder.js';
+	import { initializeFaceCardSetup, submitFaceCardAnswer } from '../../logic/gameActions.js';
 
 	let currentAnswer = '';
 	let isSubmitting = false;
 
-	// Initialize face card deck if not already done
-	if ($gameState.faceCardDeck.length === 0) {
-		gameState.update(state => ({
-			...state,
-			faceCardDeck: createFaceCardDeck(),
-			faceCardIndex: 0,
-			currentFaceCard: null
-		}));
-		
-		// Set the first card
-		const { card, remainingDeck } = drawCard($gameState.faceCardDeck);
-		gameState.update(state => ({
-			...state,
-			currentFaceCard: card,
-			faceCardDeck: remainingDeck
-		}));
+	// Initialize face card deck if not already done - use centralized service
+	if ($gameState.faceCardDeck.length === 0 && !$gameState.currentFaceCard) {
+		initializeFaceCardSetup();
 	}
 
 	// Get current question text
@@ -34,91 +33,32 @@
 	$: totalCards = 12;
 	$: isLastCard = progress === totalCards;
 
-	async function generateImage(prompt) {
-		try {
-			const response = await fetch('/games/the-ground-itself/api/generate-image', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					prompt: prompt,
-					isDevelopmentMode: $gameState.isDevelopmentMode
-				})
-			});
+	/**
+	 * Handle answer submission - uses centralized game actions
+	 * NO game logic here - just UI handling and service calls
+	 */
+	async function handleSubmitAnswer() {
+		if (!$gameState.currentFaceCard || isSubmitting) return;
 
-			const result = await response.json();
+		try {
+			isSubmitting = true;
 			
-			if (result.success) {
-				gameState.update(state => ({
-					...state,
-					currentImageUrl: result.imageUrl,
-					lastGeneratedPrompt: result.prompt,
-					isGeneratingImage: false
-				}));
-			} else {
-				console.error('Image generation failed:', result.error);
-				gameState.update(state => ({
-					...state,
-					isGeneratingImage: false
-				}));
+			// Use the centralized game action - no logic duplication!
+			const result = await submitFaceCardAnswer(currentAnswer, currentQuestion);
+			
+			// Reset form
+			currentAnswer = '';
+			
+			// Handle completion if needed (UI feedback only)
+			if (result.isComplete) {
+				// Face card setup is complete - the service handles phase transition
+				console.log('Face card setup completed!');
 			}
 		} catch (error) {
-			console.error('Error calling image API:', error);
-			gameState.update(state => ({
-				...state,
-				isGeneratingImage: false
-			}));
+			console.error('Error submitting face card answer:', error);
+		} finally {
+			isSubmitting = false;
 		}
-	}
-
-	async function submitAnswer() {
-		if (!$gameState.currentFaceCard) return;
-
-		isSubmitting = true;
-		
-		// Only store answer and generate image if there's actual content
-		if (currentAnswer.trim()) {
-			// Create unique key for this face card answer
-			const answerKey = `setup_${$gameState.currentFaceCard.rank}_${$gameState.currentFaceCard.suit}`;
-			
-			// Store the answer
-			gameState.update(state => ({
-				...state,
-				answers: {
-					...state.answers,
-					[answerKey]: currentAnswer.trim()
-				},
-				isGeneratingImage: true
-			}));
-
-			// Generate new image with updated world state
-			const prompt = buildImagePrompt($gameState);
-			await generateImage(prompt);
-		}
-
-		// Move to next card or complete setup (regardless of whether answer was provided)
-		if (isLastCard) {
-			// All face cards complete
-			gameState.update(state => ({
-				...state,
-				faceCardsComplete: true,
-				currentPhase: 'mainPlay'
-			}));
-		} else {
-			// Draw next card
-			const { card, remainingDeck } = drawCard($gameState.faceCardDeck);
-			gameState.update(state => ({
-				...state,
-				currentFaceCard: card,
-				faceCardDeck: remainingDeck,
-				faceCardIndex: state.faceCardIndex + 1
-			}));
-		}
-
-		// Reset form
-		currentAnswer = '';
-		isSubmitting = false;
 	}
 
 	function formatCardName(card) {
@@ -177,7 +117,7 @@
 				></textarea>
 
 				<button 
-					on:click={submitAnswer} 
+					on:click={handleSubmitAnswer} 
 					class="submit-button"
 					disabled={isSubmitting || $gameState.isGeneratingImage}
 				>
