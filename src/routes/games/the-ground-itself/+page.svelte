@@ -16,6 +16,7 @@
 	import { gameState } from './stores.js';
 	import { imageStyleOptions } from './data.js';
 	import { startGame, rollTimeline, rollTimelineWithDetails, acceptTimeline, rerollTimeline, navigateToPhase } from './logic/gameActions.js';
+	import { goto } from '$app/navigation';
 	import FaceCardSetup from './components/setup/FaceCardSetup.svelte';
 
 	// UI state only - no game logic here
@@ -202,7 +203,7 @@
 			<div class="main-play-redirect">
 				<h2>Entering Main Gameplay</h2>
 				<p>Your world has been established. Time to begin the main story...</p>
-				<button on:click={() => window.location.href = '/games/the-ground-itself/play'} class="play-button">
+				<button on:click={() => goto('/games/the-ground-itself/play')} class="play-button">
 					Begin Playing
 				</button>
 			</div>
