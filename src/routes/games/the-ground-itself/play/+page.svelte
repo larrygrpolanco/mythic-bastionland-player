@@ -1,15 +1,15 @@
 <script>
 	/**
 	 * MAIN PLAY PAGE - PHASE 2 IMPLEMENTATION
-	 * 
+	 *
 	 * This component handles the main gameplay loop where players:
 	 * 1. Draw numerical cards (Ace through 9, and 10s for time gaps)
 	 * 2. Answer questions or choose focused situations
 	 * 3. See their world evolve through 4 cycles
-	 * 
+	 *
 	 * Following clean architecture - UI only, uses service abstractions
 	 */
-	
+
 	import { gameState } from '../stores.js';
 	import { goto } from '$app/navigation';
 	import DrawCardPrompt from '../components/play/DrawCardPrompt.svelte';
@@ -53,10 +53,11 @@
 		{:else}
 			<img src={$gameState.currentImageUrl} alt="Your evolving place" class="world-image" />
 		{/if}
-		
+
 		{#if $gameState.isDevelopmentMode && $gameState.lastGeneratedPrompt}
 			<div class="debug-info">
-				<strong>Last Prompt:</strong> {$gameState.lastGeneratedPrompt}
+				<strong>Last Prompt:</strong>
+				{$gameState.lastGeneratedPrompt}
 			</div>
 		{/if}
 	</div>
@@ -68,19 +69,26 @@
 			<div class="game-status">
 				<span class="cycle-info">Cycle {currentCycle} of 4</span>
 				{#if timelineUnit}
-					<span class="timeline-info" title={timelineDescription || 'Time gaps measured in ' + timelineUnit}>
+					<span
+						class="timeline-info"
+						title={timelineDescription || 'Time gaps measured in ' + timelineUnit}
+					>
 						🎲 {timelineRoll ? timelineRoll + ': ' : ''}{timelineUnit}
 					</span>
 				{:else}
-					<span class="timeline-info timeline-missing" title="Timeline not set - this may indicate a setup issue">
+					<span
+						class="timeline-info timeline-missing"
+						title="Timeline not set - this may indicate a setup issue"
+					>
 						⚠️ Timeline not set
 					</span>
 				{/if}
 			</div>
-			
+
 			{#if $gameState.isDevelopmentMode && timelineDescription}
 				<div class="timeline-debug">
-					<strong>Timeline:</strong> {timelineDescription}
+					<strong>Timeline:</strong>
+					{timelineDescription}
 				</div>
 			{/if}
 		</div>
@@ -154,8 +162,12 @@
 	}
 
 	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 
 	.debug-info {
@@ -165,6 +177,7 @@
 		border-radius: 4px;
 		font-size: 0.9rem;
 		border-left: 4px solid #007bff;
+		white-space: pre-wrap;
 	}
 
 	.content-section {
@@ -190,7 +203,8 @@
 		color: #718096;
 	}
 
-	.cycle-info, .timeline-info {
+	.cycle-info,
+	.timeline-info {
 		padding: 0.25rem 0.75rem;
 		background: #edf2f7;
 		border-radius: 4px;

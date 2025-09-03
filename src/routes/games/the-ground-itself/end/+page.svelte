@@ -1,14 +1,14 @@
 <script>
 	/**
 	 * END GAME PAGE
-	 * 
+	 *
 	 * This page displays when the 4th "10" card is drawn, concluding the game.
 	 * It presents the final prompt from the rulebook and allows one final
 	 * image generation to show the ultimate state of the player's place.
-	 * 
+	 *
 	 * Uses existing services and follows clean architecture.
 	 */
-	
+
 	import { gameState } from '../stores.js';
 	import { generateImageWithContext } from '../logic/imageService.js';
 
@@ -33,7 +33,7 @@
 			isSubmitting = true;
 
 			// Save the final answer
-			gameState.update(state => ({
+			gameState.update((state) => ({
 				...state,
 				answers: {
 					...state.answers,
@@ -43,12 +43,11 @@
 
 			// Generate the ultimate final image
 			await generateImageWithContext(
-				"What happens tomorrow in your place? Who wakes up (does anyone)? What do they see, and what is the feeling they get from the world?",
+				'What happens tomorrow in your place? Who wakes up (does anyone)? What do they see, and what is the feeling they get from the world?',
 				finalAnswer.trim()
 			);
 
 			gameComplete = true;
-
 		} catch (error) {
 			console.error('Error submitting final answer:', error);
 		} finally {
@@ -64,7 +63,7 @@
 		gameState.set({
 			// Overall Game Flow
 			currentPhase: 'intro',
-			
+
 			// Setup Data
 			settingDescription: '',
 			timelineUnit: null,
@@ -74,7 +73,7 @@
 			currentFaceCard: null,
 			faceCardIndex: 0,
 			faceCardsComplete: false,
-			
+
 			// Core Gameplay Data
 			numericalDeck: [],
 			activeCard: null,
@@ -92,13 +91,13 @@
 				nine: 0
 			},
 			turnState: 'drawing',
-			
+
 			// Narrative & Visuals
 			answers: {},
 			imagePrompt: '',
 			currentImageUrl: 'https://via.placeholder.com/800x600/2d3748/ffffff?text=Your+World+Awaits',
 			isGeneratingImage: false,
-			
+
 			// Development/Debug
 			isDevelopmentMode: true,
 			lastGeneratedPrompt: ''
@@ -120,10 +119,11 @@
 		{:else}
 			<img src={currentImageUrl} alt="Your place at the end of time" class="final-image" />
 		{/if}
-		
+
 		{#if isDevelopmentMode && lastGeneratedPrompt}
 			<div class="debug-info">
-				<strong>Final Prompt:</strong> {lastGeneratedPrompt}
+				<strong>Final Prompt:</strong>
+				{lastGeneratedPrompt}
 			</div>
 		{/if}
 	</div>
@@ -138,28 +138,29 @@
 		{#if !gameComplete}
 			<div class="conclusion-text">
 				<p>
-					When the 4th ten card is drawn, the game is over— no matter the number of cards left in the pile, 
-					or the stories that are in motion. Our window has fogged, and the clarity of vision we had into 
-					our place is lost to us. It may feel sudden, but in truth there is never a clean exit. Places go 
-					on forever, building narrative by their mere existence.
+					When the 4th ten card is drawn, the game is over— no matter the number of cards left in
+					the pile, or the stories that are in motion. Our window has fogged, and the clarity of
+					vision we had into our place is lost to us. It may feel sudden, but in truth there is
+					never a clean exit. Places go on forever, building narrative by their mere existence.
 				</p>
-				
+
 				<p>
-					However, just because we cannot know for certain what takes place after the window of our game 
-					does not mean that we cannot make some conjectures. After all, this is a game about long traces 
-					over time— by watching our place with such attention, maybe we have learned to predict what could 
-					come to pass.
+					However, just because we cannot know for certain what takes place after the window of our
+					game does not mean that we cannot make some conjectures. After all, this is a game about
+					long traces over time— by watching our place with such attention, maybe we have learned to
+					predict what could come to pass.
 				</p>
 			</div>
 
 			<div class="final-question-section">
 				<h3>One Final Question</h3>
 				<div class="question-text">
-					What happens tomorrow in your place? Who wakes up (does anyone)? What do they see, and what is the feeling they get from the world?
+					What happens tomorrow in your place? Who wakes up (does anyone)? What do they see, and
+					what is the feeling they get from the world?
 				</div>
 
 				<div class="final-answer-section">
-					<textarea 
+					<textarea
 						bind:value={finalAnswer}
 						placeholder="Describe what tomorrow brings to your place..."
 						rows="6"
@@ -167,7 +168,7 @@
 						disabled={isSubmitting || $gameState.isGeneratingImage}
 					></textarea>
 
-					<button 
+					<button
 						on:click={handleSubmitFinal}
 						class="final-submit-button"
 						disabled={!finalAnswer.trim() || isSubmitting || $gameState.isGeneratingImage}
@@ -184,32 +185,29 @@
 		{:else}
 			<div class="completion-section">
 				<h3>Your Story is Complete</h3>
-				
+
 				<div class="story-summary">
 					<p>
-						You have witnessed <strong>{settingDescription}</strong> across the span of <strong>{timelineUnit}</strong>, 
-						through four cycles of change and growth. The place you began with has evolved, been shaped by time, 
-						and now exists in its final form in your imagination.
+						You have witnessed <strong>{settingDescription}</strong> across the span of
+						<strong>{timelineUnit}</strong>, through four cycles of change and growth. The place you
+						began with has evolved, been shaped by time, and now exists in its final form in your
+						imagination.
 					</p>
-					
+
 					<p>
-						This is the ultimate image of your created place—a culmination of all the stories, changes, 
-						and moments you've woven together. The ground itself remembers everything that has happened here.
+						This is the ultimate image of your created place—a culmination of all the stories,
+						changes, and moments you've woven together. The ground itself remembers everything that
+						has happened here.
 					</p>
 				</div>
 
 				<div class="final-actions">
-					<button 
-						on:click={handleNewGame}
-						class="new-game-button"
-					>
-						Create Another Place
-					</button>
+					<button on:click={handleNewGame} class="new-game-button"> Create Another Place </button>
 				</div>
 
 				<div class="credits">
 					<p>
-						<em>"The Ground Itself"</em> by Everest Pipkin<br>
+						<em>"The Ground Itself"</em> by Everest Pipkin<br />
 						Digital adaptation for immersive storytelling
 					</p>
 				</div>
@@ -269,8 +267,12 @@
 	}
 
 	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 
 	.debug-info {
@@ -280,6 +282,7 @@
 		border-radius: 4px;
 		font-size: 0.9rem;
 		border-left: 4px solid #d69e2e;
+		white-space: pre-wrap;
 	}
 
 	.end-content-section {
@@ -466,7 +469,8 @@
 			top: 0;
 		}
 
-		.final-image, .loading-placeholder {
+		.final-image,
+		.loading-placeholder {
 			height: 300px;
 		}
 
@@ -474,7 +478,9 @@
 			font-size: 2rem;
 		}
 
-		.conclusion-text, .final-question-section, .story-summary {
+		.conclusion-text,
+		.final-question-section,
+		.story-summary {
 			padding: 1.5rem;
 		}
 	}

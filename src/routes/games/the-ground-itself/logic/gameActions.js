@@ -28,11 +28,8 @@ import { generateImage, generateImageWithContext, generateImageWithMultipleAnswe
  * @returns {Promise<boolean>} - Success/failure of game start
  */
 export async function startGame(settingDescription, imageStyle, customImageStyle = '') {
-	if (!settingDescription.trim()) {
-		throw new Error('Please describe your place before continuing.');
-	}
-
 	// Update game state with both styles - prompt builder will handle priority
+	// Empty descriptions are allowed - promptBuilder.js has fallback to 'a mysterious place'
 	gameState.update(state => ({
 		...state,
 		settingDescription: settingDescription.trim(),
@@ -195,20 +192,21 @@ export async function submitFaceCardAnswer(answer, currentQuestion) {
 		// Generate if it's a multiple of 3, OR if it's the last card AND there are unprocessed answers
 		shouldGenerateImage = (isMultipleOfThree && hasAnswers) || (isLastCard && hasAnswers && hasUnprocessedAnswers);
 		
-		// Generate image if conditions are met
+		// Generate image if conditions are met (non-blocking)
 		if (shouldGenerateImage) {
-			try {
-				if (currentState.recentAnswers.length > 1) {
-					// Use multiple answers template
-					await generateImageWithMultipleAnswers(currentState.recentAnswers);
-				} else {
-					// Fallback to single answer for first image
-					await generateImageWithContext(currentQuestion, answer.trim());
-				}
-				imageGenerated = true;
-			} catch (error) {
-				console.error('Error generating image:', error);
+			// Generate image in background - don't block game progression
+			if (currentState.recentAnswers.length > 1) {
+				// Use multiple answers template
+				generateImageWithMultipleAnswers(currentState.recentAnswers).catch(error => {
+					console.error('Background image generation failed:', error);
+				});
+			} else {
+				// Fallback to single answer for first image
+				generateImageWithContext(currentQuestion, answer.trim()).catch(error => {
+					console.error('Background image generation failed:', error);
+				});
 			}
+			imageGenerated = true; // Mark as triggered, even though it's async
 		}
 	}
 
@@ -397,15 +395,17 @@ export async function submitNumericalCardAnswer(answer, currentQuestion) {
 			}
 		}));
 
-		// Generate image with the new answer using centralized service
-		await generateImageWithContext(currentQuestion, answer.trim());
-
-		// Reset for next turn
+		// Reset for next turn IMMEDIATELY - don't wait for image
 		gameState.update(state => ({
 			...state,
 			turnState: 'drawing',
 			activeCard: null
 		}));
+
+		// Generate image in background - don't block game progression
+		generateImageWithContext(currentQuestion, answer.trim()).catch(error => {
+			console.error('Background image generation failed:', error);
+		});
 
 		return true;
 	} catch (error) {
@@ -454,16 +454,18 @@ export async function submitFocusedSituation(situation, response) {
 			}
 		}));
 
-		// Generate image with the focused situation response
-		const contextQuestion = `Focused Situation: ${situation.name}`;
-		await generateImageWithContext(contextQuestion, response.trim());
-
-		// Reset for next turn
+		// Reset for next turn IMMEDIATELY - don't wait for image
 		gameState.update(state => ({
 			...state,
 			turnState: 'drawing',
 			activeCard: null
 		}));
+
+		// Generate image in background - don't block game progression
+		const contextQuestion = `Focused Situation: ${situation.name}`;
+		generateImageWithContext(contextQuestion, response.trim()).catch(error => {
+			console.error('Background image generation failed:', error);
+		});
 
 		return true;
 	} catch (error) {

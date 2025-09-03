@@ -173,8 +173,8 @@
 			</div>
 		{:else if $gameState.currentPhase === 'setup-timeline'}
 			<div class="timeline-setup">
-				<h2>Establish Your Timeline</h2>
-				<p>
+				<h1>Establish Your Timeline</h1>
+				<p class="subtitle">
 					This game is played in 4 cycles, separated by gaps in time. Roll to determine the unit of
 					time that will measure these gaps.
 				</p>
@@ -315,13 +315,14 @@
 		border-radius: 4px;
 		font-size: 0.9rem;
 		border-left: 4px solid #007bff;
+		white-space: pre-wrap;
 	}
 
 	.content-section {
 		overflow-y: auto;
 	}
 
-	.intro-content h1 {
+	h1 {
 		font-size: 2.5rem;
 		margin-bottom: 0.5rem;
 		color: #2d3748;
