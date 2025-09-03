@@ -102,9 +102,9 @@ export function buildImagePrompt(state, options = {}) {
  * Used when first establishing the place with just a stock image
  */
 function buildInitialSetupPrompt(location, style) {
-	return `This is "The Ground Itself" a storytelling game about a single place over time. Your job is to make these stories come to life by creating the images to these stories visual just provide images no text responses just images. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n\n
+	return `This is "The Ground Itself" a storytelling game about a single place over time. Your job is to make these stories come to life by creating the images to these stories visual just provide images no text responses just images. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-Bring this location to life: ${location}. This image should just be in this style: ${style}.\n\n`;
+Bring this location to life: ${location}. This image should just be in this style: ${style}.\n`;
 }
 
 /**
@@ -115,11 +115,11 @@ function buildSetupPhasePrompt(location, style, question, answer) {
 	const questionText = question || 'establishing this place';
 	const answerText = answer || 'building the world';
 	
-	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n\n
+	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-The location is ${location}. This image should just be in this style: ${style}. \n\n
+The location is ${location}. This image should just be in this style: ${style}. \n
 
-The player is establishing this place. Take this image and modify it while keeping the location consistent according to the question and answer \n\n
+The player is establishing this place. Take this image and modify it while keeping the location consistent according to the question and answer \n
 
 Question: ${questionText} \n
 Answer: ${answerText}`;
@@ -130,22 +130,22 @@ Answer: ${answerText}`;
  * Used when generating images every 3 answered questions during setup
  */
 function buildSetupPhasePromptMultiple(location, style, questionAnswerPairs) {
-	let prompt = `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n\n
+	let prompt = `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-The location is ${location}. This image should just be in this style: ${style}. \n\n
+The location is ${location}. This image should just be in this style: ${style}. \n
 
-The player is establishing this place. Take this image and modify it while keeping the location consistent according to these recent developments: \n\n
+The player is establishing this place. Take this image and modify it while keeping the location consistent according to these recent developments: \n
 
 `;
 	
 	// Add each question/answer pair
 	questionAnswerPairs.forEach((qa, index) => {
 		if (qa && qa.question && qa.answer) {
-			prompt += `${index + 1}. Question: ${qa.question}\n   Answer: ${qa.answer}\n\n`;
+			prompt += `${index + 1}. Question: ${qa.question}\n   Answer: ${qa.answer}\n`;
 		}
 	});
 	
-	prompt += `\n\n Incorporate all these elements into the evolving image of this place.`;
+	prompt += `\n Incorporate all these elements into the evolving image of this place.`;
 	
 	return prompt;
 }
@@ -158,11 +158,11 @@ function buildMainGameplayPrompt(location, style, question, answer) {
 	const questionText = question || 'continuing the story';
 	const answerText = answer || 'the story continues';
 	
-	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n\n
+	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-The location is ${location}. This image should just be in this style: ${style}. \n\n
+The location is ${location}. This image should just be in this style: ${style}. \n
 
-The story continues in this place. Take this image and modify it while keeping the location consistent according to the question and  \n\n
+The story continues in this place. Take this image and modify it while keeping the location consistent according to the question and  \n
 
 Question: ${questionText} \n
 Answer: ${answerText}`;
@@ -177,9 +177,9 @@ function buildTimeGapPrompt(location, style, timeAmount, timeUnit, direction, ch
 	const unit = timeUnit || 'time';
 	const dir = direction || 'forward';
 	
-	let prompt = `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n\n
+	let prompt = `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-The location is ${location}. This image should just be in this style: ${style}. \n\n
+The location is ${location}. This image should just be in this style: ${style}. \n
 
 This location has just gone through a time gap. Time has moved ${dir} ${amount} ${unit}`;
 	
@@ -198,7 +198,7 @@ The players have described the changes as such: \n`;
 	
 	prompt += `
 
-\n\n Remember to keep the camera on the same location from the previous image, it can change drastically or very little but the "camera" is anchored.`;
+\n Remember to keep the camera on the same location from the previous image, it can change drastically or very little but the "camera" is anchored.`;
 	
 	return prompt;
 }
@@ -210,14 +210,14 @@ The players have described the changes as such: \n`;
 function buildEndGamePrompt(location, style, finalAnswer) {
 	const answer = finalAnswer || 'the story concludes';
 	
-	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n\n
+	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-The location is ${location}. This image should just be in this style: ${style}. \n\n
+The location is ${location}. This image should just be in this style: ${style}. \n
 
 This is the final image of our place. The story concludes with this vision of tomorrow: \n
 
 ${answer}
-\n\n
+\n
 Show the ultimate state of this place, keeping the camera anchored to the same location we've been following throughout the entire story.`;
 }
 
