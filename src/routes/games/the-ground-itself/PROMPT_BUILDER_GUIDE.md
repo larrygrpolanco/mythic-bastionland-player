@@ -2,153 +2,167 @@
 
 ## Overview
 
-The prompt builder system is the **heart of the game** - it transforms player narratives into AI-ready prompts that generate coherent, evolving visuals. This system is **fully implemented and integrated** throughout all game phases, ready for prompt engineering optimization.
+The prompt builder system is the **heart of the game** - it transforms player narratives into AI-ready prompts using **simple, predictable templates**. The complex system has been replaced with clean templates that match exact game specifications.
 
-## Current Status: FULLY INTEGRATED ✅
+## Current Status: SIMPLE TEMPLATE SYSTEM ✅
 
-**Implementation**: Complete across all game phases  
-**Integration**: Perfect service layer architecture  
-**Usage**: All image generation flows through the prompt builder  
-**Ready for**: Prompt engineering optimization phase  
+**Implementation**: Simple template-based approach  
+**Integration**: Perfect service layer architecture maintained  
+**Usage**: All image generation flows through 5 core templates  
+**Ready for**: Easy testing and prompt optimization  
 
 ---
 
-## Integration Architecture - COMPLETE
+## Simple Template Architecture
 
-### **Service Layer Flow**
+### **Service Layer Flow (Unchanged)**
 ```
 Components → gameActions.js → imageService.js → promptBuilder.js → API
 ```
 
 **✅ Perfect Abstraction**: Components never call prompt builder directly  
 **✅ Centralized Control**: All prompts flow through single service  
-**✅ Context Preservation**: Rich context passed through all layers  
+**✅ Simple Templates**: Predictable, testable prompt generation  
 
-### **Complete Integration Points**
+### **5 Core Templates**
 
-#### **1. Setup Phase Integration ✅**
-- **File**: `components/setup/FaceCardSetup.svelte`
-- **Flow**: `submitFaceCardAnswer()` → `generateImageWithContext()`
-- **Context**: Question + answer for each face card
-- **Result**: World builds iteratively with each answer
+#### **1. Initial Setup Template**
+Used when first establishing the place with stock image:
+```
+"This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
 
-#### **2. Main Gameplay Integration ✅**
-- **Files**: All `components/play/*.svelte` components
-- **Flow**: Answer submission → `generateImageWithContext()`
-- **Context**: Current question + player answer
-- **Result**: World evolves with each narrative choice
+The location is [location]. This image should just be in this style: [style]."
+```
 
-#### **3. Time Gap Integration ✅**
-- **File**: `components/play/TimeGap.svelte`
-- **Flow**: Time gap answers → `generateTimeGapImage()`
-- **Context**: Time amount, direction, change descriptions
-- **Result**: Dramatic visual transitions between cycles
+#### **2. Setup Phase Template (Face Cards)**
+Used during world-building with face card questions:
+```
+"This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
 
-#### **4. End Game Integration ✅**
-- **File**: `end/+page.svelte`
-- **Flow**: Final answer → `generateImageWithContext()`
-- **Context**: "What happens tomorrow" final prompt
-- **Result**: Ultimate concluding image of the place
+The location is [location]. This image should just be in this style: [style].
+
+The player is establishing this place. Take this image and modify it while keeping the location consistent according to the question and answer
+
+Question: [question]
+Answer: [answer]"
+```
+
+#### **3. Main Gameplay Template**
+Used during main game with numerical card questions:
+```
+"This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is [location]. This image should just be in this style: [style].
+
+The story continues in this place. Take this image and modify it while keeping the location consistent according to the question and answer
+
+Question: [question]
+Answer: [answer]"
+```
+
+#### **4. Time Gap Template**
+Used when "10" cards trigger time jumps with all 3 changes:
+```
+"This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is [location]. This image should just be in this style: [style].
+
+This location has just gone through a time gap. Time has moved [forward/backward] [amount] [unit]
+
+The players have described the changes as such:
+[Question/answer 1]
+[Question/answer 2] 
+[Question/answer 3]
+
+Remember to keep the camera on the same location from the previous image, it can change drastically or very little but the "camera" is anchored."
+```
+
+#### **5. End Game Template**
+Used for final "what happens tomorrow" conclusion:
+```
+"This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is [location]. This image should just be in this style: [style].
+
+This is the final image of our place. The story concludes with this vision of tomorrow:
+
+[final answer]
+
+Show the ultimate state of this place, keeping the camera anchored to the same location we've been following throughout the entire story."
+```
 
 ---
 
-## Prompt Builder Architecture - SOPHISTICATED
+## Enhanced Style System ✅
 
-### **Core Function**
+### **User Input Priority**
+1. **Custom user input** (if provided) - highest priority
+2. **Selected dropdown option** (if no custom input)
+3. **Random selection** from 8 predefined options
+4. **Default fallback**: "atmospheric, digital painting, high detail"
+
+### **Implementation**
 ```javascript
-buildImagePrompt(state, options = {})
+function getImageStyle(state) {
+    // Custom style takes priority
+    if (state.customImageStyle && state.customImageStyle.trim()) {
+        return state.customImageStyle.trim();
+    }
+    
+    // Selected style second
+    if (state.imageStyle && state.imageStyle.trim()) {
+        return state.imageStyle.trim();
+    }
+    
+    // Random selection third
+    if (imageStyleOptions && imageStyleOptions.length > 0) {
+        const randomIndex = Math.floor(Math.random() * imageStyleOptions.length);
+        return imageStyleOptions[randomIndex];
+    }
+    
+    // Final fallback
+    return CONFIG.defaultStyle;
+}
 ```
 
-### **Prompt Structure**
-```
-[Game Context] + [Place Foundation] + [Current Narrative] + [Time Context] + [Style Instructions]
-```
+---
 
-### **Configuration (Optimizable)**
+## Simple Configuration
+
 ```javascript
 const CONFIG = {
-    maxPromptLength: 800,        // Adjustable for different AI models
-    placeDescriptionLimit: 200,  // Core place description limit
-    recentNarrativeLimit: 300,   // Recent narrative space
-    debugMode: true              // Production: set to false
+    debugMode: true, // Set to false in production
+    defaultStyle: 'atmospheric, digital painting, high detail'
 };
 ```
 
----
-
-## Phase-Based Content Management - IMPLEMENTED
-
-### **1. Setup Phase (`intro`, `setup-timeline`)**
-- **Strategy**: Preserve user's exact place description
-- **Context**: Initial world establishment
-- **Priority**: User voice preservation + game context
-- **Result**: Clean foundation prompt
-
-### **2. Face Card Phase (`setup-place`)**
-- **Strategy**: Iterative world building
-- **Context**: Current question + answer + recent face card answers
-- **Priority**: Cumulative building without losing previous details
-- **Result**: Rich, evolving world description
-
-### **3. Main Gameplay Phase (`mainPlay`)**
-- **Strategy**: Focus on recent narrative developments
-- **Context**: Current event + recent gameplay answers + place foundation
-- **Priority**: Latest player input while maintaining place identity
-- **Result**: Dynamic storytelling with visual continuity
-
-### **4. Time Gap Phase (`timeGap`)**
-- **Strategy**: Dramatic transition emphasis
-- **Context**: Time amount + direction + change descriptions
-- **Priority**: Visual transformation while preserving place essence
-- **Result**: Most dramatic visual changes in the game
+**No complex length management** - Templates are self-contained  
+**No smart truncation** - Important context never gets cut off  
+**No priority systems** - Simple template selection based on game phase  
 
 ---
 
-## Current Implementation Features
+## Integration Points - All Working ✅
 
-### **1. User Voice Preservation ✅**
-```javascript
-// Implemented: Keeps user's exact words
-let description = state.settingDescription.trim();
+### **1. Setup Phase Integration ✅**
+- **Template Used**: Initial Setup → Setup Phase
+- **Flow**: `submitFaceCardAnswer()` → `generateImageWithContext()`
+- **Result**: Clean, predictable prompts for world building
 
-// Intelligent truncation only when necessary
-if (description.length > CONFIG.placeDescriptionLimit) {
-    // Find last complete sentence within limit
-    const truncated = description.substring(0, CONFIG.placeDescriptionLimit);
-    const lastSentence = truncated.lastIndexOf('.');
-    if (lastSentence > CONFIG.placeDescriptionLimit * 0.7) {
-        description = truncated.substring(0, lastSentence + 1);
-    }
-}
-```
+### **2. Main Gameplay Integration ✅**
+- **Template Used**: Main Gameplay
+- **Flow**: Answer submission → `generateImageWithContext()`
+- **Result**: Consistent story continuation prompts
 
-### **2. Game Context Integration ✅**
-```javascript
-// Implemented: Core game rule explanation
-function getGameContext() {
-    return `This is "The Ground Itself" - a storytelling game about a single place over time. 
-    IMPORTANT: Everything happens in this one location. The camera is anchored to this place 
-    and cannot move outside this frame or show events elsewhere.`;
-}
-```
+### **3. Time Gap Integration ✅**
+- **Template Used**: Time Gap (includes all 3 changes)
+- **Flow**: Time gap answers → `generateTimeGapImage()`
+- **Result**: Dramatic transition prompts with complete context
 
-### **3. Smart Length Management ✅**
-**Priority System Implemented**:
-1. **Game context + current user input** (never truncated)
-2. **Place foundation** (summarized if needed, never removed)
-3. **Recent narrative** (intelligently condensed)
-4. **Historical context** (first to be shortened)
-
-### **4. Enhanced Context System ✅**
-```javascript
-// Implemented: Rich context passing
-const prompt = buildImagePrompt($gameState, {
-    currentContext: {
-        currentQuestion: "What stories are told in or about this place?",
-        currentAnswer: "The library holds ancient tales..."
-    }
-});
-```
+### **4. End Game Integration ✅**
+- **Template Used**: End Game
+- **Flow**: Final answer → `generateImageWithContext()`
+- **Result**: Conclusive final image prompt
 
 ---
 

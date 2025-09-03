@@ -22,6 +22,7 @@
 	// UI state only - no game logic here
 	let settingInput = '';
 	let selectedImageStyle = $gameState.imageStyle;
+	let customStyleInput = '';
 	let isSubmitting = false;
 
 	/**
@@ -34,7 +35,8 @@
 		try {
 			isSubmitting = true;
 			// Use the centralized game action - no logic duplication!
-			await startGame(settingInput, selectedImageStyle);
+			// Pass both selected style and custom style - the prompt builder will handle priority
+			await startGame(settingInput, selectedImageStyle, customStyleInput);
 		} catch (error) {
 			alert(error.message);
 		} finally {
@@ -121,6 +123,17 @@
 								<option value={style}>{style}</option>
 							{/each}
 						</select>
+						
+						<div class="custom-style-section">
+							<h4>Or describe your own style:</h4>
+							<input 
+								type="text" 
+								bind:value={customStyleInput}
+								placeholder="e.g., watercolor painting, soft pastels, dreamy atmosphere..."
+								class="custom-style-input"
+							/>
+							<p class="style-hint">Leave blank to use the selected style above, or write your own description</p>
+						</div>
 					</div>
 
 					<button on:click={handleStartGame} class="start-button" disabled={isSubmitting || $gameState.isGeneratingImage}>
@@ -331,6 +344,40 @@
 		border-radius: 4px;
 		font-size: 1rem;
 		background: white;
+		margin-bottom: 1rem;
+	}
+
+	.custom-style-section {
+		margin-top: 1rem;
+	}
+
+	.custom-style-section h4 {
+		color: #4a5568;
+		margin-bottom: 0.5rem;
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
+	.custom-style-input {
+		width: 100%;
+		padding: 0.75rem;
+		border: 2px solid #e2e8f0;
+		border-radius: 4px;
+		font-size: 1rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.custom-style-input:focus {
+		outline: none;
+		border-color: #4299e1;
+		box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+	}
+
+	.style-hint {
+		color: #718096;
+		font-size: 0.85rem;
+		font-style: italic;
+		margin: 0;
 	}
 
 	.start-button, .continue-button, .roll-button, .play-button {

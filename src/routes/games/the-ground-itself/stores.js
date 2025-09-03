@@ -13,6 +13,7 @@ export const gameState = writable({
 	timelineImplication: null, // What this timeline means for storytelling
 	timelineExample: null, // Example of what this timeline is good for
 	imageStyle: 'atmospheric, digital painting, high detail', // default style, user can change
+	customImageStyle: '', // User-defined custom style (takes priority over imageStyle)
 	faceCardDeck: [],
 	currentFaceCard: null, // Current face card being answered
 	faceCardIndex: 0, // Progress through face cards (0-11)
@@ -39,7 +40,8 @@ export const gameState = writable({
 	// Narrative & Visuals
 	answers: {}, // A single object to hold all answers, keyed uniquely
 	imagePrompt: '',
-	currentImageUrl: 'https://via.placeholder.com/800x600/2d3748/ffffff?text=Your+World+Awaits', // Provide a default starting image
+	currentImageUrl:
+		'https://science.nasa.gov/wp-content/uploads/2023/09/rcw120-threecolor-with-star-final.png?w=900', // Provide a default starting image
 	isGeneratingImage: false,
 
 	// Development/Debug

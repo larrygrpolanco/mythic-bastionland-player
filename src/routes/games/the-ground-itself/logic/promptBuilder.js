@@ -1,293 +1,324 @@
 // src/routes/games/the-ground-itself/logic/promptBuilder.js
 
-// Configuration for easy testing and adaptation
+import { imageStyleOptions } from '../data.js';
+
+/**
+ * SIMPLE TEMPLATE-BASED PROMPT BUILDER
+ * 
+ * This system uses simple, predictable templates instead of complex logic.
+ * Each game phase has its own template function that produces consistent,
+ * testable prompts that match the game's specifications exactly.
+ */
+
+// Configuration for the new simple system
 const CONFIG = {
-	maxPromptLength: 800, // Increased for better AI instruction following
-	placeDescriptionLimit: 200, // Word limit for core place description
-	recentNarrativeLimit: 300, // Space for recent user answers
-	debugMode: true // Set to false in production
+	debugMode: true, // Set to false in production
+	defaultStyle: 'atmospheric, digital painting, high detail'
 };
 
 /**
- * Main prompt building function - uses phase-based approach
- * Preserves user voice while providing AI with game context
+ * Main prompt building function - now uses simple template selection
+ * @param {Object} state - Current game state
+ * @param {Object} options - Context options from imageService
+ * @returns {string} - Complete prompt ready for AI image generation
  */
 export function buildImagePrompt(state, options = {}) {
-	const sections = {
-		gameContext: getGameContext(),
-		placeFoundation: getPlaceFoundation(state),
-		currentNarrative: getCurrentNarrative(state, options),
-		styleInstructions: getStyleInstructions(state),
-		timeContext: getTimeContext(state, options)
-	};
-
-	// Combine sections with smart length management
-	let prompt = buildPromptFromSections(sections);
+	const location = state.settingDescription || 'a mysterious place';
+	const style = getImageStyle(state);
+	const currentContext = options.currentContext || {};
+	
+	let prompt = '';
+	
+	// Simple template selection based on game phase and context
+	if (state.currentPhase === 'intro' || state.currentPhase === 'setup-timeline') {
+		// Initial setup - just the place and style
+		prompt = buildInitialSetupPrompt(location, style);
+		
+	} else if (state.currentPhase === 'setup-place') {
+		// Face card setup phase
+		prompt = buildSetupPhasePrompt(
+			location, 
+			style, 
+			currentContext.currentQuestion, 
+			currentContext.currentAnswer
+		);
+		
+	} else if (state.currentPhase === 'mainPlay') {
+		// Main gameplay
+		prompt = buildMainGameplayPrompt(
+			location, 
+			style, 
+			currentContext.currentQuestion, 
+			currentContext.currentAnswer
+		);
+		
+	} else if (state.currentPhase === 'timeGap' || currentContext.timeGapInfo) {
+		// Time gap transitions
+		const timeGapInfo = currentContext.timeGapInfo || {};
+		const timeGapAnswers = currentContext.timeGapAnswers || [];
+		prompt = buildTimeGapPrompt(
+			location, 
+			style, 
+			timeGapInfo.timeAmount, 
+			timeGapInfo.timeUnit, 
+			timeGapInfo.direction, 
+			timeGapAnswers
+		);
+		
+	} else if (state.currentPhase === 'end') {
+		// End game
+		prompt = buildEndGamePrompt(
+			location, 
+			style, 
+			currentContext.currentAnswer
+		);
+		
+	} else {
+		// Fallback to basic setup
+		prompt = buildInitialSetupPrompt(location, style);
+	}
 	
 	// Debug output for testing
-	if (CONFIG.debugMode && options.debug) {
-		console.log('Prompt Sections:', sections);
-		console.log('Final Prompt Length:', prompt.length);
-	}
-
-	// Always log the final prompt for debugging in development
 	if (CONFIG.debugMode) {
+		console.log('=== PROMPT BUILDER DEBUG ===');
+		console.log('Phase:', state.currentPhase);
+		console.log('Location:', location);
+		console.log('Style:', style);
+		console.log('Context:', currentContext);
 		console.log('Generated Prompt:', prompt);
+		console.log('Prompt Length:', prompt.length);
+		console.log('============================');
 	}
-
+	
 	return prompt;
 }
 
 /**
- * Game context - explains the core rule about fixed location
- * This helps AI understand the constraint and create coherent images
+ * Template 1: Initial Setup
+ * Used when first establishing the place with just a stock image
  */
-function getGameContext() {
-	return `This is "The Ground Itself" - a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.`;
+function buildInitialSetupPrompt(location, style) {
+	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is ${location}. This image should just be in this style: ${style}.`;
 }
 
 /**
- * Core place description - always preserved, user's exact words
- * This is the foundation that should appear in every image
+ * Template 2: Setup Phase (Face Cards)
+ * Used during the world-building phase with face card questions
  */
-function getPlaceFoundation(state) {
-	if (!state.settingDescription) return '';
+function buildSetupPhasePrompt(location, style, question, answer) {
+	const questionText = question || 'establishing this place';
+	const answerText = answer || 'building the world';
 	
-	// Keep user's exact words, just manage length
-	let description = state.settingDescription.trim();
-	
-	// If too long, intelligently truncate while preserving meaning
-	if (description.length > CONFIG.placeDescriptionLimit) {
-		// Find last complete sentence within limit
-		const truncated = description.substring(0, CONFIG.placeDescriptionLimit);
-		const lastSentence = truncated.lastIndexOf('.');
-		if (lastSentence > CONFIG.placeDescriptionLimit * 0.7) {
-			description = truncated.substring(0, lastSentence + 1);
-		} else {
-			description = truncated + '...';
-		}
-	}
-	
-	return description;
+	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is ${location}. This image should just be in this style: ${style}.
+
+The player is establishing this place. Take this image and modify it while keeping the location consistent according to the question and answer
+
+Question: ${questionText}
+Answer: ${answerText}`;
 }
 
 /**
- * Current narrative - phase-specific content management
- * Prioritizes recent user input while maintaining context
+ * Template 3: Main Gameplay
+ * Used during the main game with numerical card questions
  */
-function getCurrentNarrative(state, options = {}) {
-	const phase = state.currentPhase;
-	const currentContext = options.currentContext || {};
+function buildMainGameplayPrompt(location, style, question, answer) {
+	const questionText = question || 'continuing the story';
+	const answerText = answer || 'the story continues';
 	
-	switch (phase) {
-		case 'setup-place':
-			return getFaceCardNarrative(state, currentContext);
+	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is ${location}. This image should just be in this style: ${style}.
+
+The story continues in this place. Take this image and modify it while keeping the location consistent according to the question and answer
+
+Question: ${questionText}
+Answer: ${answerText}`;
+}
+
+/**
+ * Template 4: Time Gap Transitions
+ * Used when "10" cards trigger time jumps with dramatic changes
+ */
+function buildTimeGapPrompt(location, style, timeAmount, timeUnit, direction, changes) {
+	const amount = timeAmount || 'some';
+	const unit = timeUnit || 'time';
+	const dir = direction || 'forward';
+	
+	let prompt = `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is ${location}. This image should just be in this style: ${style}.
+
+This location has just gone through a time gap. Time has moved ${dir} ${amount} ${unit}`;
+	
+	// Add all 3 time gap question/answers if provided
+	if (changes && changes.length > 0) {
+		prompt += `
+
+The players have described the changes as such:`;
 		
-		case 'mainPlay':
-			return getMainGameplayNarrative(state, currentContext);
-		
-		case 'timeGap':
-			return getTimeGapNarrative(state, currentContext);
-		
-		default:
-			return getRecentAnswers(state, 2); // Fallback: last 2 answers
-	}
-}
-
-/**
- * Face card phase - builds world iteratively
- * Each answer adds to the place without losing previous context
- */
-function getFaceCardNarrative(state, context) {
-	let narrative = '';
-	
-	// If we have a current question and answer, prioritize it
-	if (context.currentQuestion && context.currentAnswer) {
-		narrative += `Currently: ${context.currentQuestion} Answer: ${context.currentAnswer}. `;
-	}
-	
-	// Add recent face card answers for context
-	const recentFaceCardAnswers = getRecentFaceCardAnswers(state, 2);
-	if (recentFaceCardAnswers.length > 0) {
-		narrative += `Recent details: ${recentFaceCardAnswers.join(' ')} `;
-	}
-	
-	return narrative;
-}
-
-/**
- * Main gameplay - focuses on recent narrative developments
- * Preserves user's latest input while maintaining place continuity
- */
-function getMainGameplayNarrative(state, context) {
-	let narrative = '';
-	
-	// Current question and answer get top priority
-	if (context.currentQuestion && context.currentAnswer) {
-		narrative += `Current event: ${context.currentQuestion} ${context.currentAnswer}. `;
-	}
-	
-	// Add recent gameplay answers for continuity
-	const recentAnswers = getRecentGameplayAnswers(state, 2);
-	if (recentAnswers.length > 0) {
-		narrative += `Recent developments: ${recentAnswers.join(' ')} `;
-	}
-	
-	return narrative;
-}
-
-/**
- * Time gap phase - handles dramatic transitions
- * This is where images can change the most dramatically
- */
-function getTimeGapNarrative(state, context) {
-	let narrative = '';
-	
-	// Time gap gets special dramatic instructions
-	if (context.timeGapInfo) {
-		const { timeAmount, timeUnit, direction } = context.timeGapInfo;
-		narrative += `DRAMATIC TIME TRANSITION: ${timeAmount} ${timeUnit} have passed `;
-		narrative += direction === 'backward' ? 'into the past. ' : 'into the future. ';
-		
-		// Add the time gap questions if answered
-		if (context.timeGapAnswers) {
-			narrative += `Changes: ${context.timeGapAnswers.join(' ')} `;
-		}
-	}
-	
-	return narrative;
-}
-
-/**
- * Time context - provides temporal framing for the AI
- */
-function getTimeContext(state, options = {}) {
-	if (!state.timelineUnit) return '';
-	
-	const timeScales = {
-		'days': 'immediate, present moment, detailed and intimate',
-		'weeks': 'short-term changes, seasonal shifts, recent developments',
-		'years': 'natural cycles, growth and wear, moderate changes',
-		'decades': 'generational shifts, architectural changes, cultural evolution',
-		'centuries': 'historical depth, ancient and new elements layered',
-		'millennia': 'geological time, deep transformation, epic scope'
-	};
-	
-	let context = `Time scale: ${timeScales[state.timelineUnit]}.`;
-	
-	// Add cycle information if available
-	if (state.currentCycle && state.currentCycle > 1) {
-		context += ` This is cycle ${state.currentCycle} of the story.`;
-	}
-	
-	return context;
-}
-
-/**
- * Style instructions - simple, AI-friendly guidance
- */
-function getStyleInstructions(state) {
-	let instructions = '';
-	
-	if (state.imageStyle) {
-		instructions += `Style: ${state.imageStyle}. `;
-	}
-	
-	// Add quality and mood instructions
-	instructions += 'High detail, atmospheric, immersive. Focus on the place itself rather than individual people.';
-	
-	return instructions;
-}
-
-/**
- * Smart prompt assembly with length management
- */
-function buildPromptFromSections(sections) {
-	// Priority order for length management
-	const priorities = [
-		{ key: 'gameContext', essential: true },
-		{ key: 'placeFoundation', essential: true },
-		{ key: 'currentNarrative', essential: false },
-		{ key: 'timeContext', essential: false },
-		{ key: 'styleInstructions', essential: true }
-	];
-	
-	let prompt = '';
-	let remainingLength = CONFIG.maxPromptLength;
-	
-	// First pass: add essential sections
-	priorities.forEach(({ key, essential }) => {
-		if (essential && sections[key]) {
-			const section = sections[key] + ' ';
-			if (section.length <= remainingLength) {
-				prompt += section;
-				remainingLength -= section.length;
+		changes.forEach((change, index) => {
+			if (change && change.trim()) {
+				prompt += `\n${change}`;
 			}
-		}
-	});
+		});
+	}
 	
-	// Second pass: add non-essential sections if space allows
-	priorities.forEach(({ key, essential }) => {
-		if (!essential && sections[key]) {
-			const section = sections[key] + ' ';
-			if (section.length <= remainingLength) {
-				prompt += section;
-				remainingLength -= section.length;
-			}
-		}
-	});
+	prompt += `
+
+Remember to keep the camera on the same location from the previous image, it can change drastically or very little but the "camera" is anchored.`;
 	
-	return prompt.trim();
+	return prompt;
 }
 
 /**
- * Helper functions for extracting recent answers
+ * Template 5: End Game
+ * Used for the final "what happens tomorrow" conclusion
  */
-function getRecentFaceCardAnswers(state, count = 2) {
-	const faceCardKeys = Object.keys(state.answers).filter(key => key.startsWith('setup_'));
-	return faceCardKeys
-		.slice(-count)
-		.map(key => state.answers[key])
-		.filter(answer => answer && answer.trim());
+function buildEndGamePrompt(location, style, finalAnswer) {
+	const answer = finalAnswer || 'the story concludes';
+	
+	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere.
+
+The location is ${location}. This image should just be in this style: ${style}.
+
+This is the final image of our place. The story concludes with this vision of tomorrow:
+
+${answer}
+
+Show the ultimate state of this place, keeping the camera anchored to the same location we've been following throughout the entire story.`;
 }
 
-function getRecentGameplayAnswers(state, count = 2) {
-	const gameplayKeys = Object.keys(state.answers).filter(key => 
-		key.startsWith('card_') || key.startsWith('focused_')
-	);
-	return gameplayKeys
-		.slice(-count)
-		.map(key => state.answers[key])
-		.filter(answer => answer && answer.trim());
-}
-
-function getRecentAnswers(state, count = 2) {
-	const allKeys = Object.keys(state.answers);
-	return allKeys
-		.slice(-count)
-		.map(key => state.answers[key])
-		.filter(answer => answer && answer.trim());
+/**
+ * Enhanced style system - user input with random defaults
+ * @param {Object} state - Game state containing style preferences
+ * @returns {string} - Style description for the prompt
+ */
+function getImageStyle(state) {
+	// If user has specified a custom style, use it
+	if (state.customImageStyle && state.customImageStyle.trim()) {
+		return state.customImageStyle.trim();
+	}
+	
+	// If user selected from predefined options, use that
+	if (state.imageStyle && state.imageStyle.trim()) {
+		return state.imageStyle.trim();
+	}
+	
+	// Otherwise, randomly select from available options
+	if (imageStyleOptions && imageStyleOptions.length > 0) {
+		const randomIndex = Math.floor(Math.random() * imageStyleOptions.length);
+		return imageStyleOptions[randomIndex];
+	}
+	
+	// Final fallback
+	return CONFIG.defaultStyle;
 }
 
 /**
  * Mock function for development - generates fake image URLs
- * Enhanced to show more of the prompt for better debugging
+ * Shows more of the prompt for better debugging
  */
 export function generateMockImageUrl(prompt) {
-	// In development, encode more of the prompt for debugging
+	// Encode first 150 characters for debugging
 	const encodedPrompt = encodeURIComponent(prompt.substring(0, 150));
 	return `https://via.placeholder.com/800x600/4a5568/ffffff?text=${encodedPrompt}`;
 }
 
 /**
- * Utility function for manual prompt testing
- * Useful during development and testing phases
+ * Enhanced testing function - shows all templates with sample data
+ * Perfect for copying prompts to test in AI image playgrounds
  */
-export function testPromptBuilder(state, options = {}) {
-	const prompt = buildImagePrompt(state, { ...options, debug: true });
-	console.log('=== PROMPT BUILDER TEST ===');
-	console.log('Final Prompt:', prompt);
-	console.log('Length:', prompt.length);
-	console.log('========================');
-	return prompt;
+export function testAllTemplates() {
+	console.log('=== TEMPLATE TESTING SUITE ===');
+	
+	const sampleLocation = 'an ancient library built into the roots of a massive oak tree';
+	const sampleStyle = 'atmospheric, digital painting, high detail';
+	const sampleQuestion = 'What stories are told in or about this place?';
+	const sampleAnswer = 'The library holds ancient tales of the Tree Keepers who first planted this oak centuries ago.';
+	
+	console.log('\n1. INITIAL SETUP TEMPLATE:');
+	console.log(buildInitialSetupPrompt(sampleLocation, sampleStyle));
+	
+	console.log('\n2. SETUP PHASE TEMPLATE:');
+	console.log(buildSetupPhasePrompt(sampleLocation, sampleStyle, sampleQuestion, sampleAnswer));
+	
+	console.log('\n3. MAIN GAMEPLAY TEMPLATE:');
+	console.log(buildMainGameplayPrompt(sampleLocation, sampleStyle, 'What are the plants like?', 'Moss covers the ancient bark, glowing softly in the dim light.'));
+	
+	console.log('\n4. TIME GAP TEMPLATE:');
+	console.log(buildTimeGapPrompt(sampleLocation, sampleStyle, 5, 'centuries', 'forward', [
+		'The library is now ruins, but new trees have grown',
+		'The books have turned to dust, but their knowledge lives in the wind',
+		'Visitors still come seeking wisdom from the ancient place'
+	]));
+	
+	console.log('\n5. END GAME TEMPLATE:');
+	console.log(buildEndGamePrompt(sampleLocation, sampleStyle, 'Tomorrow, the first new seedling will sprout from the old oak\'s roots, beginning the cycle anew.'));
+	
+	console.log('\n===============================');
+	
+	return 'All templates tested - check console for output';
+}
+
+/**
+ * Simple prompt testing function for individual templates
+ * @param {string} templateName - Which template to test
+ * @param {Object} params - Parameters for the template
+ */
+export function testSingleTemplate(templateName, params = {}) {
+	const defaults = {
+		location: 'a mysterious place',
+		style: 'atmospheric, digital painting, high detail',
+		question: 'What is this place like?',
+		answer: 'It is full of wonder and mystery.'
+	};
+	
+	const p = { ...defaults, ...params };
+	
+	let result = '';
+	
+	switch (templateName) {
+		case 'initial':
+			result = buildInitialSetupPrompt(p.location, p.style);
+			break;
+		case 'setup':
+			result = buildSetupPhasePrompt(p.location, p.style, p.question, p.answer);
+			break;
+		case 'gameplay':
+			result = buildMainGameplayPrompt(p.location, p.style, p.question, p.answer);
+			break;
+		case 'timegap':
+			result = buildTimeGapPrompt(p.location, p.style, p.timeAmount, p.timeUnit, p.direction, p.changes);
+			break;
+		case 'endgame':
+			result = buildEndGamePrompt(p.location, p.style, p.answer);
+			break;
+		default:
+			result = 'Unknown template. Use: initial, setup, gameplay, timegap, endgame';
+	}
+	
+	console.log(`=== ${templateName.toUpperCase()} TEMPLATE TEST ===`);
+	console.log(result);
+	console.log(`Length: ${result.length} characters`);
+	console.log('=====================================');
+	
+	return result;
+}
+
+/**
+ * Future enhancement hook - LLM summarization support
+ * This will be used to create condensed narrative context
+ */
+export function getSummarizedContext(state) {
+	// TODO: Implement LLM summarization
+	// - Summarize setup phase answers into 1 sentence
+	// - Summarize each cycle into brief narrative
+	// - Return condensed context for prompt inclusion
+	
+	// For now, return empty string
+	return '';
 }

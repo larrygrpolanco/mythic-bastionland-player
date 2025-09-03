@@ -24,18 +24,20 @@ import { generateImage, generateImageWithContext } from './imageService.js';
  * Start the game with user's place description and style
  * @param {string} settingDescription - User's description of their place
  * @param {string} imageStyle - Selected visual style
+ * @param {string} customImageStyle - Optional custom style description
  * @returns {Promise<boolean>} - Success/failure of game start
  */
-export async function startGame(settingDescription, imageStyle) {
+export async function startGame(settingDescription, imageStyle, customImageStyle = '') {
 	if (!settingDescription.trim()) {
 		throw new Error('Please describe your place before continuing.');
 	}
 
-	// Update game state
+	// Update game state with both styles - prompt builder will handle priority
 	gameState.update(state => ({
 		...state,
 		settingDescription: settingDescription.trim(),
 		imageStyle: imageStyle,
+		customImageStyle: customImageStyle.trim(),
 		currentPhase: 'setup-timeline'
 	}));
 
@@ -258,14 +260,17 @@ export async function drawNumericalCard() {
 
 	// Check if it's a "10" card (time gap/end game)
 	if (card.rank === 'ten') {
-		// Handle time gap logic
+		// Calculate new tens count
+		const newTensCount = currentState.tensDrawn + 1;
+		
+		// Update tens drawn count
 		gameState.update(state => ({
 			...state,
-			tensDrawn: state.tensDrawn + 1
+			tensDrawn: newTensCount
 		}));
 
 		// Check if this is the 4th ten (game end)
-		if (currentState.tensDrawn + 1 >= 4) {
+		if (newTensCount >= 4) {
 			gameState.update(state => ({
 				...state,
 				currentPhase: 'end'

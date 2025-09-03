@@ -124,14 +124,14 @@ const { card, remainingDeck } = drawCard(deck);
 // Complex card creation logic already exists and works!
 ```
 
-#### `promptBuilder.js` - AI Prompt Generation ✅
+#### `promptBuilder.js` - Simple Template-Based AI Prompt Generation ✅
 ```javascript
-// ✅ CORRECT: Use existing function (FULLY IMPLEMENTED)
+// ✅ CORRECT: Use existing function (SIMPLE TEMPLATE SYSTEM)
 import { buildImagePrompt } from './promptBuilder.js';
 const prompt = buildImagePrompt(state, options);
 
 // ❌ WRONG: Don't create prompts manually
-// Sophisticated prompt building logic already exists!
+// Simple, predictable template system already exists!
 ```
 
 ## Component Implementation Status - ALL COMPLETE

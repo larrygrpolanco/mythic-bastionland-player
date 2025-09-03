@@ -11,6 +11,7 @@
 	 */
 	
 	import { gameState } from '../stores.js';
+	import { goto } from '$app/navigation';
 	import DrawCardPrompt from '../components/play/DrawCardPrompt.svelte';
 	import TurnDecision from '../components/play/TurnDecision.svelte';
 	import AnswerInput from '../components/play/AnswerInput.svelte';
@@ -24,6 +25,11 @@
 	$: timelineUnit = $gameState.timelineUnit;
 	$: timelineRoll = $gameState.timelineRoll;
 	$: timelineDescription = $gameState.timelineDescription;
+
+	// Handle navigation to end page when game ends
+	$: if (currentPhase === 'end') {
+		goto('/games/the-ground-itself/end');
+	}
 
 	// Debug timeline data
 	$: if ($gameState.isDevelopmentMode) {
