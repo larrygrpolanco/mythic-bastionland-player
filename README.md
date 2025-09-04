@@ -1,38 +1,36 @@
-# sv
+# Mythic Player
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A playground of interactive tabletop game adaptations, powered by AI for enhanced storytelling and visual experiences. Each game is completely modular and portable to other projects.
 
-## Creating a project
+## 🎮 Current Games
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **The Ground Itself** - Narrative game about places over time, build stories around locations that evolve through cycles of change
 
-```sh
-# create a new project in the current directory
-npx sv create
+## 🚀 Quick Start
 
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+```bash
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Visit http://localhost:5173 to play.
 
-To create a production version of your app:
+## 🛠️ Tech Stack
 
-```sh
-npm run build
-```
+- **Framework:** SvelteKit
+- **AI Integration:** OpenAI for narrative generation and image creation
+- **Styling:** Custom CSS with responsive design
+- **Architecture:** Fully modular games - each game is completely self-contained with no shared logic
 
-You can preview the production build with `npm run preview`.
+## 📁 Project Structure
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- `src/routes/games/` - Individual game implementations
+- `src/lib/` - Shared components and utilities
+- `Rules/` - Source materials and design references
+
+## 🎯 Goals
+
+- Modular game development (each game = independent component)
+- AI-enhanced storytelling mechanics
+- Scalable architecture for adding new games
+- Portable codebase for easy integration into other projects
