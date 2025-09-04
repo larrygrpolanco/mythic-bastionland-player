@@ -4,7 +4,7 @@ import { imageStyleOptions } from '../data.js';
 
 /**
  * SIMPLE TEMPLATE-BASED PROMPT BUILDER
- * 
+ *
  * This system uses simple, predictable templates instead of complex logic.
  * Each game phase has its own template function that produces consistent,
  * testable prompts that match the game's specifications exactly.
@@ -26,62 +26,53 @@ export function buildImagePrompt(state, options = {}) {
 	const location = state.settingDescription || 'a mysterious place';
 	const style = getImageStyle(state);
 	const currentContext = options.currentContext || {};
-	
+
 	let prompt = '';
-	
+
 	// Simple template selection based on game phase and context
 	if (state.currentPhase === 'intro' || state.currentPhase === 'setup-timeline') {
 		// Initial setup - just the place and style
 		prompt = buildInitialSetupPrompt(location, style);
-		
 	} else if (state.currentPhase === 'setup-place') {
 		// Face card setup phase - handle both single and multiple answers
 		if (currentContext.multipleAnswers) {
 			prompt = buildSetupPhasePromptMultiple(location, style, currentContext.multipleAnswers);
 		} else {
 			prompt = buildSetupPhasePrompt(
-				location, 
-				style, 
-				currentContext.currentQuestion, 
+				location,
+				style,
+				currentContext.currentQuestion,
 				currentContext.currentAnswer
 			);
 		}
-		
 	} else if (state.currentPhase === 'mainPlay') {
 		// Main gameplay
 		prompt = buildMainGameplayPrompt(
-			location, 
-			style, 
-			currentContext.currentQuestion, 
+			location,
+			style,
+			currentContext.currentQuestion,
 			currentContext.currentAnswer
 		);
-		
 	} else if (state.currentPhase === 'timeGap' || currentContext.timeGapInfo) {
 		// Time gap transitions
 		const timeGapInfo = currentContext.timeGapInfo || {};
 		const timeGapAnswers = currentContext.timeGapAnswers || [];
 		prompt = buildTimeGapPrompt(
-			location, 
-			style, 
-			timeGapInfo.timeAmount, 
-			timeGapInfo.timeUnit, 
-			timeGapInfo.direction, 
+			location,
+			style,
+			timeGapInfo.timeAmount,
+			timeGapInfo.timeUnit,
+			timeGapInfo.direction,
 			timeGapAnswers
 		);
-		
 	} else if (state.currentPhase === 'end') {
 		// End game
-		prompt = buildEndGamePrompt(
-			location, 
-			style, 
-			currentContext.currentAnswer
-		);
-		
+		prompt = buildEndGamePrompt(location, style, currentContext.currentAnswer);
 	} else {
 		// Fallback to basic setup
 		prompt = buildInitialSetupPrompt(location, style);
 	}
-	
+
 	// Debug output for testing
 	if (CONFIG.debugMode) {
 		console.log('=== PROMPT BUILDER DEBUG ===');
@@ -93,7 +84,7 @@ export function buildImagePrompt(state, options = {}) {
 		console.log('Prompt Length:', prompt.length);
 		console.log('============================');
 	}
-	
+
 	return prompt;
 }
 
@@ -102,9 +93,12 @@ export function buildImagePrompt(state, options = {}) {
  * Used when first establishing the place with just a stock image
  */
 function buildInitialSetupPrompt(location, style) {
-	return `This is "The Ground Itself" a storytelling game about a single place over time. Your job is to make these stories come to life by creating the images to these stories visual just provide images no text responses just images. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
+	return `This is "The Ground Itself" a storytelling game about a single place over time. Your job is to make these stories come to life by creating the images to these provided descriptions. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-Bring this location to life: ${location}. This image should just be in this style: ${style}.\n`;
+Bring this location choosen by the user to life: ${location}. 
+This image should just be in this style: ${style}.
+
+This first image is just establishing the place. It should be an evocative representation of the location capturing what the player has described while leaving a lot of room for more. This should feel open and ripe for continued story telling. No matter how small the location keep it meteaphorically zoomed out, make it feel big, as to allow the user to see oppurtunity to build on this place and its story.`;
 }
 
 /**
@@ -114,12 +108,12 @@ Bring this location to life: ${location}. This image should just be in this styl
 function buildSetupPhasePrompt(location, style, question, answer) {
 	const questionText = question || 'establishing this place';
 	const answerText = answer || 'building the world';
-	
+
 	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-The location is ${location}. This image should just be in this style: ${style}. \n
+The location or ground itself is ${location}. This image should just be in this style: ${style}. \n
 
-The player is establishing this place. Take this image and modify it while keeping the location consistent according to the question and answer \n
+The player is establishing this place. Take this image and modify it while keeping the location consistent according to these recent developments\n
 
 Question: ${questionText} \n
 Answer: ${answerText}`;
@@ -132,21 +126,21 @@ Answer: ${answerText}`;
 function buildSetupPhasePromptMultiple(location, style, questionAnswerPairs) {
 	let prompt = `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
-The location is ${location}. This image should just be in this style: ${style}. \n
+The location or ground itself is ${location}. This image should just be in this style: ${style}. \n
 
 The player is establishing this place. Take this image and modify it while keeping the location consistent according to these recent developments: \n
 
 `;
-	
+
 	// Add each question/answer pair
 	questionAnswerPairs.forEach((qa, index) => {
 		if (qa && qa.question && qa.answer) {
 			prompt += `${index + 1}. Question: ${qa.question}\n   Answer: ${qa.answer}\n`;
 		}
 	});
-	
+
 	prompt += `\n Incorporate all these elements into the evolving image of this place.`;
-	
+
 	return prompt;
 }
 
@@ -157,7 +151,7 @@ The player is establishing this place. Take this image and modify it while keepi
 function buildMainGameplayPrompt(location, style, question, answer) {
 	const questionText = question || 'continuing the story';
 	const answerText = answer || 'the story continues';
-	
+
 	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
 The location is ${location}. This image should just be in this style: ${style}. \n
@@ -176,30 +170,30 @@ function buildTimeGapPrompt(location, style, timeAmount, timeUnit, direction, ch
 	const amount = timeAmount || 'some';
 	const unit = timeUnit || 'time';
 	const dir = direction || 'forward';
-	
+
 	let prompt = `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
 The location is ${location}. This image should just be in this style: ${style}. \n
 
 This location has just gone through a time gap. Time has moved ${dir} ${amount} ${unit}`;
-	
+
 	// Add all 3 time gap question/answers if provided
 	if (changes && changes.length > 0) {
 		prompt += `
 
 The players have described the changes as such: \n`;
-		
+
 		changes.forEach((change, index) => {
 			if (change && change.trim()) {
 				prompt += `\n${change}`;
 			}
 		});
 	}
-	
+
 	prompt += `
 
 \n Remember to keep the camera on the same location from the previous image, it can change drastically or very little but the "camera" is anchored.`;
-	
+
 	return prompt;
 }
 
@@ -209,7 +203,7 @@ The players have described the changes as such: \n`;
  */
 function buildEndGamePrompt(location, style, finalAnswer) {
 	const answer = finalAnswer || 'the story concludes';
-	
+
 	return `This is "The Ground Itself" a storytelling game about a single place over time. IMPORTANT: Everything happens in this one location. The camera is anchored to this place and cannot move outside this frame or show events elsewhere. \n
 
 The location is ${location}. This image should just be in this style: ${style}. \n
@@ -231,18 +225,18 @@ function getImageStyle(state) {
 	if (state.customImageStyle && state.customImageStyle.trim()) {
 		return state.customImageStyle.trim();
 	}
-	
+
 	// If user selected from predefined options, use that
 	if (state.imageStyle && state.imageStyle.trim()) {
 		return state.imageStyle.trim();
 	}
-	
+
 	// Otherwise, randomly select from available options
 	if (imageStyleOptions && imageStyleOptions.length > 0) {
 		const randomIndex = Math.floor(Math.random() * imageStyleOptions.length);
 		return imageStyleOptions[randomIndex];
 	}
-	
+
 	// Final fallback
 	return CONFIG.defaultStyle;
 }
@@ -263,33 +257,49 @@ export function generateMockImageUrl(prompt) {
  */
 export function testAllTemplates() {
 	console.log('=== TEMPLATE TESTING SUITE ===');
-	
+
 	const sampleLocation = 'an ancient library built into the roots of a massive oak tree';
 	const sampleStyle = 'atmospheric, digital painting, high detail';
 	const sampleQuestion = 'What stories are told in or about this place?';
-	const sampleAnswer = 'The library holds ancient tales of the Tree Keepers who first planted this oak centuries ago.';
-	
+	const sampleAnswer =
+		'The library holds ancient tales of the Tree Keepers who first planted this oak centuries ago.';
+
 	console.log('\n1. INITIAL SETUP TEMPLATE:');
 	console.log(buildInitialSetupPrompt(sampleLocation, sampleStyle));
-	
+
 	console.log('\n2. SETUP PHASE TEMPLATE:');
 	console.log(buildSetupPhasePrompt(sampleLocation, sampleStyle, sampleQuestion, sampleAnswer));
-	
+
 	console.log('\n3. MAIN GAMEPLAY TEMPLATE:');
-	console.log(buildMainGameplayPrompt(sampleLocation, sampleStyle, 'What are the plants like?', 'Moss covers the ancient bark, glowing softly in the dim light.'));
-	
+	console.log(
+		buildMainGameplayPrompt(
+			sampleLocation,
+			sampleStyle,
+			'What are the plants like?',
+			'Moss covers the ancient bark, glowing softly in the dim light.'
+		)
+	);
+
 	console.log('\n4. TIME GAP TEMPLATE:');
-	console.log(buildTimeGapPrompt(sampleLocation, sampleStyle, 5, 'centuries', 'forward', [
-		'The library is now ruins, but new trees have grown',
-		'The books have turned to dust, but their knowledge lives in the wind',
-		'Visitors still come seeking wisdom from the ancient place'
-	]));
-	
+	console.log(
+		buildTimeGapPrompt(sampleLocation, sampleStyle, 5, 'centuries', 'forward', [
+			'The library is now ruins, but new trees have grown',
+			'The books have turned to dust, but their knowledge lives in the wind',
+			'Visitors still come seeking wisdom from the ancient place'
+		])
+	);
+
 	console.log('\n5. END GAME TEMPLATE:');
-	console.log(buildEndGamePrompt(sampleLocation, sampleStyle, 'Tomorrow, the first new seedling will sprout from the old oak\'s roots, beginning the cycle anew.'));
-	
+	console.log(
+		buildEndGamePrompt(
+			sampleLocation,
+			sampleStyle,
+			"Tomorrow, the first new seedling will sprout from the old oak's roots, beginning the cycle anew."
+		)
+	);
+
 	console.log('\n===============================');
-	
+
 	return 'All templates tested - check console for output';
 }
 
@@ -305,11 +315,11 @@ export function testSingleTemplate(templateName, params = {}) {
 		question: 'What is this place like?',
 		answer: 'It is full of wonder and mystery.'
 	};
-	
+
 	const p = { ...defaults, ...params };
-	
+
 	let result = '';
-	
+
 	switch (templateName) {
 		case 'initial':
 			result = buildInitialSetupPrompt(p.location, p.style);
@@ -321,7 +331,14 @@ export function testSingleTemplate(templateName, params = {}) {
 			result = buildMainGameplayPrompt(p.location, p.style, p.question, p.answer);
 			break;
 		case 'timegap':
-			result = buildTimeGapPrompt(p.location, p.style, p.timeAmount, p.timeUnit, p.direction, p.changes);
+			result = buildTimeGapPrompt(
+				p.location,
+				p.style,
+				p.timeAmount,
+				p.timeUnit,
+				p.direction,
+				p.changes
+			);
 			break;
 		case 'endgame':
 			result = buildEndGamePrompt(p.location, p.style, p.answer);
@@ -329,12 +346,12 @@ export function testSingleTemplate(templateName, params = {}) {
 		default:
 			result = 'Unknown template. Use: initial, setup, gameplay, timegap, endgame';
 	}
-	
+
 	console.log(`=== ${templateName.toUpperCase()} TEMPLATE TEST ===`);
 	console.log(result);
 	console.log(`Length: ${result.length} characters`);
 	console.log('=====================================');
-	
+
 	return result;
 }
 
@@ -347,7 +364,7 @@ export function getSummarizedContext(state) {
 	// - Summarize setup phase answers into 1 sentence
 	// - Summarize each cycle into brief narrative
 	// - Return condensed context for prompt inclusion
-	
+
 	// For now, return empty string
 	return '';
 }

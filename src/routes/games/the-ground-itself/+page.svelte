@@ -259,7 +259,7 @@
 		max-width: 1200px;
 		margin: 0 auto;
 		padding: 2rem;
-		min-height: 100vh;
+		min-height: calc(100vh - 3.5rem); /* Account for header height */
 	}
 
 	.image-section {
