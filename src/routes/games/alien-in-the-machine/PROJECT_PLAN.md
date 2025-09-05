@@ -73,66 +73,140 @@ This plan breaks down the development of our Alien in the Machine MVP into disti
 
 ---
 
-#### **Phase 2: Action & Interaction (The Player-Controlled Puppet)** ✅ **COMPLETE**
+#### **Pre-Phase 2: Tick-Based Turn System Foundation** ✅ **UI FOUNDATION COMPLETE**
 
-- **Goal:** Build and validate the complete set of game rules and interactions _before_ introducing the complexity of an AI. The player-controlled marine acts as a direct, reliable way to unit-test our `actionSystem` in real-time.
+- **Goal:** Establish the tick-based turn system architecture before implementing game actions. This elegant system unifies speed, timing, and actions into one cohesive mechanism where actions directly cost time ticks.
 
-**Status:** ✅ **ACHIEVED** - Interactive action system successfully implemented
+**Status:** ✅ **UI FOUNDATION ACHIEVED** - Enhanced turn control interface successfully implemented for Phase 2 readiness
 
-**Sub-Phases:**
-  1.  ✅ **Component Creation:** Enhanced `World.js` with interactive components and `world.roomData` structure for door/item management. All rooms populated with interactive elements in `rooms.json` v0.2.0:
-     - **Docking Bay**: Security keycard, emergency toolkit, searchable cargo containers
-     - **Medical Bay**: Medical supplies, diagnostic scanner, searchable medical cabinets  
-     - **Main Corridor**: Emergency flashlight, equipment locker, maintenance alcove
-     - **Command Bridge**: Research data pad, usable command console, communication terminal
-  
-  2.  ✅ **Action Queue System**: Complete `world.actionQueue` implementation with proper action object structure (`{ action: 'moveTo', entityId: 1, target: 'medbay' }`). UI pushes structured actions, systems process and clear queue each turn.
-  
-  3.  ✅ **Action System Implementation**: Full `actionSystem` in `systems.js` with turn-based processing:
-     - Processes all queued actions in order each turn
-     - Comprehensive error handling and validation
-     - Direct world state modification with reactive store updates
-  
-  4.  ✅ **Core Action Logic**: Complete implementation of essential game mechanics:
-     - **executeMoveTo()**: Door validation, key checking, room connectivity, position updates
-     - **executePickUpItem()**: Inventory management, weight limits, item transfer mechanics
-     - **executeSearchArea()**: Randomized search system with difficulty rolls, item discovery
-  
-  5.  ✅ **Player Control Interface**: `DebugControls.svelte` fully functional as third tab:
-     - Marine selection dropdown with real-time position tracking
-     - Dynamic action generation based on marine context and world state
-     - Turn processing with action queue management and real-time feedback log
-     - Contextual action buttons (move to available rooms, pick up nearby items, search current area)
+**Core Turn Mechanics:**
+- **Speed-Based Timers:** Each character has a countdown timer and speed stat (higher speed = faster countdown)
+- **Tick-Cost Actions:** Actions directly cost time ticks (Move Room=10 ticks, Search=6 ticks, Quick Look=3 ticks)
+- **Dynamic Turn Order:** Character with lowest timer goes next (speed determines how quickly timers count down)
+- **Unified System:** No separate action points - everything is ticks
 
-**Implementation Summary:**
-- **Interactive World System**: All 4 rooms populated with items, furniture, and searchable areas
-- **Complete Action Processing**: UI → action queue → turn processing → world updates → UI reactivity
-- **Player-Controlled Marines**: Full marine control with contextual actions based on location and inventory
-- **Real-Time Feedback**: All actions provide immediate UI updates with success/error messaging
-- **Phase-Aware Architecture**: Game systems activate based on `world.metadata.phase` settings
-- **Enhanced World Structure**: `world.roomData` enables complex door locks and item interactions
+**Turn Flow Example:**
+```
+Rook (Speed 5): Timer=0 → Acts → "Search Container (6 ticks)" → Timer=6
+- Next tick: 6-5=1, then 1-5=(-4) → Can act again relatively soon
 
-**Phase 2 Known Issues (For Bug Fixing):**
-- Search results may not always display correctly in room after discovery
-- Inventory updates may not reflect immediately in InfoView component
-- Bridge door lock status may not update properly after keycard use
-- Action error messages could be more descriptive for user feedback
-- Phase transition to 2 may require manual refresh to show full functionality
+Sarge (Speed 3): Timer=2 → 2-3=(-1) → Acts → "Move to Medical (10 ticks)" → Timer=10  
+- Longer wait: 10→7→4→1→(-2) before next action
 
-- **Checkpoint:** ✅ **ACHIEVED** - We can fully play the game as a single marine, moving, picking things up, hiding, and searching. The info panel correctly reflects all state changes in real-time. The game's rules are now proven to be solid.
+Doc (Speed 2): Timer=5 → Very slow countdown: 5→3→1→(-1) → Finally can act
+```
+
+**✅ UI Implementation Complete:**
+1. **TurnControl.svelte:** Enhanced turn management component with:
+   - Categorized action selection UI (CORE, MEDICAL, TECHNICAL, ENVIRONMENTAL, COMBAT)
+   - Character status display with speed and timer information
+   - Tick cost visibility and action state management
+   - Real-time character readiness indicators
+
+2. **TabbedRightPanel.svelte:** Organized interface structure:
+   - Turn Control as primary default tab
+   - Entity Inspector for debugging
+   - Communication Log for future AI dialogue
+   - Seamless tab switching and clean organization
+
+3. **Integrated Architecture:** Removed standalone TurnDisplay, consolidated all turn functionality into organized tabbed interface
+
+**🎯 Architecture Implementation Remaining:**
+1. **World.js Extensions:**
+   - Add `SpeedComponent`: `{ entityId: { current: 5, base: 5, modifiers: [] }}`
+   - Add `turnSystem` state: `{ characterTimers: {}, gameTick: 0 }`
+   - Update `initWorld()` to initialize speed from marines.json
+
+2. **New Modular Files:**
+   - **`TurnManager.js`**: Isolated turn logic module with pure functions
+     - `getNextCharacterToAct(world)` - finds character with timer ≤ 0
+     - `advanceTick(world)` - subtracts speed from all character timers  
+     - `executeAction(world, characterId, action)` - adds action tick cost to timer
+     - `initializeTurnSystem(world)` - sets up character timers from speed
+   - **`ActionCosts.js`**: ✅ **COMPLETE** - Centralized action cost definitions with categories
+
+3. **Systems.js Integration:**
+   - **REMOVE** `processGameTurn()` batch processing entirely
+   - **ADD** `processCharacterTurn(world)` - handle single character's action using TurnManager
+   - Import and delegate to TurnManager functions for all turn logic
+
+4. **WorldStore.js Turn Management:**
+   - **REPLACE** `nextTurn()` with `executeCharacterAction(characterId, actionType)`
+   - **ADD** `getCurrentActiveCharacter()` - get character who can act now
+   - **ADD** derived stores for current character and available actions
+
+5. **Marines.json Data Updates:**
+   - Add speed values: `"speed": 5` for Rook, `"speed": 3` for Sarge, `"speed": 2` for Doc
+   - These create natural character differentiation (Rook=agile, Sarge=balanced, Doc=careful)
+
+- **Checkpoint:** ✅ **UI FOUNDATION COMPLETE** - Enhanced turn control interface ready for Phase 2 implementation. Tick system operational UI displays whose turn it is, shows tick costs, and will provide clean action selection once backend turn logic is implemented.
+
+**Key Benefits:**
+- ✅ **UI Ready for Phase 2:** Categorized action selection eliminates "unwieldy" menu concerns
+- ✅ **Simpler:** One unified tick system instead of separate speed + action points
+- ✅ **More Tactical:** Action choice directly affects turn timing (UI shows this clearly)
+- ✅ **Intuitive:** "Heavy actions take more time" makes perfect sense to players
+- ✅ **Scalable:** UI ready to display new actions with different tick costs
+- ✅ **Modular:** All turn UI logic isolated in TurnControl component for clarity
+
+---
+
+#### **Phase 2: Action & Interaction (The Player-Controlled Puppet)**
+
+- **Goal:** Build and validate the complete set of game rules and interactions using the tick-based turn system established in Pre-Phase 2. Each action costs time ticks and is processed immediately, allowing the player to control individual marines and unit-test our game mechanics in real-time.
+
+**Prerequisites:** Pre-Phase 2 tick-based turn system must be complete and operational.
+
+- **Sub-Phases:**
+  1.  **Interactive Components:** In `World.js`, define data structures for "property" components: `Pickupable`, `Hideable`, `Searchable`, `Usable`, `Door`. Add this data to items/furniture/doors in your JSON files with expansion plans from rooms.json.
+
+  2.  **Action Logic Functions:** Write individual action functions (`moveTo`, `pickUpItem`, `searchArea`, `useItem`, `hideInCover`). These are pure functions: take `world` and `action`, return success/failure and apply changes. Each action has a defined tick cost from `ActionCosts.js`.
+
+  3.  **Tick Cost Integration:** Integrate action tick costs into `processCharacterTurn()` via TurnManager. When player selects action, add tick cost to character's timer using `TurnManager.executeAction()`. Character's next turn depends on their speed and action cost.
+
+  4.  **Interactive UI Controls:** Transform the debug panel into the primary player interface. Show only the currently active character's available actions based on their position and world state. Display tick costs clearly: *"Search Cargo Container (6 ticks)"*.
+
+  5.  **World State Validation:** Add items, furniture, and searchable areas to rooms.json. Create entities for these objects during world initialization. Ensure characters can interact with environmental objects through proper component queries.
+
+- **Checkpoint:** Player can control individual marines through the tick system. Each character performs one action per turn (with associated tick cost), then waits for their timer to count down based on speed before acting again. Turn order is dynamic based on action choices. All game rules validated through direct player interaction.
+
+**Success Criteria:**
+- ✅ Only the current active character (timer ≤ 0) can perform actions
+- ✅ Action tick costs are enforced and displayed clearly
+- ✅ Character timers increase by action cost after each action
+- ✅ Turn order changes dynamically based on speed and action choices
+- ✅ All actions modify world state and show immediate feedback
+- ✅ Environmental interactions work (searching, movement, item handling)
+- ✅ Players can see character timers counting down between turns
 
 ---
 
 #### **Phase 3: The Living World (The AI Ghost in the Machine)**
 
-- **Goal:** To cleanly delegate decision-making to an external "brain" (the LLM) while the core game engine remains the sole authority on rules and state changes.
+- **Goal:** To cleanly delegate decision-making to an external "brain" (the LLM) while the core game engine remains the sole authority on rules and state changes. AI characters use the same tick-based turn system as human players.
+
+**Prerequisites:** Pre-Phase 2 and Phase 2 must be complete with working tick-based turn system.
+
 - **Sub-Phases:**
-  1.  **AI System:** Create an `aiSystem` in `systems.js`. It runs _before_ the `actionSystem`.
-  2.  **Prompt Assembly (The Context Package):** The `aiSystem` will query the `world` to build a comprehensive, structured context package (the prompt) for each AI entity. This is the game's "API" for the LLM.
-  3.  **LLM Service:** Create a helper module (`LLMService.js`). Its only job is to manage the API call: take a prompt string, send it, and return the parsed JSON response. This isolates the external dependency.
-  4.  **Response Parsing & Queuing:** The `aiSystem` takes the structured JSON response from the LLM and translates it into a valid action object, which it then pushes into the `world.actionQueue`. This ensures the AI must "play by the rules" defined in our `actionSystem`.
-  5.  **Log Integration:** Create a `logStore.js` and `RadioLog.svelte`. The `aiSystem` will push the `dialogue` and `thoughts` from the LLM response into this store for immediate visibility into the AI's reasoning.
-- **Checkpoint:** On each turn, the AI marine thinks, its dialogue appears in the log, and it performs a valid action in the world. We can now "watch" the simulation play itself.
+  1.  **AI Turn Integration:** When it's an AI character's turn (timer ≤ 0), trigger AI decision-making instead of waiting for player input. AI characters follow the same tick-cost system and speed mechanics as human players.
+
+  2.  **Prompt Assembly (The Context Package):** Build a comprehensive context for the current AI character's turn: their position, inventory, visible environment, personality traits, available actions with tick costs, and current game situation. This becomes the LLM prompt.
+
+  3.  **LLM Service:** Create a helper module (`LLMService.js`). Takes a structured prompt, calls the LLM API, returns parsed JSON response containing the AI's chosen action and dialogue. Isolates external dependency.
+
+  4.  **AI Action Processing:** The AI response is validated and processed through the same `processCharacterTurn()` system used for human players via TurnManager. This ensures AI must follow all game rules and tick costs.
+
+  5.  **Log Integration:** Extend existing `logStore.js` and `RadioLog.svelte` to capture AI dialogue and internal thoughts from LLM responses, providing real-time visibility into AI reasoning and decision-making process.
+
+- **Checkpoint:** When it's an AI marine's turn, they automatically think (visible in log), choose a valid action with appropriate tick cost, execute it through the normal TurnManager system, and wait for their timer to count down before acting again. Players can watch the simulation run itself with dynamic turn order.
+
+**Success Criteria:**
+- ✅ AI characters take turns using the same tick-based timing as human players
+- ✅ AI respects tick costs and speed limitations (no cheating the timer system)
+- ✅ AI dialogue and reasoning appears in communication log  
+- ✅ AI actions processed through same TurnManager validation as human actions
+- ✅ Turn system seamlessly handles mixed AI and human players in dynamic order
+- ✅ AI decisions factor in tick costs when choosing between actions
 
 ---
 

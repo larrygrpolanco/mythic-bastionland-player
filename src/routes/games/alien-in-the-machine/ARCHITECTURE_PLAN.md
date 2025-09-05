@@ -32,39 +32,83 @@ The entire state of the game is contained within a single JavaScript object we c
   - To find where Rook is, you query `world.components.position[5]`. To see if an entity is a marine, you check `if (world.components.isMarine[entityId])`.
 - **System:** A pure function that takes the `world` object as an argument, performs logic, and often returns a set of changes to be applied. It is the "verb" to the component "noun."
 
-#### **3. Data Flow: Anatomy of a Turn**
+#### **3. Data Flow: Tick-Based Turn System**
 
-This is the precise, non-negotiable order of operations for a single game tick.
+This game uses **speed-based tick timers** where actions directly cost time, creating a unified and elegant turn system. This is the precise, non-negotiable order of operations for the tick-based system.
 
-1.  **UI Interaction:** A player clicks a debug button or enters a command. The Svelte component _does not modify the world directly_. It calls a manager function, pushing a structured action object into `world.actionQueue`.
-2.  **Turn Trigger:** A central `nextTurn()` function is called.
-3.  **`aiSystem` Runs:**
-    - It queries for all entities with an `AIControlComponent`.
-    - For each, it generates a prompt and calls the `LLMService`.
-    - It pushes the returned action from the LLM into the `world.actionQueue`.
-4.  **`actionSystem` Runs:**
-    - It iterates through every action in the `world.actionQueue` in order.
-    - It executes the logic for each action, directly modifying the `world.components` data.
-    - After processing all actions, it clears the `world.actionQueue`.
-5.  **`missionSystem` Runs:**
-    - It checks the state of components to see if any objective conditions are now met. It might set a `world.gameState` flag (e.g., from 'PLAYING' to 'WON').
-6.  **State Commit:** The `nextTurn()` function completes.
-7.  **Store Update:** The _final, fully updated_ `world` object is passed to the `worldStore.set(world)` method.
-8.  **UI Reactivity:** Svelte detects the store change and all subscribed components (MapView, InfoView, etc.) re-render automatically, displaying the new state of the world.
+**Core Turn Mechanics:**
+- **Speed-Based Timers:** Each character has countdown timer and speed stat (higher speed = faster countdown)
+- **Tick-Cost Actions:** Actions cost time directly (Move Room=10 ticks, Search=6 ticks, Quick Look=3 ticks)
+- **Dynamic Turn Order:** Character with lowest timer value gets to act next
+- **Unified System:** Speed, timing, and actions all use the same tick currency
+
+**Tick-Based Turn Flow:**
+
+1.  **Turn Determination:**
+    - `TurnManager.getNextCharacterToAct(world)` finds character with timer ≤ 0
+    - Game displays active character: *"Rook can act (Search costs 6 ticks)"*
+    - Only the active character can perform actions
+
+2.  **Player Action Selection:**
+    - Player clicks action button showing tick cost: *"Move to Medical Bay (10 ticks)"*
+    - Svelte component calls `executeCharacterAction(characterId, actionType)`
+    - Action cost retrieved from centralized `ActionCosts.js`
+
+3.  **Action Validation:**
+    - Validates action is legal for current character and world state
+    - No "insufficient resource" checks needed - any character can take any action
+    - Returns error only if action is impossible (e.g., move to non-connected room)
+
+4.  **Single Action Processing:**
+    - Action logic executes immediately, modifying world components
+    - `TurnManager.executeAction()` adds tick cost to character's timer
+    - **NO ACTION QUEUE** - actions processed individually and immediately
+
+5.  **Timer Update:**
+    - Character's timer increases by action cost (e.g., timer becomes 10 after "Move Room" action)
+    - Character now must wait for timer to count down before acting again
+    - Turn immediately available to next character with timer ≤ 0
+
+6.  **Continuous Time Progression:**
+    - `TurnManager.advanceTick()` subtracts each character's speed from their timer
+    - Fast characters (high speed) count down quickly, slow characters count down slowly
+    - Multiple characters may reach timer ≤ 0 simultaneously
+
+7.  **AI Turn Processing (Phase 3):**
+    - When AI character's timer ≤ 0, trigger AI decision-making
+    - AI gets context including available actions with tick costs
+    - AI action processed through same `TurnManager.executeAction()` system
+
+8.  **State Update & UI Reactivity:**
+    - Each action immediately updates `worldStore`
+    - UI shows all character timers: *"Sarge: 3 ticks, Rook: ready, Doc: 7 ticks"*
+    - Dynamic turn indicators update based on who can act next
+
+**Key Architecture Points:**
+- **Unified Currency:** Everything uses ticks - no separate systems to manage
+- **Proportional Speed:** 2x speed = ~2x more actions (elegant scaling)
+- **Tactical Depth:** Action choice directly affects turn timing
+- **Immediate Feedback:** Every action shows tick cost and timer changes
+- **Dynamic Order:** Turn sequence changes based on speed and action choices
+- **Modular Logic:** All turn mechanics isolated in `TurnManager.js`
 
 #### **4. Module Responsibilities**
 
-- **`World.js`:** Defines the shape of the `world` object and provides helper functions for creating entities and attaching components. It is the **database schema**.
-- **`systems.js`:** Contains all core game logic (AI, actions, missions). These are the **business logic** functions. They are the only modules that should be modifying the `world` object.
-- **`/data/*.json`:** The raw content. These files should know nothing about the game engine. They are **pure data**.
-- **`/stores/*.js`:** The public API for the UI. Svelte components should **only** interact with the game engine through these stores (and any exposed manager functions).
-- **`/components/*.svelte`:** The presentation layer. These components should be "dumb." They read from stores and display data. They emit user events to be handled by the game logic.
+- **`World.js`:** Defines the shape of the `world` object and provides helper functions for creating entities and attaching components. It is the **database schema**. Contains turn system state structure (`turnSystem`, `actionPoints` component).
+
+- **`systems.js`:** Contains all core game logic (AI, actions, missions, **turn management**). These are the **business logic** functions. Key turn system functions: `processCharacterAction()`, `validateCharacterAction()`, `advanceToNextCharacter()`. They are the only modules that should be modifying the `world` object.
+
+- **`/data/*.json`:** The raw content. These files should know nothing about the game engine. They are **pure data**. Marines.json defines turn order through entity creation sequence.
+
+- **`/stores/*.js`:** The public API for the UI. Svelte components should **only** interact with the game engine through these stores. Key turn functions: `executeCharacterAction()`, `endCurrentTurn()`, `getCurrentCharacterDetails()`.
+
+- **`/components/*.svelte`:** The presentation layer. These components should be "dumb." They read from stores and display data (including current character and action points). They emit user events to be handled by the game logic. Must show action costs and enforce turn-based interactions.
 
 ---
 
-#### **5. Current Implementation Status (Phase 2 Complete)**
+#### **5. Current Implementation Status (Phase 1 Complete)**
 
-**✅ Phase 0, 1, & 2 Infrastructure Complete:**
+**✅ Phase 0 & 1 Infrastructure Complete:**
 
 **Core Game Engine (`lib/game/`):**
 - `World.js` - Complete ECS foundation with all component types defined, helper functions implemented, and **full `initWorld()` function** that creates entities from JSON data
@@ -80,48 +124,46 @@ This is the precise, non-negotiable order of operations for a single game tick.
 
 **UI Components (`lib/components/`):**
 - `MapView.svelte` - **Fully functional** interactive station map with real entity visualization, click handlers, and reactive data from worldStore
+- `TurnControl.svelte` - **Enhanced turn management interface** with categorized action selection, character status display, and tick-based turn system integration
+- `TabbedRightPanel.svelte` - **Tabbed interface** organizing Turn Control (default), Entity Inspector, and Communication Log
 - `InfoView.svelte` - Entity inspector with component debugging and world status display  
 - `RadioLog.svelte` - AI dialogue log with filtering, real-time updates, and message type differentiation
 
 **Main Interface:**
-- `+page.svelte` - Complete terminal-aesthetic game interface with **automatic world initialization on mount**
+- `+page.svelte` - Complete terminal-aesthetic game interface with **automatic world initialization on mount** and integrated tabbed right panel
 
-**🎯 Current State (Phase 2 Complete):**
-- **Interactive World**: Fully implemented action system with player-controlled marines
-- **Enhanced Data Layer**: All rooms populated with interactive items, furniture, searchable containers, and hiding spots
-  - **Docking Bay**: Security keycard, emergency toolkit, searchable cargo containers
-  - **Medical Bay**: Medical supplies, diagnostic scanner, searchable medical cabinets
-  - **Main Corridor**: Emergency flashlight, equipment locker, maintenance alcove
-  - **Command Bridge**: Research data pad, usable command console, communication terminal
-- **Complete Action System**: Full implementation of core game mechanics
-  - **Movement**: `executeMoveTo()` with door validation, key checking, room connectivity
-  - **Item Management**: `executePickUpItem()` with inventory limits, weight management
-  - **Exploration**: `executeSearchArea()` with randomized results, item discovery
-- **Player Control Interface**: `DebugControls.svelte` provides full marine control
-  - Marine selection dropdown with real-time position tracking
-  - Dynamic action generation based on context (movement/items/exploration)
-  - Turn processing with action queue management
-  - Real-time feedback log with categorized messages
-- **Complete Game Loop**: UI → action queue → turn processing → world update → UI reactivity
+**🎯 Current State (Phase 1 Complete):**
+- **Data-driven world**: 7 entities (4 rooms + 3 marines) loaded from JSON files
+- **Full ECS implementation**: Real entities with proper component data (isMarine, isRoom, position, health, inventory, personality, skills, tag, environment)
+- **Interactive entity system**: Click any room or marine to inspect complete component data
+- **Reactive UI**: All changes flow through worldStore to update components in real-time
+- **Phase progression working**: Game shows "Phase 1" status and "PLAYING" state
+- **Station layout functional**: 4-room station (Docking Bay, Main Corridor, Medical Bay, Command Bridge) with proper positioning
+- **Marine positioning**: All three marines (Sarge, Rook, Doc) correctly positioned in Docking Bay from JSON data
 
-**🎯 Phase 2 Architecture Validated:**
-- **Action Queue System**: Working `world.actionQueue` with proper processing
-- **Turn-Based Processing**: `nextTurn()` and `processGameTurn()` fully operational
-- **Phase-Aware Systems**: Systems activate based on `world.metadata.phase`
-- **Real-Time Reactivity**: All changes flow through worldStore to update UI components
-- **Debug Infrastructure**: Complete player control and action feedback system
+**🎯 Pre-Phase 2 UI Foundation Complete:**
+- **Enhanced Turn Interface**: TurnControl component with categorized action selection UI ready for Phase 2 implementation
+- **Tabbed Right Panel**: Clean organization of Turn Control (default), Entity Inspector, and Communication Log
+- **Action Categorization**: UI structure prepared for CORE_ACTIONS, MEDICAL_ACTIONS, TECHNICAL_ACTIONS, ENVIRONMENTAL_ACTIONS, COMBAT_ACTIONS
+- **Character Status Display**: Real-time character timers, speeds, and turn readiness indicators
+- **Tick System Integration**: UI properly displays tick costs and timer countdowns for Phase 2 testing
+- **Scalable Interface**: Categorized action groups will expand to show individual actions with tick costs in Phase 2
 
-**🔧 Phase 2 Technical Implementation:**
-- **World.js Enhanced**: Added `world.roomData` for door checking and item management
-- **systems.js Complete**: Full action logic with validation, error handling, and state updates
-- **TabbedRightPanel.svelte**: Integrated DebugControls as third tab
-- **Comprehensive Error Handling**: Actions validate entity existence, component requirements, and game rules
-- **Phase 2 Checkpoint Achieved**: "We can fully play the game as a single marine, moving, picking things up, hiding, and searching. The info panel correctly reflects all state changes in real-time."
+**🎯 Ready for Phase 2 Implementation:**
+- **Turn System Foundation**: Character-centric turn system architecture needs implementation to replace current batch processing
+- **Component System**: All interactive components pre-defined (pickupable, usable, door, searchable, hideable)  
+- **Entity Selection**: Working selection system ready for player control integration
+- **Debug Infrastructure**: Entity inspector ready to show action results in real-time
+- **Action Selection UI**: Categorized interface ready for player-controlled marine actions
 
-**🎯 Ready for Phase 3:**
-- **AI System Infrastructure**: `processAISystem()` skeleton ready for LLM integration
-- **Prompt Assembly**: Component system ready to build AI context packages
-- **Action Validation**: All AI actions will go through same validated action system
-- **Logging Integration**: `logStore.js` ready for AI dialogue and reasoning display
+**⚠️ Architecture Conflict**: Current `world.actionQueue` and `processGameTurn()` batch processing conflicts with character-centric design and must be replaced with individual turn management before Phase 2.
+
+**🔧 Development Notes:**
+- All code includes comprehensive JSDoc documentation
+- Phase progression tracked in `world.metadata.phase` and displayed in UI
+- Architecture validated: SvelteKit runs without errors, full reactivity confirmed
+- JSON data structure rich and ready for Phase 2 expansion (items, furniture, interactive elements)
+- Accessibility warnings present but non-blocking (keyboard handlers needed for map interactions)
+- **Phase 1 Checkpoint Achieved**: "We see the 4-room station laid out with REAL entities loaded from JSON data. We see dots representing our marines (Sarge, Rook, Doc) in their starting room (Docking Bay). Clicking on any room or marine shows its complete component data in the info panel."
 
 ---

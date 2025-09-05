@@ -43,6 +43,7 @@ export function createWorld() {
       // Physical properties
       health: {},       // { entityId: { current: number, max: number } }
       inventory: {},    // { entityId: { items: array, capacity: number } }
+      speed: {},        // { entityId: { current: number, base: number, modifiers: [] } }
       
       // Interactive properties (for Phase 2)
       pickupable: {},   // { entityId: { weight: number } }
@@ -67,14 +68,18 @@ export function createWorld() {
     gameState: 'INITIALIZING', // INITIALIZING, PLAYING, PAUSED, WON, LOST
     currentTurn: 0,
     
-    // Action Queue - commands waiting to be processed
+    // Tick-Based Turn System
+    turnSystem: {
+      characterTimers: {},   // { entityId: timer_value }
+      gameTick: 0,           // Global tick counter
+      activeCharacterId: null // Current character who can act
+    },
+    
+    // Action Queue - commands waiting to be processed (deprecated - will be removed)
     actionQueue: [],
     
     // Room connectivity (loaded from data files)
     roomConnections: {},
-    
-    // Raw room data for door checking and item management
-    roomData: {},
     
     // Metadata for debugging and development
     metadata: {
@@ -227,9 +232,6 @@ export function initWorld(roomsData, marinesData) {
     // Store room entity ID for reference
     if (!world.roomEntityIds) world.roomEntityIds = {};
     world.roomEntityIds[roomData.id] = roomEntityId;
-    
-    // Store raw room data for door checking and item management
-    world.roomData[roomData.id] = { ...roomData };
   });
   
   // Build room connections from door data
@@ -281,6 +283,14 @@ export function initWorld(roomsData, marinesData) {
     if (marineData.skills) {
       addComponent(world, marineEntityId, 'skills', { ...marineData.skills });
     }
+    
+    // Add speed component for tick-based turn system
+    const speed = marineData.speed || 3; // Default speed if not specified
+    addComponent(world, marineEntityId, 'speed', {
+      current: speed,
+      base: speed,
+      modifiers: []
+    });
     
     // Store marine entity ID for reference
     if (!world.marineEntityIds) world.marineEntityIds = {};

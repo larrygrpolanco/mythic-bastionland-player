@@ -55,6 +55,7 @@
         "medical": 4,
         "stealth": 6
       },
+      "speed": 3,
       "equipment": [],
       "backstory": "20-year veteran with multiple deep-space deployments. Known for bringing everyone home.",
       "appearance": "Grizzled, weathered face with regulation buzz cut. Battle scars tell stories of previous encounters."
@@ -103,6 +104,7 @@
         "medical": 6,
         "stealth": 7
       },
+      "speed": 5,
       "equipment": [],
       "backstory": "Fresh from the academy. This is their first real deployment. Specializes in technical systems and sensors.",
       "appearance": "Young, clean-shaven, alert eyes. Still has the eager look of someone untested by real combat."
@@ -151,6 +153,7 @@
         "medical": 9,
         "stealth": 5
       },
+      "speed": 2,
       "equipment": [],
       "backstory": "Former civilian doctor who enlisted after losing patients in a colony attack. Determined to save lives in dangerous situations.",
       "appearance": "Thoughtful expression, gentle hands, carries themselves with the quiet confidence of someone who has seen life and death."

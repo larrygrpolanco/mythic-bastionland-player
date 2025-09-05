@@ -3,7 +3,7 @@
   // Phase 1: Loading world data and creating entities
   
   import { onMount } from 'svelte';
-  import { gameStatusStore, nextTurn, resetGame, initializeWorld } from './lib/stores/worldStore.js';
+  import { gameStatusStore, resetGame, initializeWorld, advanceTime } from './lib/stores/worldStore.js';
   import MapView from './lib/components/MapView.svelte';
   import TabbedRightPanel from './lib/components/TabbedRightPanel.svelte';
   
@@ -18,9 +18,9 @@
     await initializeWorld();
   });
   
-  // Game controls
-  function handleNextTurn() {
-    nextTurn();
+  // Game controls  
+  function handleAdvanceTime() {
+    advanceTime();
   }
   
   function handleResetGame() {
@@ -59,8 +59,8 @@
           <div class="control-section">
             <h3>Game Controls</h3>
             <div class="control-buttons">
-              <button class="control-btn" on:click={handleNextTurn}>
-                Next Turn
+              <button class="control-btn" on:click={handleAdvanceTime}>
+                Advance Time
               </button>
               <button class="control-btn secondary" on:click={handleResetGame}>
                 Reset Game

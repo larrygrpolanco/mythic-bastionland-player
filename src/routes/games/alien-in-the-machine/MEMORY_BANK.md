@@ -22,6 +22,15 @@ A living record of our key decisions, philosophies, and future ideas.
 - **Decision:** AI interaction with the game will be mediated through structured JSON.
 - **Reasoning:** The LLM's role is decision-making, not rule execution. Forcing it to return a JSON object (e.g., `{ "action": "moveTo", "target": "medbay" }`) eliminates the complexity of natural language parsing and ensures the AI can only perform valid actions the `actionSystem` knows how to handle. This dramatically reduces bugs and unpredictability in the critical early stages.
 
+#### **Critical Turn System Decision (Pre-Phase 2 Clarification)**
+
+- **Decision:** Tick-based turn system where actions directly cost time, NOT separate action points or fixed turn order.
+- **Reasoning:** This was a planning oversight that needed immediate correction. The original character-centric approach with action points was still too complex - having both speed AND action points created unnecessary dual systems. The elegant solution: actions cost time ticks directly. Fast characters act more often because their timers count down faster. Heavy actions delay you longer than light actions.
+- **Technical Impact:** Unified system where everything uses tick currency. Character speeds determine countdown rate. Action costs determine delay until next turn. No action queues, no turn boundaries, no action point tracking - just timers and speed. Dynamic turn order based on who reaches timer ≤ 0 first.
+- **AI Integration:** When it's an AI character's turn in Phase 3, they see the same action costs and make decisions about time vs. benefit tradeoffs, just like human players. AI must consider "is this 10-tick action worth the delay?" creating natural tactical AI behavior.
+- **Learning Value:** Forces us to think about time as the fundamental resource in tactical games. Speed becomes meaningful. Action choice has immediate consequences. Eliminates arbitrary gamey mechanics in favor of intuitive time-based decisions.
+- **Architectural Beauty:** Entire complex turn system reduces to: `TurnManager.getNextCharacterToAct()` → action selected → `TurnManager.executeAction(cost)` → repeat. Modular, testable, understandable.
+
 #### **Phase 0 Completion (January 5, 2025)**
 
 **Status:** ✅ **COMPLETE** - Foundation successfully established
@@ -86,75 +95,34 @@ A living record of our key decisions, philosophies, and future ideas.
 - **Reactive Architecture Working**: Svelte stores provide seamless UI updates when world state changes
 - **Debug Infrastructure Solid**: Entity inspector provides clear visibility into ECS component data
 
-**Ready for Phase 2:** Action queue implementation, player-controlled marines, and interactive game mechanics
+**Ready for Phase 2:** Character-centric turn system implementation, action point mechanics, and player-controlled individual marine turns
 
-#### **Phase 2 Completion (September 5, 2025)**
+**⚠️ Critical Pre-Phase 2 Requirement:** The current `world.actionQueue` system must be **replaced** with character-centric turn management. The existing batch-processing approach in systems.js conflicts with the individual turn design and needs architectural revision before Phase 2 implementation.
 
-**Status:** ✅ **COMPLETE** - Interactive action system successfully implemented
+#### **UI Enhancement Completion (September 5, 2025)**
+
+**Status:** ✅ **COMPLETE** - Enhanced turn control interface successfully implemented
 
 **What Was Built:**
-- **Enhanced Data Layer**: Complete room population with interactive elements
-  - **rooms.json v0.2.0**: All 4 rooms now contain items, furniture, searchable containers, and hiding spots
-  - **Interactive Items**: Security keycard, medical supplies, tools, data pads with proper pickup/use mechanics
-  - **Furniture Systems**: Cargo containers, medical cabinets, equipment lockers with search mechanics
-- **Complete Action System Implementation**: Full game mechanics in `systems.js`
-  - **executeMoveTo()**: Door validation, key checking, room connectivity, position updates
-  - **executePickUpItem()**: Inventory management, weight limits, item transfer mechanics
-  - **executeSearchArea()**: Randomized search with difficulty rolls, item discovery system
-- **Player Control Interface**: `DebugControls.svelte` - comprehensive marine control system
-  - Marine selection with real-time position tracking
-  - Dynamic action generation based on marine context and location
-  - Turn processing with action queue management and real-time feedback
-- **Complete Game Loop Integration**: UI → action queue → turn processing → world updates → UI reactivity
-- **Enhanced World Architecture**: `World.js` updated with `world.roomData` for item/door management
+- **TurnControl.svelte**: Comprehensive turn management component with categorized action selection, character status display, and tick-based turn system integration
+- **TabbedRightPanel.svelte**: Enhanced tabbed interface organizing Turn Control as default tab, Entity Inspector, and Communication Log
+- **Integrated UI Architecture**: Removed standalone TurnDisplay component and integrated all turn functionality into organized tabbed interface
 
 **Key Achievements:**
-- ✅ **Player-Controlled Marines**: Full marine control with contextual actions
-- ✅ **Interactive World**: Items can be picked up, areas searched, doors unlocked with keys
-- ✅ **Turn-Based Processing**: Complete action queue system with proper validation
-- ✅ **Real-Time Feedback**: All actions provide immediate UI updates and error handling
-- ✅ **Phase-Aware Systems**: Game systems activate based on current phase settings
-- ✅ **Integrated UI**: DebugControls added as third tab in TabbedRightPanel
+- ✅ **Categorized Action Selection**: UI structure prepared for CORE_ACTIONS, MEDICAL_ACTIONS, TECHNICAL_ACTIONS, ENVIRONMENTAL_ACTIONS, COMBAT_ACTIONS
+- ✅ **Character-Centric Interface**: Clear active character display with speed and timer status
+- ✅ **Tick System Integration**: UI properly shows tick costs and character readiness states
+- ✅ **Scalable Design**: Action categories ready to expand with individual actions in Phase 2
+- ✅ **Clean Organization**: Turn Control as primary interface with seamless tab switching
 
-**Architecture Validation:**
-- **Action System Proven**: All core game mechanics working with proper validation
-- **ECS Pattern Validated**: Complex interactions handled cleanly through component system
-- **Data-Driven Design**: Room interactions entirely driven by JSON configuration
-- **Reactive Architecture**: Svelte stores provide seamless real-time updates
-- **Error Handling**: Comprehensive validation prevents invalid game states
+**Architecture Benefits:**
+- **Phase 2 Ready**: Categorized interface eliminates "unwieldy" action menu concern
+- **User Experience**: Clear character status and action cost visibility for tactical decisions  
+- **Maintainable Code**: Modular components with clear separation of concerns
+- **Testing Friendly**: Organized interface perfect for Phase 2 player-controlled marine testing
+- **AI Integration Ready**: Same interface will work for AI character actions in Phase 3
 
-**Critical Phase 2 Learnings:**
-- **Action Queue Architecture**: Turn-based processing enables complex multi-action gameplay
-- **Component Modularity**: Interactive elements easily added through JSON without code changes
-- **State Management**: Direct world modification in systems with reactive store updates works perfectly
-- **UI Integration**: Debug controls provide excellent testing interface for game mechanics
-- **Data Structure**: `world.roomData` separation enables complex door/item interactions
-
-**Phase 2 Bugs & Known Issues (For Future Debugging):**
-- **Search Results Display**: Found items may not always appear correctly in room after search
-- **Inventory Reactivity**: Inventory updates may not reflect immediately in InfoView
-- **Door Lock Status**: Bridge door lock status may not update properly after using keycard
-- **Action Feedback**: Some action error messages could be more descriptive
-- **Phase Transition**: Setting phase to 2 may require manual refresh to show all functionality
-
-**Ready for Phase 3:** AI system integration, LLM service implementation, and autonomous marine behavior
-
-#### **File Locations for Bug Fixing (Phase 2)**
-
-**Core Game Logic:**
-- `lib/game/systems.js` - All action implementations (movement, pickup, search)
-- `lib/game/World.js` - Entity/component management, world initialization
-- `lib/stores/worldStore.js` - State management, action queue processing
-
-**UI Components:**
-- `lib/components/DebugControls.svelte` - Player control interface, action generation
-- `lib/components/TabbedRightPanel.svelte` - Tab integration
-- `lib/components/MapView.svelte` - Visual updates after actions
-- `lib/components/InfoView.svelte` - Entity inspection, component display
-
-**Data Files:**
-- `lib/data/rooms.json` - Interactive items, furniture, searchable areas
-- `lib/data/marines.json` - Marine attributes, starting inventories
+**Critical Phase 2 Foundation:** The enhanced UI provides the essential foundation for player-controlled marine actions, making Phase 2 testing smooth and intuitive rather than overwhelming.
 
 #### **Future Ideas & Wishlist (Parking Lot)**
 
@@ -164,6 +132,3 @@ A living record of our key decisions, philosophies, and future ideas.
 - Add keyboard accessibility handlers for map interactions
 - Implement save/load game state functionality
 - Consider WebGL rendering for larger station layouts
-- Add sound effects for actions (pickup, movement, search)
-- Implement item combination mechanics
-- Add environmental hazards and damage systems

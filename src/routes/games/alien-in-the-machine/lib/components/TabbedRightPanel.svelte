@@ -8,9 +8,9 @@
 <script>
   import InfoView from './InfoView.svelte';
   import RadioLog from './RadioLog.svelte';
-  import DebugControls from './DebugControls.svelte';
+  import TurnControl from './TurnControl.svelte';
   
-  let activeTab = 'inspector'; // inspector, log, debug
+  let activeTab = 'turnControl'; // turnControl, inspector, log
   
   function switchTab(tab) {
     activeTab = tab;
@@ -19,6 +19,13 @@
 
 <div class="tabbed-panel">
   <div class="tab-header">
+    <button 
+      class="tab-btn"
+      class:active={activeTab === 'turnControl'}
+      on:click={() => switchTab('turnControl')}
+    >
+      Turn Control
+    </button>
     <button 
       class="tab-btn"
       class:active={activeTab === 'inspector'}
@@ -33,22 +40,15 @@
     >
       Communication Log
     </button>
-    <button 
-      class="tab-btn"
-      class:active={activeTab === 'debug'}
-      on:click={() => switchTab('debug')}
-    >
-      Debug Controls
-    </button>
   </div>
   
   <div class="tab-content">
-    {#if activeTab === 'inspector'}
+    {#if activeTab === 'turnControl'}
+      <TurnControl />
+    {:else if activeTab === 'inspector'}
       <InfoView />
     {:else if activeTab === 'log'}
       <RadioLog />
-    {:else if activeTab === 'debug'}
-      <DebugControls />
     {/if}
   </div>
 </div>
@@ -109,8 +109,7 @@
   
   /* Override the background and border from child components to avoid double styling */
   .tab-content :global(.info-panel),
-  .tab-content :global(.radio-log),
-  .tab-content :global(.debug-controls) {
+  .tab-content :global(.radio-log) {
     background: transparent;
     border: none;
     border-radius: 0;

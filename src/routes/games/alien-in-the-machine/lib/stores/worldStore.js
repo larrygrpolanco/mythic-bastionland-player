@@ -19,7 +19,9 @@
 
 import { writable, derived } from 'svelte/store';
 import { createWorld, initWorld, getWorldSummary, getEntityComponents } from '../game/World.js';
-import { processGameTurn, queueAction, getAvailableActions } from '../game/systems.js';
+import { processCharacterAction, advanceTimeUntilAction, getAvailableActions } from '../game/systems.js';
+import * as TurnManager from '../game/TurnManager.js';
+import { getAvailableActionsForCharacter, getActionCost, getActionDescription } from '../game/ActionCosts.js';
 
 /**
  * Main world store - holds the complete game state
@@ -49,6 +51,61 @@ export const gameStatusStore = derived(
     actionQueueLength: $world.actionQueue.length,
     activeEntitiesCount: $world.entities.active.size
   })
+);
+
+/**
+ * Derived store for tick-based turn system state
+ * Provides all turn-related information for UI components
+ */
+export const turnSystemStore = derived(
+  worldStore,
+  ($world) => {
+    if (!$world.turnSystem) return null;
+    return TurnManager.getCharacterTimersState($world);
+  }
+);
+
+/**
+ * Derived store for the currently active character
+ * Returns detailed information about who can act now
+ */
+export const activeCharacterStore = derived(
+  worldStore,
+  ($world) => {
+    const activeId = $world.turnSystem?.activeCharacterId;
+    if (!activeId) return null;
+    
+    const components = getEntityComponents($world, activeId);
+    const marineComponent = components.isMarine;
+    const speedComponent = components.speed;
+    
+    return {
+      entityId: activeId,
+      name: marineComponent?.name || `Entity ${activeId}`,
+      rank: marineComponent?.rank,
+      speed: speedComponent?.current || 0,
+      timer: $world.turnSystem.characterTimers[activeId] || 0,
+      components,
+      isReady: ($world.turnSystem.characterTimers[activeId] || 0) <= 0
+    };
+  }
+);
+
+/**
+ * Derived store for available actions for the active character
+ * Shows what the current character can do with tick costs
+ */
+export const availableActionsStore = derived(
+  [worldStore, activeCharacterStore],
+  ([$world, $activeCharacter]) => {
+    if (!$activeCharacter) return [];
+    
+    const actions = getAvailableActionsForCharacter($activeCharacter.components);
+    return actions.map(action => ({
+      ...action,
+      displayName: `${getActionDescription(action.name)} (${action.cost} ticks)`
+    }));
+  }
 );
 
 /**
@@ -98,9 +155,23 @@ export async function initializeWorld() {
     
     // Initialize world with loaded data
     const world = initWorld(roomsData, marinesData);
+    
+    // Initialize the turn system for all characters
+    const turnInitResult = TurnManager.initializeTurnSystem(world);
+    if (turnInitResult.errors.length > 0) {
+      console.warn('Turn system initialization warnings:', turnInitResult.errors);
+    }
+    
+    // Update phase to Pre-Phase 2 (tick system ready)
+    world.metadata.phase = 'Pre-Phase 2';
+    
     worldStore.set(world);
     
-    console.log('World initialized with Phase 1 data:', getWorldSummary(world));
+    console.log('World initialized with tick-based turn system:', {
+      summary: getWorldSummary(world),
+      turnSystem: turnInitResult,
+      activeCharacter: world.turnSystem.activeCharacterId
+    });
   } catch (error) {
     console.error('Failed to initialize world:', error);
     // Fall back to empty world
@@ -110,44 +181,113 @@ export async function initializeWorld() {
 }
 
 /**
- * Process a single game turn - runs all systems and updates the store
- * This is the main game loop trigger
+ * NEW TICK-BASED SYSTEM: Execute a character action
+ * This is the main function for performing actions in the tick system
+ * @param {number} characterId - The character performing the action
+ * @param {string} actionType - The action type (e.g., 'MOVE_ROOM', 'SEARCH_AREA')
+ * @param {Object} actionParams - Additional parameters for the action
+ * @returns {Object} Results of the action execution
  */
-export function nextTurn() {
-  worldStore.update(world => {
-    const turnSummary = processGameTurn(world);
-    console.log('Turn processed:', turnSummary);
-    
-    // Log any errors that occurred
-    if (turnSummary.errors.length > 0) {
-      console.warn('Turn errors:', turnSummary.errors);
-    }
-    
-    return world; // World is modified in place by systems
-  });
-}
-
-/**
- * Add an action to the game's action queue
- * Used by UI components to trigger game actions
- * @param {Object} action - The action to queue (e.g., {type: 'moveTo', entityId: 1, targetRoomId: 'medbay'})
- * @returns {boolean} True if action was successfully queued
- */
-export function addAction(action) {
-  let success = false;
+export function executeCharacterAction(characterId, actionType, actionParams = {}) {
+  let results = null;
   
   worldStore.update(world => {
-    success = queueAction(world, action);
+    results = processCharacterAction(world, characterId, actionType, actionParams);
     return world;
   });
   
-  if (success) {
-    console.log('Action queued:', action);
-  } else {
-    console.warn('Failed to queue action:', action);
+  if (results?.success) {
+    console.log('Character action executed:', {
+      character: characterId,
+      action: actionType,
+      tickCost: results.tickCost,
+      nextActive: results.nextActiveCharacter
+    });
+  } else if (results?.errors.length > 0) {
+    console.warn('Character action failed:', results.errors);
   }
   
-  return success;
+  return results;
+}
+
+/**
+ * Advance time until someone can act
+ * Used when all characters are on cooldown
+ * @returns {Object} Results of time advancement
+ */
+export function advanceTime() {
+  let results = null;
+  
+  worldStore.update(world => {
+    results = advanceTimeUntilAction(world);
+    return world;
+  });
+  
+  if (results?.errors.length > 0) {
+    console.warn('Time advancement warnings:', results.errors);
+  }
+  
+  console.log('Time advanced:', {
+    ticksAdvanced: results.ticksAdvanced,
+    activeCharacter: results.activeCharacter,
+    charactersReady: results.charactersReady
+  });
+  
+  return results;
+}
+
+/**
+ * Get the current active character (who can act now)
+ * @returns {Object|null} Active character information or null
+ */
+export function getCurrentActiveCharacter() {
+  let activeCharacter = null;
+  worldStore.subscribe(world => {
+    const activeId = world.turnSystem?.activeCharacterId;
+    if (activeId) {
+      const components = getEntityComponents(world, activeId);
+      const marineComponent = components.isMarine;
+      activeCharacter = {
+        entityId: activeId,
+        name: marineComponent?.name || `Entity ${activeId}`,
+        components
+      };
+    }
+  })();
+  return activeCharacter;
+}
+
+/**
+ * Get all character timer states for UI display
+ * @returns {Object} Timer state information
+ */
+export function getCharacterTimers() {
+  let timerState = null;
+  worldStore.subscribe(world => {
+    timerState = TurnManager.getCharacterTimersState(world);
+  })();
+  return timerState;
+}
+
+/**
+ * DEPRECATED: Process a single game turn - kept for compatibility
+ * @deprecated Use executeCharacterAction for individual actions
+ */
+export function nextTurn() {
+  console.warn('nextTurn() is deprecated - use executeCharacterAction() or advanceTime()');
+  return advanceTime();
+}
+
+/**
+ * DEPRECATED: Add an action to the game's action queue
+ * @deprecated Use executeCharacterAction for immediate action execution
+ */
+export function addAction(action) {
+  console.warn('addAction() is deprecated - use executeCharacterAction()');
+  if (action.entityId && action.type) {
+    return executeCharacterAction(action.entityId, action.type, action);
+  }
+  return { success: false, error: 'Invalid action format for deprecated addAction' };
 }
 
 /**
