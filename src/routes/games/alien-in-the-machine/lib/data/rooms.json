@@ -1,0 +1,177 @@
+{
+  "metadata": {
+    "version": "0.1.0",
+    "description": "Station layout and room definitions for Alien in the Machine",
+    "lastUpdated": "2025-01-05",
+    "notes": [
+      "This file defines the 4-room station layout mentioned in PROJECT_PLAN.md",
+      "Each room MUST have doors with targetRoomId for connectivity",
+      "Future phases will add items, furniture, and environmental objects",
+      "Keep this file modular - it should be easy to swap out different station layouts"
+    ]
+  },
+  
+  "rooms": [
+    {
+      "id": "docking_bay",
+      "name": "Docking Bay",
+      "description": "A large chamber with massive airlock doors. Emergency lights cast an eerie red glow across scattered cargo containers and maintenance equipment.",
+      "coordinates": { "x": 0, "y": 0 },
+      "size": "large",
+      "atmosphere": "tense",
+      "doors": [
+        {
+          "id": "door_docking_to_corridor",
+          "targetRoomId": "main_corridor",
+          "direction": "north",
+          "locked": false,
+          "description": "Heavy blast door leading to the main corridor"
+        }
+      ],
+      "items": [],
+      "furniture": [],
+      "searchableAreas": [],
+      "hidingSpots": [],
+      "lighting": "emergency_red",
+      "temperature": "cold",
+      "sounds": ["distant_humming", "occasional_metallic_clanks"]
+    },
+    
+    {
+      "id": "main_corridor",
+      "name": "Main Corridor",
+      "description": "A central hallway connecting the major sections of the station. Flickering overhead lights illuminate worn metal plating and utility pipes running along the walls.",
+      "coordinates": { "x": 0, "y": 1 },
+      "size": "medium",
+      "atmosphere": "ominous",
+      "doors": [
+        {
+          "id": "door_corridor_to_docking",
+          "targetRoomId": "docking_bay",
+          "direction": "south",
+          "locked": false,
+          "description": "Heavy blast door leading to the docking bay"
+        },
+        {
+          "id": "door_corridor_to_medbay",
+          "targetRoomId": "medbay",
+          "direction": "west",
+          "locked": false,
+          "description": "Medical bay access hatch"
+        },
+        {
+          "id": "door_corridor_to_bridge",
+          "targetRoomId": "bridge",
+          "direction": "north",
+          "locked": true,
+          "keyRequired": "security_keycard",
+          "description": "Reinforced door to the bridge - requires security clearance"
+        }
+      ],
+      "items": [],
+      "furniture": [],
+      "searchableAreas": [],
+      "hidingSpots": [],
+      "lighting": "flickering_overhead",
+      "temperature": "normal",
+      "sounds": ["electrical_humming", "distant_ventilation"]
+    },
+    
+    {
+      "id": "medbay",
+      "name": "Medical Bay",
+      "description": "A sterile medical facility with examination tables, medical equipment, and supply cabinets. Some equipment appears to have been hastily abandoned.",
+      "coordinates": { "x": -1, "y": 1 },
+      "size": "medium",
+      "atmosphere": "sterile_but_abandoned",
+      "doors": [
+        {
+          "id": "door_medbay_to_corridor",
+          "targetRoomId": "main_corridor",
+          "direction": "east",
+          "locked": false,
+          "description": "Medical bay access hatch"
+        }
+      ],
+      "items": [],
+      "furniture": [],
+      "searchableAreas": [],
+      "hidingSpots": [],
+      "lighting": "bright_medical",
+      "temperature": "cold",
+      "sounds": ["medical_equipment_beeping", "ventilation_system"]
+    },
+    
+    {
+      "id": "bridge",
+      "name": "Command Bridge",
+      "description": "The station's nerve center, filled with command consoles, communication equipment, and tactical displays. Multiple screens show various station systems and external views.",
+      "coordinates": { "x": 0, "y": 2 },
+      "size": "large",
+      "atmosphere": "command_center",
+      "doors": [
+        {
+          "id": "door_bridge_to_corridor",
+          "targetRoomId": "main_corridor",
+          "direction": "south",
+          "locked": true,
+          "keyRequired": "security_keycard",
+          "description": "Reinforced door from the bridge - requires security clearance"
+        }
+      ],
+      "items": [],
+      "furniture": [],
+      "searchableAreas": [],
+      "hidingSpots": [],
+      "lighting": "console_glow",
+      "temperature": "normal",
+      "sounds": ["computer_systems", "communication_chatter", "tactical_displays"]
+    }
+  ],
+  
+  "roomConnections": {
+    "docking_bay": ["main_corridor"],
+    "main_corridor": ["docking_bay", "medbay", "bridge"],
+    "medbay": ["main_corridor"],
+    "bridge": ["main_corridor"]
+  },
+  
+  "stationLayout": {
+    "name": "Research Station Alpha-7",
+    "type": "small_research_facility",
+    "totalRooms": 4,
+    "securityLevel": "medium",
+    "emergencyStatus": "amber",
+    "powerStatus": "emergency_backup",
+    "notes": [
+      "Station is operating on emergency power",
+      "Bridge requires security clearance to access",
+      "Some areas show signs of hasty evacuation"
+    ]
+  },
+  
+  "expansionPlans": {
+    "phase2": {
+      "items": [
+        "Add medical supplies in medbay",
+        "Add security keycard in docking bay",
+        "Add tools and equipment scattered around"
+      ],
+      "furniture": [
+        "Medical tables and equipment in medbay",
+        "Command consoles in bridge",
+        "Cargo containers in docking bay"
+      ],
+      "searchableAreas": [
+        "Medical supply cabinets",
+        "Cargo containers",
+        "Equipment lockers"
+      ],
+      "hidingSpots": [
+        "Behind cargo containers",
+        "Under medical tables",
+        "In maintenance alcoves"
+      ]
+    }
+  }
+}

@@ -1,0 +1,214 @@
+{
+  "metadata": {
+    "version": "0.1.0",
+    "description": "Marine unit definitions for Alien in the Machine",
+    "lastUpdated": "2025-01-05",
+    "notes": [
+      "Defines the starting marines and their attributes",
+      "Each marine becomes an entity with multiple components in the ECS system",
+      "Future phases will add AI personalities, equipment, and objectives",
+      "Keep personalities distinct for interesting AI interactions"
+    ]
+  },
+  
+  "marines": [
+    {
+      "id": "marine_sarge",
+      "name": "Sarge",
+      "rank": "Sergeant",
+      "callsign": "Alpha-1",
+      "startingRoom": "docking_bay",
+      "health": {
+        "current": 100,
+        "max": 100
+      },
+      "inventory": {
+        "items": [],
+        "capacity": 6
+      },
+      "personality": {
+        "type": "leader",
+        "traits": {
+          "leadership": 9,
+          "caution": 7,
+          "aggression": 6,
+          "technical": 5,
+          "social": 8
+        },
+        "description": "Experienced squad leader. Prioritizes team safety and mission completion. Makes tactical decisions and coordinates team movements.",
+        "speechPattern": "Direct, authoritative, uses military terminology",
+        "motivations": [
+          "Keep the team alive",
+          "Complete the mission objectives",
+          "Maintain order and discipline"
+        ],
+        "fears": [
+          "Losing squad members",
+          "Mission failure",
+          "Unknown threats"
+        ]
+      },
+      "skills": {
+        "combat": 8,
+        "leadership": 9,
+        "technical": 5,
+        "medical": 4,
+        "stealth": 6
+      },
+      "equipment": [],
+      "backstory": "20-year veteran with multiple deep-space deployments. Known for bringing everyone home.",
+      "appearance": "Grizzled, weathered face with regulation buzz cut. Battle scars tell stories of previous encounters."
+    },
+    
+    {
+      "id": "marine_rook",
+      "name": "Rook",
+      "rank": "Private",
+      "callsign": "Alpha-2", 
+      "startingRoom": "docking_bay",
+      "health": {
+        "current": 90,
+        "max": 100
+      },
+      "inventory": {
+        "items": [],
+        "capacity": 5
+      },
+      "personality": {
+        "type": "rookie",
+        "traits": {
+          "leadership": 3,
+          "caution": 8,
+          "aggression": 4,
+          "technical": 7,
+          "social": 6
+        },
+        "description": "New to the unit but eager to prove themselves. Nervous but competent with technology. Follows orders religiously.",
+        "speechPattern": "Formal, sometimes stammering under pressure, asks many questions",
+        "motivations": [
+          "Prove worth to the squad", 
+          "Learn from experienced marines",
+          "Survive the first real mission"
+        ],
+        "fears": [
+          "Making mistakes that endanger others",
+          "Being seen as incompetent",
+          "Unknown alien threats"
+        ]
+      },
+      "skills": {
+        "combat": 5,
+        "leadership": 3,
+        "technical": 8,
+        "medical": 6,
+        "stealth": 7
+      },
+      "equipment": [],
+      "backstory": "Fresh from the academy. This is their first real deployment. Specializes in technical systems and sensors.",
+      "appearance": "Young, clean-shaven, alert eyes. Still has the eager look of someone untested by real combat."
+    },
+    
+    {
+      "id": "marine_doc",
+      "name": "Doc",
+      "rank": "Corporal",
+      "callsign": "Alpha-3",
+      "startingRoom": "docking_bay", 
+      "health": {
+        "current": 85,
+        "max": 100
+      },
+      "inventory": {
+        "items": [],
+        "capacity": 7
+      },
+      "personality": {
+        "type": "medic",
+        "traits": {
+          "leadership": 6,
+          "caution": 9,
+          "aggression": 3,
+          "technical": 6,
+          "social": 9
+        },
+        "description": "Squad medic with a strong protective instinct. Calm under pressure. Prioritizes saving lives over completing objectives.",
+        "speechPattern": "Calm, reassuring, uses medical terminology, often checks on others' wellbeing",
+        "motivations": [
+          "Keep everyone alive and healthy",
+          "Provide medical support",
+          "Maintain team morale"
+        ],
+        "fears": [
+          "Being unable to save someone",
+          "Running out of medical supplies",
+          "Team members taking unnecessary risks"
+        ]
+      },
+      "skills": {
+        "combat": 6,
+        "leadership": 6,
+        "technical": 6,
+        "medical": 9,
+        "stealth": 5
+      },
+      "equipment": [],
+      "backstory": "Former civilian doctor who enlisted after losing patients in a colony attack. Determined to save lives in dangerous situations.",
+      "appearance": "Thoughtful expression, gentle hands, carries themselves with the quiet confidence of someone who has seen life and death."
+    }
+  ],
+  
+  "squadInfo": {
+    "designation": "Alpha Squad",
+    "mission": "Investigate Research Station Alpha-7 communications blackout",
+    "commandStructure": {
+      "leader": "marine_sarge",
+      "medic": "marine_doc", 
+      "technical": "marine_rook"
+    },
+    "startingLocation": "docking_bay",
+    "missionBriefing": "Research Station Alpha-7 has gone dark. Last transmission indicated possible contamination breach. Investigate, secure survivors, and extract vital research data.",
+    "timeConstraints": {
+      "extractionWindow": "2 hours",
+      "emergencyExtraction": "4 hours"
+    }
+  },
+  
+  "expansionPlans": {
+    "phase3_ai": {
+      "aiPersonalities": [
+        "Add unique decision-making patterns for each personality type",
+        "Different response styles to stress and danger", 
+        "Personality-based dialogue generation",
+        "Conflict resolution between different personality types"
+      ],
+      "aiObjectives": [
+        "Personal objectives that may conflict with mission goals",
+        "Dynamic objective generation based on discoveries",
+        "Personality-influenced priority systems"
+      ]
+    },
+    "phase4_survivor": {
+      "survivorTypes": [
+        {
+          "type": "scientist",
+          "personality": "analytical_panicked",
+          "knowledge": "station_research_data",
+          "location": "random"
+        },
+        {
+          "type": "security_officer", 
+          "personality": "paranoid_suspicious",
+          "knowledge": "security_systems",
+          "location": "bridge"
+        }
+      ]
+    },
+    "futureEquipment": [
+      "Weapons with limited ammunition",
+      "Medical supplies for Doc",
+      "Technical equipment for Rook",
+      "Communication devices",
+      "Environmental suits"
+    ]
+  }
+}
