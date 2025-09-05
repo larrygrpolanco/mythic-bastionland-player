@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "version": "0.1.0",
-    "description": "Station layout and room definitions for Alien in the Machine",
-    "lastUpdated": "2025-01-05",
+    "version": "0.2.0",
+    "description": "Station layout and room definitions for Alien in the Machine - Phase 2 Interactive Objects",
+    "lastUpdated": "2025-09-05",
     "notes": [
-      "This file defines the 4-room station layout mentioned in PROJECT_PLAN.md",
+      "This file defines the 4-room station layout with Phase 2 interactive elements",
       "Each room MUST have doors with targetRoomId for connectivity",
-      "Future phases will add items, furniture, and environmental objects",
+      "Phase 2 adds items, furniture, searchable areas, and hiding spots",
       "Keep this file modular - it should be easy to swap out different station layouts"
     ]
   },
@@ -28,10 +28,66 @@
           "description": "Heavy blast door leading to the main corridor"
         }
       ],
-      "items": [],
-      "furniture": [],
-      "searchableAreas": [],
-      "hidingSpots": [],
+      "items": [
+        {
+          "id": "security_keycard",
+          "name": "Security Keycard",
+          "description": "A magnetic security card with 'BRIDGE ACCESS - AUTHORIZED PERSONNEL ONLY' stamped in red letters.",
+          "type": "key",
+          "weight": 1,
+          "pickupable": true,
+          "usable": true,
+          "useType": "unlock_door",
+          "targetDoors": ["door_corridor_to_bridge", "door_bridge_to_corridor"]
+        },
+        {
+          "id": "emergency_toolkit",
+          "name": "Emergency Toolkit",
+          "description": "A compact toolkit containing basic repair tools and diagnostic equipment.",
+          "type": "tool",
+          "weight": 3,
+          "pickupable": true,
+          "usable": true,
+          "useType": "repair_equipment"
+        }
+      ],
+      "furniture": [
+        {
+          "id": "cargo_container_alpha",
+          "name": "Cargo Container Alpha",
+          "description": "A large metal shipping container with 'MEDICAL SUPPLIES' stenciled on the side.",
+          "searchable": true,
+          "hideable": true,
+          "hideCapacity": 2,
+          "searchDifficulty": 2
+        },
+        {
+          "id": "cargo_container_beta",
+          "name": "Cargo Container Beta", 
+          "description": "A smaller container marked 'TECHNICAL EQUIPMENT' that appears to have been hastily sealed.",
+          "searchable": true,
+          "hideable": true,
+          "hideCapacity": 1,
+          "searchDifficulty": 3
+        },
+        {
+          "id": "maintenance_station",
+          "name": "Maintenance Station",
+          "description": "A workbench with various tools and equipment scattered around.",
+          "searchable": true,
+          "usable": true,
+          "useType": "repair_station"
+        }
+      ],
+      "searchableAreas": [
+        "cargo_container_alpha",
+        "cargo_container_beta", 
+        "maintenance_station"
+      ],
+      "hidingSpots": [
+        "cargo_container_alpha",
+        "cargo_container_beta"
+      ],
       "lighting": "emergency_red",
       "temperature": "cold",
       "sounds": ["distant_humming", "occasional_metallic_clanks"]
@@ -68,10 +124,42 @@
           "description": "Reinforced door to the bridge - requires security clearance"
         }
       ],
-      "items": [],
-      "furniture": [],
-      "searchableAreas": [],
-      "hidingSpots": [],
+      "items": [
+        {
+          "id": "flashlight",
+          "name": "Emergency Flashlight",
+          "description": "A heavy-duty flashlight with emergency power cells. Still functional.",
+          "type": "tool",
+          "weight": 1,
+          "pickupable": true,
+          "usable": true,
+          "useType": "illumination"
+        }
+      ],
+      "furniture": [
+        {
+          "id": "equipment_locker",
+          "name": "Equipment Locker",
+          "description": "A maintenance locker built into the wall. The lock is broken.",
+          "searchable": true,
+          "searchDifficulty": 1,
+          "containsItems": ["flashlight"]
+        },
+        {
+          "id": "maintenance_alcove",
+          "name": "Maintenance Alcove",
+          "description": "A small recessed area with utility panels and pipes.",
+          "searchable": false,
+          "hideable": true,
+          "hideCapacity": 1
+        }
+      ],
+      "searchableAreas": [
+        "equipment_locker"
+      ],
+      "hidingSpots": [
+        "maintenance_alcove"
+      ],
       "lighting": "flickering_overhead",
       "temperature": "normal",
       "sounds": ["electrical_humming", "distant_ventilation"]
@@ -93,10 +181,66 @@
           "description": "Medical bay access hatch"
         }
       ],
-      "items": [],
-      "furniture": [],
-      "searchableAreas": [],
-      "hidingSpots": [],
+      "items": [
+        {
+          "id": "medical_supplies",
+          "name": "Medical Supplies",
+          "description": "A collection of bandages, medical tape, and basic first aid equipment.",
+          "type": "consumable",
+          "weight": 2,
+          "pickupable": true,
+          "usable": true,
+          "useType": "heal",
+          "healAmount": 25
+        },
+        {
+          "id": "diagnostic_scanner",
+          "name": "Diagnostic Scanner",
+          "description": "A portable medical scanner for analyzing injuries and health status.",
+          "type": "tool",
+          "weight": 2,
+          "pickupable": true,
+          "usable": true,
+          "useType": "scan_health"
+        }
+      ],
+      "furniture": [
+        {
+          "id": "examination_table",
+          "name": "Examination Table",
+          "description": "A medical examination table with built-in diagnostic equipment.",
+          "searchable": true,
+          "hideable": true,
+          "hideCapacity": 1,
+          "usable": true,
+          "useType": "medical_station",
+          "searchDifficulty": 1
+        },
+        {
+          "id": "medical_cabinet_alpha",
+          "name": "Medical Supply Cabinet A",
+          "description": "A locked cabinet containing medical supplies. The lock appears damaged.",
+          "searchable": true,
+          "searchDifficulty": 2,
+          "containsItems": ["medical_supplies"]
+        },
+        {
+          "id": "medical_cabinet_beta", 
+          "name": "Medical Supply Cabinet B",
+          "description": "An emergency medical cabinet with a broken seal.",
+          "searchable": true,
+          "searchDifficulty": 1,
+          "containsItems": ["diagnostic_scanner"]
+        }
+      ],
+      "searchableAreas": [
+        "examination_table",
+        "medical_cabinet_alpha",
+        "medical_cabinet_beta"
+      ],
+      "hidingSpots": [
+        "examination_table"
+      ],
       "lighting": "bright_medical",
       "temperature": "cold",
       "sounds": ["medical_equipment_beeping", "ventilation_system"]
@@ -119,9 +263,49 @@
           "description": "Reinforced door from the bridge - requires security clearance"
         }
       ],
-      "items": [],
-      "furniture": [],
-      "searchableAreas": [],
+      "items": [
+        {
+          "id": "research_data_pad",
+          "name": "Research Data Pad",
+          "description": "A secure data pad containing classified research information. The screen flickers with important data.",
+          "type": "data",
+          "weight": 1,
+          "pickupable": true,
+          "usable": true,
+          "useType": "access_data"
+        }
+      ],
+      "furniture": [
+        {
+          "id": "command_console",
+          "name": "Command Console",
+          "description": "The main command and control interface for the entire station.",
+          "searchable": false,
+          "usable": true,
+          "useType": "station_control",
+          "requiresKeycard": true
+        },
+        {
+          "id": "communication_terminal",
+          "name": "Communication Terminal", 
+          "description": "Long-range communications equipment for contacting other stations and ships.",
+          "searchable": true,
+          "usable": true,
+          "useType": "communications",
+          "searchDifficulty": 2
+        },
+        {
+          "id": "tactical_display",
+          "name": "Tactical Display",
+          "description": "A large holographic display showing station schematics and security status.",
+          "searchable": false,
+          "usable": true,
+          "useType": "tactical_info"
+        }
+      ],
+      "searchableAreas": [
+        "communication_terminal"
+      ],
       "hidingSpots": [],
       "lighting": "console_glow",
       "temperature": "normal",

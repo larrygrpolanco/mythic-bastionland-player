@@ -73,6 +73,9 @@ export function createWorld() {
     // Room connectivity (loaded from data files)
     roomConnections: {},
     
+    // Raw room data for door checking and item management
+    roomData: {},
+    
     // Metadata for debugging and development
     metadata: {
       version: '0.1.0',
@@ -176,7 +179,7 @@ export function getEntityComponents(world, entityId) {
 
 /**
  * Initializes the world with data from JSON files
- * This is called during Phase 1 - kept as stub for now
+ * This loads rooms and marines from JSON data and creates corresponding entities
  * @param {Object} roomsData - Data from rooms.json
  * @param {Object} marinesData - Data from marines.json
  * @returns {Object} Initialized world object
@@ -184,10 +187,116 @@ export function getEntityComponents(world, entityId) {
 export function initWorld(roomsData, marinesData) {
   const world = createWorld();
   
-  // Phase 1: This will be implemented to load data and create entities
-  // For now, just return the empty world
+  if (!roomsData || !marinesData) {
+    console.warn('initWorld: Missing data files, returning empty world');
+    world.gameState = 'READY_FOR_PHASE_1';
+    return world;
+  }
+  
+  // Create room entities from rooms.json
+  roomsData.rooms.forEach(roomData => {
+    const roomEntityId = createEntity(world);
+    
+    // Add room components
+    addComponent(world, roomEntityId, 'isRoom', {
+      id: roomData.id,
+      name: roomData.name,
+      description: roomData.description,
+      size: roomData.size,
+      atmosphere: roomData.atmosphere
+    });
+    
+    addComponent(world, roomEntityId, 'position', {
+      roomId: roomData.id, // Rooms position themselves
+      coordinates: roomData.coordinates
+    });
+    
+    addComponent(world, roomEntityId, 'tag', {
+      name: `room_${roomData.id}`
+    });
+    
+    // Add environmental data
+    if (roomData.lighting || roomData.temperature || roomData.sounds) {
+      addComponent(world, roomEntityId, 'environment', {
+        lighting: roomData.lighting,
+        temperature: roomData.temperature,
+        sounds: roomData.sounds || []
+      });
+    }
+    
+    // Store room entity ID for reference
+    if (!world.roomEntityIds) world.roomEntityIds = {};
+    world.roomEntityIds[roomData.id] = roomEntityId;
+    
+    // Store raw room data for door checking and item management
+    world.roomData[roomData.id] = { ...roomData };
+  });
+  
+  // Build room connections from door data
+  world.roomConnections = { ...roomsData.roomConnections };
+  
+  // Create marine entities from marines.json
+  marinesData.marines.forEach(marineData => {
+    const marineEntityId = createEntity(world);
+    
+    // Add marine identity components
+    addComponent(world, marineEntityId, 'isMarine', {
+      id: marineData.id,
+      name: marineData.name,
+      rank: marineData.rank,
+      callsign: marineData.callsign
+    });
+    
+    addComponent(world, marineEntityId, 'position', {
+      roomId: marineData.startingRoom
+    });
+    
+    addComponent(world, marineEntityId, 'health', {
+      current: marineData.health.current,
+      max: marineData.health.max
+    });
+    
+    addComponent(world, marineEntityId, 'inventory', {
+      items: [...marineData.inventory.items],
+      capacity: marineData.inventory.capacity
+    });
+    
+    addComponent(world, marineEntityId, 'tag', {
+      name: marineData.id
+    });
+    
+    // Add personality data for future AI use
+    if (marineData.personality) {
+      addComponent(world, marineEntityId, 'personality', {
+        type: marineData.personality.type,
+        traits: { ...marineData.personality.traits },
+        description: marineData.personality.description,
+        speechPattern: marineData.personality.speechPattern,
+        motivations: [...marineData.personality.motivations],
+        fears: [...marineData.personality.fears]
+      });
+    }
+    
+    // Add skills data
+    if (marineData.skills) {
+      addComponent(world, marineEntityId, 'skills', { ...marineData.skills });
+    }
+    
+    // Store marine entity ID for reference
+    if (!world.marineEntityIds) world.marineEntityIds = {};
+    world.marineEntityIds[marineData.id] = marineEntityId;
+  });
+  
+  // Update world metadata
   world.metadata.lastUpdate = new Date().toISOString();
-  world.gameState = 'READY_FOR_PHASE_1';
+  world.metadata.phase = 'Phase 1';
+  world.gameState = 'PLAYING';
+  
+  console.log('World initialized with data:', {
+    rooms: roomsData.rooms.length,
+    marines: marinesData.marines.length,
+    totalEntities: world.entities.active.size
+  });
   
   return world;
 }

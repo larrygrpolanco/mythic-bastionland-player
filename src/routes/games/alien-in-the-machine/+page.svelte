@@ -1,18 +1,24 @@
 <script>
   // Alien in the Machine - Main Game Page
-  // Phase 0: Foundation & Setup - Complete interface layout
+  // Phase 1: Loading world data and creating entities
   
-  import { gameStatusStore, nextTurn, resetGame } from './lib/stores/worldStore.js';
+  import { onMount } from 'svelte';
+  import { gameStatusStore, nextTurn, resetGame, initializeWorld } from './lib/stores/worldStore.js';
   import MapView from './lib/components/MapView.svelte';
-  import InfoView from './lib/components/InfoView.svelte';
-  import RadioLog from './lib/components/RadioLog.svelte';
+  import TabbedRightPanel from './lib/components/TabbedRightPanel.svelte';
   
   let gameTitle = "Alien in the Machine";
-  let currentPhase = "Phase 0: Foundation & Setup";
   
   $: gameStatus = $gameStatusStore;
+  $: currentPhase = gameStatus.phase || "Phase 0";
   
-  // Phase 0: Basic game controls for testing
+  // Phase 1: Initialize world with data on mount
+  onMount(async () => {
+    console.log('Initializing world with Phase 1 data...');
+    await initializeWorld();
+  });
+  
+  // Game controls
   function handleNextTurn() {
     nextTurn();
   }
@@ -46,12 +52,7 @@
         <MapView />
       </div>
       <div class="right-panel">
-        <div class="right-top">
-          <InfoView />
-        </div>
-        <div class="right-bottom">
-          <RadioLog />
-        </div>
+        <TabbedRightPanel />
       </div>
       <div class="bottom-panel">
         <div class="game-controls">
@@ -79,7 +80,7 @@
             <h3>Development</h3>
             <div class="dev-info">
               <span class="phase-info">Current: {currentPhase}</span>
-              <span class="next-phase">Next: Phase 1 - Static World</span>
+              <span class="next-phase">Next: Phase 2 - Action & Interaction</span>
             </div>
           </div>
         </div>
@@ -132,10 +133,10 @@
   /* Game interface layout */
   .interface-panels {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr auto;
     gap: 1rem;
-    min-height: 75vh;
+    height: calc(100vh - 140px); /* Account for header (~80px) and gaps/padding (~60px) */
   }
 
   .left-panel {
@@ -144,17 +145,6 @@
 
   .right-panel {
     grid-row: 1 / 2;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .right-top {
-    flex: 1;
-  }
-
-  .right-bottom {
-    flex: 1;
   }
 
   .bottom-panel {
@@ -241,10 +231,12 @@
   }
 
   /* Responsive design */
-  @media (max-width: 1200px) {
+  @media (max-width: 768px) {
     .interface-panels {
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto;
+      height: auto; /* Override fixed height for mobile */
+      min-height: calc(100vh - 140px); /* Allow expansion but maintain minimum */
     }
     
     .left-panel {
@@ -254,7 +246,6 @@
     
     .right-panel {
       grid-row: 2 / 3;
-      flex-direction: row;
     }
     
     .bottom-panel {

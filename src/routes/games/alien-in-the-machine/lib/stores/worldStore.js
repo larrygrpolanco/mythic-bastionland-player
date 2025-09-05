@@ -83,15 +83,30 @@ export const selectedEntityDetailsStore = derived(
 
 /**
  * Initialize the game world with data from JSON files
- * This will be called during Phase 1 when we implement data loading
- * @param {Object} roomsData - Loaded rooms.json data
- * @param {Object} marinesData - Loaded marines.json data
+ * Loads rooms.json and marines.json, then creates the world entities
  */
-export function initializeWorld(roomsData = null, marinesData = null) {
-  const world = initWorld(roomsData, marinesData);
-  world.metadata.phase = 1; // Update to Phase 1 when data is loaded
-  worldStore.set(world);
-  console.log('World initialized:', getWorldSummary(world));
+export async function initializeWorld() {
+  try {
+    // Import the JSON data files
+    const [roomsModule, marinesModule] = await Promise.all([
+      import('../data/rooms.json'),
+      import('../data/marines.json')
+    ]);
+    
+    const roomsData = roomsModule.default;
+    const marinesData = marinesModule.default;
+    
+    // Initialize world with loaded data
+    const world = initWorld(roomsData, marinesData);
+    worldStore.set(world);
+    
+    console.log('World initialized with Phase 1 data:', getWorldSummary(world));
+  } catch (error) {
+    console.error('Failed to initialize world:', error);
+    // Fall back to empty world
+    const world = initWorld(null, null);
+    worldStore.set(world);
+  }
 }
 
 /**

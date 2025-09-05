@@ -22,7 +22,7 @@
  * - Log important decisions for debugging
  */
 
-import { getEntitiesWithComponent, getComponent, hasComponent, addComponent } from './World.js';
+import { getEntitiesWithComponent, getComponent, hasComponent, addComponent, removeEntity } from './World.js';
 
 /**
  * Main game loop - executes all systems in the correct order
@@ -219,31 +219,159 @@ export function executeAction(world, action) {
  * @param {Object} action - { type: 'moveTo', entityId: number, targetRoomId: string }
  */
 export function executeMoveTo(world, action) {
-  // Phase 2: This will be implemented with full movement logic
-  // For now, just a placeholder that validates the structure
+  const { entityId, targetRoomId } = action;
   
-  if (!action.targetRoomId) {
+  if (!targetRoomId) {
     return { success: false, error: 'No target room specified' };
   }
   
-  // Future implementation will:
-  // 1. Check if entity can move (not hidden, not incapacitated)
-  // 2. Validate target room exists and is connected
-  // 3. Check if door is locked
-  // 4. Update entity's position component
-  // 5. Trigger any room entry effects
+  // Get entity's current position
+  const currentPosition = getComponent(world, entityId, 'position');
+  if (!currentPosition) {
+    return { success: false, error: 'Entity has no position component' };
+  }
   
-  return { success: true, details: `Entity ${action.entityId} moved to ${action.targetRoomId}` };
+  const currentRoomId = currentPosition.roomId;
+  if (currentRoomId === targetRoomId) {
+    return { success: false, error: 'Entity is already in target room' };
+  }
+  
+  // Check if entity can move (not hidden, not incapacitated)
+  const hiddenComponent = getComponent(world, entityId, 'hidden');
+  if (hiddenComponent && hiddenComponent.isHidden) {
+    return { success: false, error: 'Cannot move while hidden' };
+  }
+  
+  // Validate target room exists in room connections
+  const roomConnections = world.roomConnections[currentRoomId];
+  if (!roomConnections || !roomConnections.includes(targetRoomId)) {
+    return { success: false, error: `No connection from ${currentRoomId} to ${targetRoomId}` };
+  }
+  
+  // Check if door is locked - need to find the door data from room JSON
+  const roomEntities = getEntitiesWithComponent(world, 'isRoom');
+  let doorBlocked = false;
+  let requiredKey = null;
+  
+  for (const roomEntityId of roomEntities) {
+    const roomComponent = getComponent(world, roomEntityId, 'isRoom');
+    if (roomComponent.id === currentRoomId) {
+      // Check if this room has door data (from original JSON)
+      const roomData = world.roomData?.[currentRoomId];
+      if (roomData && roomData.doors) {
+        const door = roomData.doors.find(d => d.targetRoomId === targetRoomId);
+        if (door && door.locked) {
+          doorBlocked = true;
+          requiredKey = door.keyRequired;
+        }
+      }
+      break;
+    }
+  }
+  
+  // If door is locked, check if entity has the required key
+  if (doorBlocked && requiredKey) {
+    const inventory = getComponent(world, entityId, 'inventory');
+    if (!inventory) {
+      return { success: false, error: `Door is locked - requires ${requiredKey}` };
+    }
+    
+    // Check if required key is in inventory
+    const hasKey = inventory.items.some(item => 
+      typeof item === 'string' ? item === requiredKey : item.id === requiredKey
+    );
+    
+    if (!hasKey) {
+      return { success: false, error: `Door is locked - requires ${requiredKey}` };
+    }
+  }
+  
+  // Update entity's position component
+  world.components.position[entityId] = {
+    ...currentPosition,
+    roomId: targetRoomId
+  };
+  
+  return { 
+    success: true, 
+    details: `Entity ${entityId} moved from ${currentRoomId} to ${targetRoomId}`,
+    roomTransition: { from: currentRoomId, to: targetRoomId }
+  };
 }
 
 /**
  * Pick Up Item Action - Phase 2
  * @param {Object} world - The world object
- * @param {Object} action - { type: 'pickUpItem', entityId: number, itemId: number }
+ * @param {Object} action - { type: 'pickUpItem', entityId: number, itemId: string }
  */
 export function executePickUpItem(world, action) {
-  // Phase 2: Full implementation with inventory management
-  return { success: true, details: `Entity ${action.entityId} picked up item ${action.itemId}` };
+  const { entityId, itemId } = action;
+  
+  if (!itemId) {
+    return { success: false, error: 'No item ID specified' };
+  }
+  
+  // Get entity's inventory and position
+  const inventory = getComponent(world, entityId, 'inventory');
+  const position = getComponent(world, entityId, 'position');
+  
+  if (!inventory) {
+    return { success: false, error: 'Entity has no inventory component' };
+  }
+  
+  if (!position) {
+    return { success: false, error: 'Entity has no position component' };
+  }
+  
+  // Find the item in the current room
+  const currentRoomData = world.roomData[position.roomId];
+  if (!currentRoomData || !currentRoomData.items) {
+    return { success: false, error: 'No items available in current room' };
+  }
+  
+  const itemIndex = currentRoomData.items.findIndex(item => item.id === itemId);
+  if (itemIndex === -1) {
+    return { success: false, error: `Item ${itemId} not found in current room` };
+  }
+  
+  const item = currentRoomData.items[itemIndex];
+  
+  // Check if item is pickupable
+  if (!item.pickupable) {
+    return { success: false, error: `${item.name} cannot be picked up` };
+  }
+  
+  // Check inventory capacity
+  const currentWeight = inventory.items.reduce((weight, item) => {
+    if (typeof item === 'string') return weight + 1; // Simple items have weight 1
+    return weight + (item.weight || 1);
+  }, 0);
+  
+  const itemWeight = item.weight || 1;
+  if (currentWeight + itemWeight > inventory.capacity) {
+    return { success: false, error: 'Inventory is full' };
+  }
+  
+  // Remove item from room
+  currentRoomData.items.splice(itemIndex, 1);
+  
+  // Add item to entity's inventory
+  inventory.items.push({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    type: item.type,
+    weight: item.weight,
+    usable: item.usable,
+    useType: item.useType,
+    ...item // Copy any additional properties
+  });
+  
+  return { 
+    success: true, 
+    details: `Entity ${entityId} picked up ${item.name}`,
+    itemPickedUp: { id: item.id, name: item.name }
+  };
 }
 
 /**
@@ -269,11 +397,83 @@ export function executeHideInCover(world, action) {
 /**
  * Search Area Action - Phase 2
  * @param {Object} world - The world object
- * @param {Object} action - { type: 'searchArea', entityId: number, targetId: number }
+ * @param {Object} action - { type: 'searchArea', entityId: number, targetArea: string }
  */
 export function executeSearchArea(world, action) {
-  // Phase 2: Search mechanics with randomization
-  return { success: true, details: `Entity ${action.entityId} searched area` };
+  const { entityId, targetArea } = action;
+  
+  if (!targetArea) {
+    return { success: false, error: 'No target area specified' };
+  }
+  
+  // Get entity's position
+  const position = getComponent(world, entityId, 'position');
+  if (!position) {
+    return { success: false, error: 'Entity has no position component' };
+  }
+  
+  // Get current room data
+  const currentRoomData = world.roomData[position.roomId];
+  if (!currentRoomData) {
+    return { success: false, error: 'Current room data not found' };
+  }
+  
+  // Find the furniture/area to search
+  const searchTarget = currentRoomData.furniture?.find(furniture => furniture.id === targetArea);
+  if (!searchTarget) {
+    return { success: false, error: `${targetArea} not found in current room` };
+  }
+  
+  // Check if area is searchable
+  if (!searchTarget.searchable) {
+    return { success: false, error: `${searchTarget.name} cannot be searched` };
+  }
+  
+  // Check if already searched (future enhancement - track search state)
+  const searchDifficulty = searchTarget.searchDifficulty || 1;
+  const searchRoll = Math.floor(Math.random() * 6) + 1; // 1d6
+  
+  if (searchRoll < searchDifficulty) {
+    return { 
+      success: true, 
+      details: `Entity ${entityId} searched ${searchTarget.name} but found nothing`,
+      searchResult: { found: false, target: searchTarget.name }
+    };
+  }
+  
+  // Success! Check if there are items to find
+  const foundItems = [];
+  if (searchTarget.containsItems && searchTarget.containsItems.length > 0) {
+    // Move items from furniture to room items (so they can be picked up)
+    searchTarget.containsItems.forEach(itemId => {
+      // Find the item definition in the room's items array or create it
+      const itemDef = currentRoomData.items?.find(item => item.id === itemId);
+      if (itemDef) {
+        foundItems.push(itemDef.name);
+      } else {
+        // If item not in room items, we need to create it based on item ID
+        // For now, just track that something was found
+        foundItems.push(itemId);
+      }
+    });
+    
+    // Clear the containsItems since they're now available in the room
+    searchTarget.containsItems = [];
+  }
+  
+  if (foundItems.length > 0) {
+    return { 
+      success: true, 
+      details: `Entity ${entityId} searched ${searchTarget.name} and found: ${foundItems.join(', ')}`,
+      searchResult: { found: true, target: searchTarget.name, items: foundItems }
+    };
+  } else {
+    return { 
+      success: true, 
+      details: `Entity ${entityId} searched ${searchTarget.name} thoroughly but found nothing useful`,
+      searchResult: { found: false, target: searchTarget.name }
+    };
+  }
 }
 
 /**

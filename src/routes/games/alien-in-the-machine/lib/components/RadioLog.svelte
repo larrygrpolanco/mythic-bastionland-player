@@ -36,9 +36,13 @@
   let messageContainer;
   
   // Auto-scroll to bottom when new messages arrive
+  // Only auto-scroll if the container is visible (not in hidden tab)
   $: if (autoScroll && messageContainer && messages) {
     setTimeout(() => {
-      messageContainer.scrollTop = messageContainer.scrollHeight;
+      // Check if element is visible before attempting to scroll
+      if (messageContainer.offsetParent !== null) {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }
     }, 10);
   }
   
@@ -490,22 +494,30 @@
     85%, 100% { opacity: 0.3; }
   }
   
-  /* Scrollbar styling */
+  /* Terminal-style scrollbar styling */
   .log-messages::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
   
   .log-messages::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 0;
+    border-left: 1px solid #333;
   }
   
   .log-messages::-webkit-scrollbar-thumb {
     background: #00ff41;
-    border-radius: 4px;
+    border-radius: 0;
+    border: none;
+    box-shadow: inset 0 0 2px rgba(0, 255, 65, 0.5);
   }
   
   .log-messages::-webkit-scrollbar-thumb:hover {
-    background: #44ff44;
+    background: #00cc33;
+    box-shadow: inset 0 0 4px rgba(0, 255, 65, 0.8);
+  }
+  
+  .log-messages::-webkit-scrollbar-thumb:active {
+    background: #009922;
   }
 </style>

@@ -21,39 +21,56 @@
   import { worldStore, selectedEntityStore, selectEntity } from '../stores/worldStore.js';
   import { getEntitiesWithComponent, getComponent } from '../game/World.js';
   
-  // Phase 0: Static placeholder data for layout testing
-  let rooms = [
-    { id: 'docking_bay', name: 'Docking Bay', x: 0, y: 0, connections: ['main_corridor'] },
-    { id: 'main_corridor', name: 'Main Corridor', x: 0, y: 1, connections: ['docking_bay', 'medbay', 'bridge'] },
-    { id: 'medbay', name: 'Medical Bay', x: -1, y: 1, connections: ['main_corridor'] },
-    { id: 'bridge', name: 'Command Bridge', x: 0, y: 2, connections: ['main_corridor'] }
-  ];
-  
-  let marines = [
-    { id: 1, name: 'Sarge', roomId: 'docking_bay' },
-    { id: 2, name: 'Rook', roomId: 'docking_bay' },
-    { id: 3, name: 'Doc', roomId: 'docking_bay' }
-  ];
-  
-  // Phase 1: These will be derived from worldStore
-  // $: rooms = getRoomsFromWorld($worldStore);
-  // $: entities = getEntitiesWithComponent($worldStore, 'position');
-  
+  // Phase 1: Derive real data from worldStore
+  $: rooms = getRoomsFromWorld($worldStore);
+  $: marines = getMarinesFromWorld($worldStore);
   $: selectedEntity = $selectedEntityStore;
   
-  // Phase 0: Placeholder functions
-  function handleRoomClick(roomId) {
-    console.log('Room clicked:', roomId);
-    // Phase 1: Select room entity for inspection
-    // Phase 2: Show available room actions
+  // Helper function to extract room data from world
+  function getRoomsFromWorld(world) {
+    const roomEntities = getEntitiesWithComponent(world, 'isRoom');
+    return roomEntities.map(entityId => {
+      const roomComponent = getComponent(world, entityId, 'isRoom');
+      const positionComponent = getComponent(world, entityId, 'position');
+      return {
+        entityId: entityId,
+        id: roomComponent.id,
+        name: roomComponent.name,
+        x: positionComponent.coordinates.x,
+        y: positionComponent.coordinates.y,
+        connections: world.roomConnections[roomComponent.id] || []
+      };
+    });
   }
   
-  function handleEntityClick(entityId) {
-    console.log('Entity clicked:', entityId);
-    selectEntity(entityId);
+  // Helper function to extract marine data from world
+  function getMarinesFromWorld(world) {
+    const marineEntities = getEntitiesWithComponent(world, 'isMarine');
+    return marineEntities.map(entityId => {
+      const marineComponent = getComponent(world, entityId, 'isMarine');
+      const positionComponent = getComponent(world, entityId, 'position');
+      return {
+        entityId: entityId,
+        id: marineComponent.id,
+        name: marineComponent.name,
+        roomId: positionComponent.roomId
+      };
+    });
   }
   
-  // Phase 1: Helper functions for world data
+  // Click handlers
+  function handleRoomClick(room) {
+    console.log('Room clicked:', room.name);
+    // Select the room entity for inspection
+    selectEntity(room.entityId);
+  }
+  
+  function handleEntityClick(entity) {
+    console.log('Entity clicked:', entity.name);
+    selectEntity(entity.entityId);
+  }
+  
+  // Helper functions for rendering
   function getRoomPosition(roomId) {
     const room = rooms.find(r => r.id === roomId);
     return { x: room?.x || 0, y: room?.y || 0 };
@@ -69,12 +86,12 @@
     <h2>Research Station Alpha-7</h2>
     <div class="map-controls">
       <!-- Phase 2: Add zoom, pan controls -->
-      <span class="status">Phase 0 - Static Layout</span>
+      <span class="status">Phase 1 - Data-Driven World</span>
     </div>
   </div>
   
   <div class="map-viewport">
-    <svg class="station-map" viewBox="-2 -1 4 4" preserveAspectRatio="xMidYMid meet">
+    <svg class="station-map" viewBox="-1.3 -0.3 1.8 2.8" preserveAspectRatio="xMidYMid meet">
       <!-- Background grid for reference -->
       <defs>
         <pattern id="grid" width="0.5" height="0.5" patternUnits="userSpaceOnUse">
@@ -108,8 +125,8 @@
             width="0.8" 
             height="0.6"
             class="room-rect"
-            class:selected={selectedEntity === room.id}
-            on:click={() => handleRoomClick(room.id)}
+            class:selected={selectedEntity === room.entityId}
+            on:click={() => handleRoomClick(room)}
             role="button"
             tabindex="0"
           />
@@ -129,8 +146,8 @@
               cy={0.1}
               r="0.05"
               class="entity-dot marine-dot"
-              class:selected={selectedEntity === entity.id}
-              on:click|stopPropagation={() => handleEntityClick(entity.id)}
+              class:selected={selectedEntity === entity.entityId}
+              on:click|stopPropagation={() => handleEntityClick(entity)}
               role="button"
               tabindex="0"
             />
@@ -148,20 +165,6 @@
     </svg>
   </div>
   
-  <!-- Map legend -->
-  <div class="map-legend">
-    <h3>Legend</h3>
-    <div class="legend-item">
-      <div class="legend-icon room-icon"></div>
-      <span>Rooms</span>
-    </div>
-    <div class="legend-item">
-      <div class="legend-icon marine-icon"></div>
-      <span>Marines</span>
-    </div>
-    <!-- Phase 1: Add more entity types -->
-    <!-- Phase 2: Add interactive elements -->
-  </div>
 </div>
 
 <style>
@@ -171,6 +174,7 @@
     border-radius: 4px;
     padding: 1rem;
     height: 100%;
+    max-height: 500px; /* Match TabbedRightPanel height for consistent layout */
     display: flex;
     flex-direction: column;
   }
@@ -273,45 +277,6 @@
     font-family: 'Courier New', monospace;
     font-size: 0.06px;
     pointer-events: none;
-  }
-  
-  /* Legend styling */
-  .map-legend {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #00ff41;
-  }
-  
-  .map-legend h3 {
-    margin: 0 0 0.5rem 0;
-    color: #00ff41;
-    font-size: 1rem;
-  }
-  
-  .legend-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.3rem;
-    color: #00ff41;
-    font-size: 0.9rem;
-  }
-  
-  .legend-icon {
-    width: 12px;
-    height: 12px;
-    margin-right: 0.5rem;
-    border: 1px solid;
-  }
-  
-  .room-icon {
-    background: rgba(0, 255, 65, 0.1);
-    border-color: #00ff41;
-  }
-  
-  .marine-icon {
-    background: #44aaff;
-    border-color: #ffffff;
-    border-radius: 50%;
   }
   
   /* Future phase styling placeholders */
