@@ -106,7 +106,49 @@ This game uses **speed-based tick timers** where actions directly cost time, cre
 
 ---
 
-#### **5. Current Implementation Status (Phase 1 Complete)**
+#### **5. AI Integration Architecture (Phase 3 Design)**
+
+**LLM Service Architecture:**
+- **API Provider:** OpenRouter with OpenAI SDK for multi-model testing capability
+- **Response Format:** Structured JSON responses with clear instructions: `{"action": "MOVE_ROOM", "target": "medbay", "reasoning": "...", "dialogue": "..."}`
+- **Context Strategy:** Rich contextual prompts including full environment state, personality traits, available actions with tick costs, and tactical situation
+- **Prompt Template System:** Abstracted prompt library in separate files for easier testing and editing
+
+**Prompt Template Architecture:**
+```javascript
+// lib/prompts/PromptLibrary.js
+export const ACTION_TEMPLATES = {
+  MOVE_INSTRUCTION: "Move to {target} room. Consider: obstacles, distance, stealth needs.",
+  SEARCH_INSTRUCTION: "Search {target}. Look for: items, clues, threats.",
+  COMBAT_INSTRUCTION: "Engage {target}. Tactics: cover, weapon choice, team coordination."
+};
+
+// Composable prompt building
+const fullPrompt = buildPrompt([
+  TEMPLATES.SITUATION_CONTEXT,
+  TEMPLATES.CHARACTER_STATE, 
+  TEMPLATES.AVAILABLE_ACTIONS,
+  TEMPLATES.ACTION_TEMPLATES.MOVE_INSTRUCTION
+]);
+```
+
+**Key Benefits:**
+- **Multi-Model Testing:** OpenRouter enables easy comparison between Claude, GPT, and local models
+- **Maintainable Prompts:** Change one template, update everywhere that uses it
+- **Rich Context:** AI gets full tactical picture for intelligent decisions
+- **Structured Responses:** JSON format eliminates parsing ambiguity
+- **Template Reuse:** Core instructions shared across different AI decision points
+
+**AI Turn Flow Integration:**
+1. **Context Assembly:** Current character state + environment + available actions + personality
+2. **Prompt Composition:** Template library builds structured prompt from components
+3. **LLM API Call:** OpenRouter with model selection and JSON response validation
+4. **Response Processing:** Parse JSON action and execute through same TurnManager as human players
+5. **Dialogue Logging:** AI reasoning and speech captured in communication log
+
+---
+
+#### **6. Current Implementation Status (Phase 1 Complete, Phase 2 In Progress)**
 
 **✅ Phase 0 & 1 Infrastructure Complete:**
 
@@ -149,21 +191,32 @@ This game uses **speed-based tick timers** where actions directly cost time, cre
 - **Tick System Integration**: UI properly displays tick costs and timer countdowns for Phase 2 testing
 - **Scalable Interface**: Categorized action groups will expand to show individual actions with tick costs in Phase 2
 
-**🎯 Ready for Phase 2 Implementation:**
-- **Turn System Foundation**: Character-centric turn system architecture needs implementation to replace current batch processing
-- **Component System**: All interactive components pre-defined (pickupable, usable, door, searchable, hideable)  
-- **Entity Selection**: Working selection system ready for player control integration
-- **Debug Infrastructure**: Entity inspector ready to show action results in real-time
-- **Action Selection UI**: Categorized interface ready for player-controlled marine actions
+**🔧 Phase 2 Status (In Progress - Major Work Remaining):**
+- **Turn System Implementation**: TurnManager.js created but integration incomplete
+- **Action System**: Core actions partially implemented but not fully functional
+- **Interactive Components**: Component definitions exist but entity creation and interaction logic needs completion
+- **UI Integration**: TurnControl.svelte structure ready but action execution pipeline broken
+- **World State Updates**: Entity interactions not properly updating world state
+- **Tick Cost Integration**: Action costs defined but not properly integrated with turn progression
 
-**⚠️ Architecture Conflict**: Current `world.actionQueue` and `processGameTurn()` batch processing conflicts with character-centric design and must be replaced with individual turn management before Phase 2.
+**⚠️ Critical Phase 2 Issues to Resolve:**
+- Action execution pipeline between UI → stores → systems → TurnManager needs debugging
+- Interactive object creation during world initialization incomplete
+- Character action validation and world state modification logic incomplete
+- Turn progression and character timer updates not properly synchronized
+- Entity positioning and movement system needs implementation
+- Inventory management system for item interactions incomplete
+
+**🎯 Phase 2 Checkpoint Not Yet Achieved:**
+The checkpoint requires: "Player can control individual marines through the tick system. Each character performs one action per turn (with associated tick cost), then waits for their timer to count down based on speed before acting again. Turn order is dynamic based on action choices. All game rules validated through direct player interaction."
+
+**Current Reality:** UI framework exists but core action execution is not functional. Significant debugging and implementation work required.
 
 **🔧 Development Notes:**
 - All code includes comprehensive JSDoc documentation
 - Phase progression tracked in `world.metadata.phase` and displayed in UI
-- Architecture validated: SvelteKit runs without errors, full reactivity confirmed
-- JSON data structure rich and ready for Phase 2 expansion (items, furniture, interactive elements)
-- Accessibility warnings present but non-blocking (keyboard handlers needed for map interactions)
+- JSON data structure rich and expanded with interactive elements
 - **Phase 1 Checkpoint Achieved**: "We see the 4-room station laid out with REAL entities loaded from JSON data. We see dots representing our marines (Sarge, Rook, Doc) in their starting room (Docking Bay). Clicking on any room or marine shows its complete component data in the info panel."
+- **Phase 2 Work Required**: Core action execution system needs completion and debugging before Phase 3 AI integration can begin
 
 ---

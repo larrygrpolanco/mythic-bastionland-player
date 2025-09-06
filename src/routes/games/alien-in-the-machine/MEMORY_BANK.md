@@ -124,6 +124,75 @@ A living record of our key decisions, philosophies, and future ideas.
 
 **Critical Phase 2 Foundation:** The enhanced UI provides the essential foundation for player-controlled marine actions, making Phase 2 testing smooth and intuitive rather than overwhelming.
 
+#### **Phase 3 AI Integration Decisions (September 6, 2025)**
+
+**Status:** **PLANNING COMPLETE** - Technical architecture decisions finalized for implementation
+
+**Key Technical Decisions:**
+
+- **Decision:** Use OpenRouter API with OpenAI SDK for LLM integration
+- **Reasoning:** Enables testing multiple models (Claude, GPT-4, local models) through single interface. Provides flexibility for comparing AI behavior across different models without changing code architecture.
+
+- **Decision:** Rich contextual prompts with full environment state
+- **Reasoning:** AI needs complete tactical picture to make intelligent decisions. Include character state, visible environment, available actions with tick costs, personality traits, and current situation. This requires extensive testing and debugging but creates more believable AI behavior.
+
+- **Decision:** Structured JSON responses from AI
+- **Reasoning:** LLMs excel at structured output when given clear instructions. Format: `{"action": "MOVE_ROOM", "target": "medbay", "reasoning": "...", "dialogue": "..."}`. Eliminates natural language parsing complexity and ensures AI can only perform valid actions.
+
+- **Decision:** Abstracted prompt template system
+- **Reasoning:** Critical for maintainability and testing. Core instructions (movement, combat, searching) stored in separate prompt library files. Change one move instruction template, update everywhere that uses it. Enables rapid prompt iteration and A/B testing.
+
+**Template Architecture Pattern:**
+```javascript
+// lib/prompts/PromptLibrary.js - Centralized prompt components
+export const CORE_TEMPLATES = {
+  MOVE_INSTRUCTION: "Move to {target}. Consider: distance={distance}, stealth needs, obstacles.",
+  SEARCH_INSTRUCTION: "Search {target} for items/clues. Time cost: {ticks} ticks.",
+  CHARACTER_STATE: "You are {name}, {personality}. Health: {health}. Location: {room}."
+};
+
+// Composable prompt building
+const aiPrompt = buildPrompt([
+  TEMPLATES.CHARACTER_STATE,
+  TEMPLATES.SITUATION_CONTEXT,
+  TEMPLATES.AVAILABLE_ACTIONS,  
+  TEMPLATES.MOVE_INSTRUCTION
+]);
+```
+
+**AI Integration Benefits:**
+- **Multi-Model Testing:** Easy comparison between Claude, GPT, and local models
+- **Rich Decision Context:** AI sees full tactical situation for intelligent choices  
+- **Maintainable Prompts:** Template changes propagate automatically
+- **Structured Responses:** No parsing ambiguity, validated JSON output
+- **Same Turn System:** AI characters use identical tick mechanics as human players
+
+**Phase 3 Learning Objectives:**
+- Master prompt engineering for tactical AI behavior
+- Understand LLM decision-making patterns in time-constrained scenarios
+- Build robust AI-human interaction systems with shared game mechanics
+- Create debugging tools for AI reasoning and decision transparency
+
+#### **Phase 2 Reality Check (September 6, 2025)**
+
+**Status:** **IN PROGRESS** - Significant work remaining before checkpoint
+
+**Critical Gap Analysis:**
+Despite having strong UI foundation and architectural framework, core Phase 2 functionality is incomplete:
+
+- **Action Execution Pipeline:** TurnControl → worldStore → systems → TurnManager flow is broken
+- **Interactive Object System:** Entity creation for items/furniture incomplete  
+- **World State Updates:** Character actions not properly modifying world components
+- **Turn Progression:** Timer updates and character sequencing needs debugging
+- **Movement System:** Room-to-room navigation not implemented
+- **Inventory Management:** Item pickup/drop mechanics incomplete
+
+**Key Learning:** UI-first development created false confidence. The interface looks ready but the underlying game mechanics need substantial implementation work before Phase 2 checkpoint can be achieved.
+
+**Phase 2 Checkpoint Requirement:** "Player can control individual marines through the tick system. Each character performs one action per turn (with associated tick cost), then waits for their timer to count down based on speed before acting again. Turn order is dynamic based on action choices."
+
+**Current Reality:** Framework exists but core execution is non-functional. Must complete Phase 2 before Phase 3 AI integration.
+
 #### **Future Ideas & Wishlist (Parking Lot)**
 
 - Capture the LLM's "actions I wish I could take" response to generate a backlog of new feature ideas.

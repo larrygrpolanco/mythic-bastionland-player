@@ -19,40 +19,16 @@
 
 /**
  * Core Action Costs - Phase 2 Implementation
- * These are the fundamental actions available to all characters
+ * Only includes actions that are currently implemented in systems.js
  */
 export const CORE_ACTIONS = {
-  // Movement Actions (Heavy - require crossing rooms, checking doors)
-  MOVE_ROOM: 10,           // Move between connected rooms
-  MOVE_ADJACENT: 8,        // Move within same room to different area
-  
-  // Investigation Actions (Medium - require time and focus)
-  SEARCH_AREA: 6,          // Search containers, furniture, debris
-  SEARCH_THOROUGH: 10,     // Deep search with higher success chance
-  EXAMINE_ITEM: 4,         // Look closely at specific item
-  
-  // Interaction Actions (Variable based on complexity)
-  USE_ITEM: 4,             // Use simple item (flashlight, tool)
-  USE_COMPLEX_ITEM: 8,     // Use complex item (computer, machinery)
-  PICK_UP_ITEM: 3,         // Pick up small item
-  PICK_UP_HEAVY: 6,        // Pick up large/heavy item
-  DROP_ITEM: 2,            // Drop item from inventory
-  
-  // Quick Actions (Light - minimal time investment)
-  QUICK_LOOK: 3,           // Fast glance around current area
-  LISTEN: 3,               // Focus on hearing sounds
-  CHECK_HEALTH: 2,         // Quick self-assessment
-  COMMUNICATE: 2,          // Send short radio message
-  
-  // Stealth Actions (Medium - require care and patience)
-  HIDE_IN_COVER: 6,        // Find and use concealment
-  SNEAK_MOVE: 12,          // Move quietly and carefully
-  PEEK_AROUND: 4,          // Careful look around corner
-  
-  // Emergency Actions (Very Light - reactions and defensive moves)
-  DUCK_FOR_COVER: 1,       // Immediate defensive reaction
-  DODGE_DANGER: 2,         // Quick evasive maneuver
-  EMERGENCY_STOP: 1,       // Stop current action immediately
+  // Basic Actions
+  WAIT: 2,                 // Wait and observe - default action
+  MOVE_TO: 10,             // Move between connected rooms (maps to moveTo in systems.js)
+  PICK_UP_ITEM: 3,         // Pick up an item (maps to pickUpItem in systems.js)
+  USE_ITEM: 4,             // Use an item (maps to useItem in systems.js)
+  SEARCH_AREA: 6,          // Search current area (maps to searchArea in systems.js)
+  HIDE_IN_COVER: 6,        // Find cover and hide (maps to hideInCover in systems.js)
 };
 
 /**

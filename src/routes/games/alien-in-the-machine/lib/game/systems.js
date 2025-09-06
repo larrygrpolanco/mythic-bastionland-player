@@ -22,7 +22,7 @@
  * - Log important decisions for debugging
  */
 
-import { getEntitiesWithComponent, getComponent, hasComponent, addComponent } from './World.js';
+import { getEntitiesWithComponent, getComponent, hasComponent, addComponent, removeEntity } from './World.js';
 import * as TurnManager from './TurnManager.js';
 import { getActionCost, getModifiedActionCost, getAvailableActionsForCharacter } from './ActionCosts.js';
 
@@ -113,33 +113,6 @@ export function processCharacterAction(world, characterId, actionType, actionPar
   return results;
 }
 
-/**
- * DEPRECATED: Old batch processing function - kept for compatibility during transition
- * Will be removed once all UI components use the new character-centric system
- * @deprecated Use processCharacterAction instead
- */
-export function processGameTurn(world) {
-  console.warn('processGameTurn is deprecated - use processCharacterAction for individual actions');
-  
-  // For now, just advance the tick system if no one is ready
-  if (!TurnManager.getNextCharacterToAct(world)) {
-    const tickResult = TurnManager.advanceTick(world);
-    return {
-      turn: ++world.currentTurn,
-      ticksAdvanced: 1,
-      newlyReady: tickResult.newlyReady,
-      activeCharacter: world.turnSystem.activeCharacterId,
-      errors: tickResult.errors
-    };
-  }
-  
-  return {
-    turn: world.currentTurn,
-    message: 'Character ready to act - use processCharacterAction',
-    activeCharacter: world.turnSystem.activeCharacterId,
-    errors: []
-  };
-}
 
 /**
  * Advance time until someone can act
@@ -241,37 +214,6 @@ export function processAISystem(world) {
   return results;
 }
 
-/**
- * Action System - Phase 2
- * Processes all actions in the queue, applying their effects to the world
- * @param {Object} world - The world object (will be modified)
- * @returns {Object} Results of action processing
- */
-export function processActionSystem(world) {
-  const results = {
-    processed: 0,
-    errors: []
-  };
-  
-  // Process all actions in queue
-  const actionsToProcess = [...world.actionQueue];
-  world.actionQueue = []; // Clear the queue
-  
-  for (const action of actionsToProcess) {
-    try {
-      const actionResult = executeAction(world, action);
-      if (actionResult.success) {
-        results.processed++;
-      } else {
-        results.errors.push(`Action failed: ${actionResult.error}`);
-      }
-    } catch (error) {
-      results.errors.push(`Action execution error: ${error.message}`);
-    }
-  }
-  
-  return results;
-}
 
 /**
  * Mission System - Phase 4
@@ -353,21 +295,56 @@ export function executeAction(world, action) {
  * @param {Object} action - { type: 'moveTo', entityId: number, targetRoomId: string }
  */
 export function executeMoveTo(world, action) {
-  // Phase 2: This will be implemented with full movement logic
-  // For now, just a placeholder that validates the structure
+  const { entityId, targetRoomId } = action;
   
-  if (!action.targetRoomId) {
+  if (!targetRoomId) {
     return { success: false, error: 'No target room specified' };
   }
   
-  // Future implementation will:
-  // 1. Check if entity can move (not hidden, not incapacitated)
-  // 2. Validate target room exists and is connected
-  // 3. Check if door is locked
-  // 4. Update entity's position component
-  // 5. Trigger any room entry effects
+  // Get current position
+  const currentPosition = getComponent(world, entityId, 'position');
+  if (!currentPosition) {
+    return { success: false, error: 'Entity has no position component' };
+  }
   
-  return { success: true, details: `Entity ${action.entityId} moved to ${action.targetRoomId}` };
+  const currentRoomId = currentPosition.roomId;
+  
+  // Check if target room exists
+  if (!world.roomEntityIds || !world.roomEntityIds[targetRoomId]) {
+    return { success: false, error: `Target room '${targetRoomId}' does not exist` };
+  }
+  
+  // Check if rooms are connected
+  const connections = world.roomConnections[currentRoomId] || [];
+  if (!connections.includes(targetRoomId)) {
+    return { success: false, error: `Cannot move from ${currentRoomId} to ${targetRoomId} - rooms not connected` };
+  }
+  
+  // Check if entity is hidden (cannot move while hidden)
+  const hiddenComponent = getComponent(world, entityId, 'hidden');
+  if (hiddenComponent && hiddenComponent.isHidden) {
+    return { success: false, error: 'Cannot move while hidden' };
+  }
+  
+  // Update position
+  currentPosition.roomId = targetRoomId;
+  
+  // Get character name for logging
+  const marineComponent = getComponent(world, entityId, 'isMarine');
+  const characterName = marineComponent?.name || `Entity ${entityId}`;
+  
+  // Get room names for better messaging
+  const currentRoomComponent = getComponent(world, world.roomEntityIds[currentRoomId], 'isRoom');
+  const targetRoomComponent = getComponent(world, world.roomEntityIds[targetRoomId], 'isRoom');
+  
+  const message = `${characterName} moved from ${currentRoomComponent?.name || currentRoomId} to ${targetRoomComponent?.name || targetRoomId}`;
+  
+  return { 
+    success: true, 
+    details: message,
+    previousRoom: currentRoomId,
+    newRoom: targetRoomId
+  };
 }
 
 /**
@@ -376,8 +353,83 @@ export function executeMoveTo(world, action) {
  * @param {Object} action - { type: 'pickUpItem', entityId: number, itemId: number }
  */
 export function executePickUpItem(world, action) {
-  // Phase 2: Full implementation with inventory management
-  return { success: true, details: `Entity ${action.entityId} picked up item ${action.itemId}` };
+  const { entityId, itemId } = action;
+  
+  if (!itemId) {
+    return { success: false, error: 'No item specified' };
+  }
+  
+  // Get character position and inventory
+  const characterPosition = getComponent(world, entityId, 'position');
+  const characterInventory = getComponent(world, entityId, 'inventory');
+  
+  if (!characterPosition) {
+    return { success: false, error: 'Character has no position component' };
+  }
+  
+  if (!characterInventory) {
+    return { success: false, error: 'Character has no inventory component' };
+  }
+  
+  // Find the item entity by ID
+  let itemEntityId = null;
+  if (world.itemEntityIds && world.itemEntityIds[itemId]) {
+    itemEntityId = world.itemEntityIds[itemId];
+  } else {
+    return { success: false, error: `Item '${itemId}' not found` };
+  }
+  
+  // Get item components
+  const itemComponent = getComponent(world, itemEntityId, 'isItem');
+  const itemPosition = getComponent(world, itemEntityId, 'position');
+  const pickupableComponent = getComponent(world, itemEntityId, 'pickupable');
+  
+  if (!itemComponent || !itemPosition || !pickupableComponent) {
+    return { success: false, error: 'Item is not pickupable' };
+  }
+  
+  // Check if item is in the same room as character
+  if (itemPosition.roomId !== characterPosition.roomId) {
+    return { success: false, error: 'Item is not in the same room' };
+  }
+  
+  // Check inventory capacity
+  const currentWeight = characterInventory.items.reduce((total, item) => {
+    const itemId = item.id || item;
+    const itemEntity = world.itemEntityIds?.[itemId];
+    if (itemEntity) {
+      const itemComp = getComponent(world, itemEntity, 'isItem');
+      return total + (itemComp?.weight || 0);
+    }
+    return total;
+  }, 0);
+  
+  if (currentWeight + pickupableComponent.weight > characterInventory.capacity) {
+    return { success: false, error: 'Inventory is full' };
+  }
+  
+  // Add item to character's inventory
+  characterInventory.items.push({
+    id: itemComponent.id,
+    name: itemComponent.name,
+    type: itemComponent.type,
+    weight: itemComponent.weight
+  });
+  
+  // Remove item from world (it's now in inventory)
+  removeEntity(world, itemEntityId);
+  delete world.itemEntityIds[itemId];
+  
+  // Get character name for logging
+  const marineComponent = getComponent(world, entityId, 'isMarine');
+  const characterName = marineComponent?.name || `Entity ${entityId}`;
+  
+  return { 
+    success: true, 
+    details: `${characterName} picked up ${itemComponent.name}`,
+    itemName: itemComponent.name,
+    newInventoryCount: characterInventory.items.length
+  };
 }
 
 /**
@@ -403,11 +455,125 @@ export function executeHideInCover(world, action) {
 /**
  * Search Area Action - Phase 2
  * @param {Object} world - The world object
- * @param {Object} action - { type: 'searchArea', entityId: number, targetId: number }
+ * @param {Object} action - { type: 'searchArea', entityId: number, targetId?: number }
  */
 export function executeSearchArea(world, action) {
-  // Phase 2: Search mechanics with randomization
-  return { success: true, details: `Entity ${action.entityId} searched area` };
+  const { entityId, targetId } = action;
+  
+  // Get character position and skills
+  const characterPosition = getComponent(world, entityId, 'position');
+  const characterSkills = getComponent(world, entityId, 'skills');
+  
+  if (!characterPosition) {
+    return { success: false, error: 'Character has no position component' };
+  }
+  
+  // If targetId is specified, search that specific furniture
+  if (targetId) {
+    return executeSearchFurniture(world, entityId, targetId, characterSkills);
+  }
+  
+  // Otherwise, search for searchable furniture in the current room
+  const searchableEntities = getEntitiesWithComponent(world, 'searchable');
+  const roomSearchables = searchableEntities.filter(furnitureId => {
+    const furniturePosition = getComponent(world, furnitureId, 'position');
+    return furniturePosition && furniturePosition.roomId === characterPosition.roomId;
+  });
+  
+  if (roomSearchables.length === 0) {
+    return { success: true, details: 'You search the area but find nothing of interest.' };
+  }
+  
+  // Search the first unsearched item, or a random one
+  const unsearched = roomSearchables.filter(id => {
+    const searchable = getComponent(world, id, 'searchable');
+    return searchable && !searchable.searched;
+  });
+  
+  const targetFurnitureId = unsearched.length > 0 ? 
+    unsearched[Math.floor(Math.random() * unsearched.length)] :
+    roomSearchables[Math.floor(Math.random() * roomSearchables.length)];
+    
+  return executeSearchFurniture(world, entityId, targetFurnitureId, characterSkills);
+}
+
+/**
+ * Helper function to search a specific piece of furniture
+ * @param {Object} world - The world object
+ * @param {number} entityId - The character entity ID
+ * @param {number} furnitureId - The furniture entity ID  
+ * @param {Object} characterSkills - The character's skills
+ * @returns {Object} Search result
+ */
+function executeSearchFurniture(world, entityId, furnitureId, characterSkills) {
+  const searchableComponent = getComponent(world, furnitureId, 'searchable');
+  const furnitureComponent = getComponent(world, furnitureId, 'isFurniture');
+  
+  if (!searchableComponent || !furnitureComponent) {
+    return { success: false, error: 'Target is not searchable' };
+  }
+  
+  // Check if locked
+  if (searchableComponent.locked) {
+    return { success: false, error: `${furnitureComponent.name} is locked` };
+  }
+  
+  // Calculate success chance based on skills
+  const baseChance = 50;
+  const skillBonus = (characterSkills?.technical || 0) * 5;
+  const difficultyPenalty = searchableComponent.difficulty * 10;
+  const successChance = Math.max(10, baseChance + skillBonus - difficultyPenalty);
+  
+  const roll = Math.random() * 100;
+  const marineComponent = getComponent(world, entityId, 'isMarine');
+  const characterName = marineComponent?.name || `Entity ${entityId}`;
+  
+  // Mark as searched regardless of success
+  searchableComponent.searched = true;
+  
+  if (roll > successChance) {
+    return { 
+      success: true, 
+      details: `${characterName} searched ${furnitureComponent.name} but found nothing useful.`,
+      found: []
+    };
+  }
+  
+  // Success - reveal items
+  const foundItems = [...searchableComponent.items];
+  searchableComponent.items = []; // Clear the container
+  
+  if (foundItems.length === 0) {
+    return { 
+      success: true, 
+      details: `${characterName} thoroughly searched ${furnitureComponent.name} but it was empty.`,
+      found: []
+    };
+  }
+  
+  // Create item entities for found items (they become pickupable in the room)
+  const createdItems = [];
+  foundItems.forEach(itemId => {
+    if (world.itemEntityIds && world.itemEntityIds[itemId]) {
+      // Item already exists, just move it to this room
+      const itemEntityId = world.itemEntityIds[itemId];
+      const itemPosition = getComponent(world, itemEntityId, 'position');
+      const furniturePosition = getComponent(world, furnitureId, 'position');
+      if (itemPosition && furniturePosition) {
+        itemPosition.roomId = furniturePosition.roomId;
+        const itemComponent = getComponent(world, itemEntityId, 'isItem');
+        createdItems.push(itemComponent?.name || itemId);
+      }
+    }
+  });
+  
+  const itemList = createdItems.join(', ');
+  
+  return { 
+    success: true, 
+    details: `${characterName} searched ${furnitureComponent.name} and found: ${itemList}`,
+    found: createdItems
+  };
 }
 
 /**
@@ -433,25 +599,6 @@ export function checkObjectiveCompletion(world, objective) {
   }
 }
 
-/**
- * Utility function to add an action to the world's action queue
- * Used by UI components and AI system
- * @param {Object} world - The world object
- * @param {Object} action - The action to queue
- */
-export function queueAction(world, action) {
-  if (!action || !action.type || !action.entityId) {
-    console.warn('Attempted to queue invalid action:', action);
-    return false;
-  }
-  
-  world.actionQueue.push({
-    ...action,
-    queuedAt: Date.now()
-  });
-  
-  return true;
-}
 
 /**
  * Debug utility to get available actions for an entity

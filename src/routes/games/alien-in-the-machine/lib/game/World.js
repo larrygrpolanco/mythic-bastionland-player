@@ -39,6 +39,7 @@ export function createWorld() {
       isSurvivor: {},   // { entityId: { name: string, background: string } }
       isRoom: {},       // { entityId: { id: string, name: string } }
       isItem: {},       // { entityId: { name: string, description: string } }
+      isFurniture: {},  // { entityId: { id: string, name: string, description: string } }
       
       // Physical properties
       health: {},       // { entityId: { current: number, max: number } }
@@ -75,8 +76,6 @@ export function createWorld() {
       activeCharacterId: null // Current character who can act
     },
     
-    // Action Queue - commands waiting to be processed (deprecated - will be removed)
-    actionQueue: [],
     
     // Room connectivity (loaded from data files)
     roomConnections: {},
@@ -237,6 +236,105 @@ export function initWorld(roomsData, marinesData) {
   // Build room connections from door data
   world.roomConnections = { ...roomsData.roomConnections };
   
+  // Create item entities from rooms.json
+  if (roomsData.items) {
+    roomsData.items.forEach(itemData => {
+      const itemEntityId = createEntity(world);
+      
+      // Add item identity components
+      addComponent(world, itemEntityId, 'isItem', {
+        id: itemData.id,
+        name: itemData.name,
+        description: itemData.description,
+        type: itemData.type,
+        weight: itemData.weight,
+        uses: itemData.uses
+      });
+      
+      addComponent(world, itemEntityId, 'position', {
+        roomId: itemData.location,
+        coordinates: itemData.position
+      });
+      
+      addComponent(world, itemEntityId, 'tag', {
+        name: itemData.id
+      });
+      
+      // Add pickupable component for all items
+      addComponent(world, itemEntityId, 'pickupable', {
+        weight: itemData.weight
+      });
+      
+      // Add usable component if item has effects
+      if (itemData.effects) {
+        addComponent(world, itemEntityId, 'usable', {
+          type: itemData.type,
+          uses: itemData.uses,
+          effects: { ...itemData.effects }
+        });
+      }
+      
+      // Store item entity ID for reference
+      if (!world.itemEntityIds) world.itemEntityIds = {};
+      world.itemEntityIds[itemData.id] = itemEntityId;
+    });
+  }
+  
+  // Create furniture entities from rooms.json
+  if (roomsData.furniture) {
+    roomsData.furniture.forEach(furnitureData => {
+      const furnitureEntityId = createEntity(world);
+      
+      // Add furniture identity components
+      addComponent(world, furnitureEntityId, 'isFurniture', {
+        id: furnitureData.id,
+        name: furnitureData.name,
+        description: furnitureData.description
+      });
+      
+      addComponent(world, furnitureEntityId, 'position', {
+        roomId: furnitureData.location,
+        coordinates: furnitureData.position
+      });
+      
+      addComponent(world, furnitureEntityId, 'tag', {
+        name: furnitureData.id
+      });
+      
+      // Add searchable component if furniture is searchable
+      if (furnitureData.searchable) {
+        addComponent(world, furnitureEntityId, 'searchable', {
+          items: [...(furnitureData.contains || [])],
+          searched: furnitureData.searched,
+          difficulty: furnitureData.searchDifficulty,
+          locked: furnitureData.locked || false
+        });
+      }
+      
+      // Add usable component if furniture is usable
+      if (furnitureData.usable) {
+        addComponent(world, furnitureEntityId, 'usable', {
+          type: furnitureData.useType,
+          data: furnitureData.data || {},
+          accessLevel: furnitureData.accessLevel || 'basic'
+        });
+      }
+      
+      // Add hideable component if furniture can hide characters
+      if (furnitureData.hideable) {
+        addComponent(world, furnitureEntityId, 'hideable', {
+          capacity: furnitureData.hideCapacity || 1,
+          difficulty: furnitureData.hideDifficulty || 5,
+          occupants: []
+        });
+      }
+      
+      // Store furniture entity ID for reference
+      if (!world.furnitureEntityIds) world.furnitureEntityIds = {};
+      world.furnitureEntityIds[furnitureData.id] = furnitureEntityId;
+    });
+  }
+  
   // Create marine entities from marines.json
   marinesData.marines.forEach(marineData => {
     const marineEntityId = createEntity(world);
@@ -328,7 +426,11 @@ export function getWorldSummary(world) {
     }, {}),
     gameState: world.gameState,
     currentTurn: world.currentTurn,
-    actionQueueLength: world.actionQueue.length,
+    turnSystem: {
+      gameTick: world.turnSystem.gameTick,
+      activeCharacter: world.turnSystem.activeCharacterId,
+      characterCount: Object.keys(world.turnSystem.characterTimers).length
+    },
     metadata: world.metadata
   };
 }

@@ -48,7 +48,7 @@ export const gameStatusStore = derived(
     gameState: $world.gameState,
     currentTurn: $world.currentTurn,
     phase: $world.metadata.phase,
-    actionQueueLength: $world.actionQueue.length,
+    activeCharacterId: $world.turnSystem?.activeCharacterId || null,
     activeEntitiesCount: $world.entities.active.size
   })
 );
@@ -162,8 +162,8 @@ export async function initializeWorld() {
       console.warn('Turn system initialization warnings:', turnInitResult.errors);
     }
     
-    // Update phase to Pre-Phase 2 (tick system ready)
-    world.metadata.phase = 'Pre-Phase 2';
+    // Update phase to Phase 2 (action system ready)
+    world.metadata.phase = 'Phase 2';
     
     worldStore.set(world);
     
@@ -278,17 +278,6 @@ export function nextTurn() {
   return advanceTime();
 }
 
-/**
- * DEPRECATED: Add an action to the game's action queue
- * @deprecated Use executeCharacterAction for immediate action execution
- */
-export function addAction(action) {
-  console.warn('addAction() is deprecated - use executeCharacterAction()');
-  if (action.entityId && action.type) {
-    return executeCharacterAction(action.entityId, action.type, action);
-  }
-  return { success: false, error: 'Invalid action format for deprecated addAction' };
-}
 
 /**
  * Select an entity for inspection (used by debug UI)

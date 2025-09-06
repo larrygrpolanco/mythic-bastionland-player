@@ -150,28 +150,167 @@
     ]
   },
   
-  "expansionPlans": {
-    "phase2": {
-      "items": [
-        "Add medical supplies in medbay",
-        "Add security keycard in docking bay",
-        "Add tools and equipment scattered around"
-      ],
-      "furniture": [
-        "Medical tables and equipment in medbay",
-        "Command consoles in bridge",
-        "Cargo containers in docking bay"
-      ],
-      "searchableAreas": [
-        "Medical supply cabinets",
-        "Cargo containers",
-        "Equipment lockers"
-      ],
-      "hidingSpots": [
-        "Behind cargo containers",
-        "Under medical tables",
-        "In maintenance alcoves"
-      ]
+  "items": [
+    {
+      "id": "medical_kit_01",
+      "name": "Emergency Medical Kit",
+      "description": "A standard emergency medical kit containing bandages, antiseptics, and basic medical supplies.",
+      "location": "medical_bay",
+      "position": { "x": 150, "y": 200 },
+      "weight": 2,
+      "type": "medical",
+      "uses": 3,
+      "effects": { "healing": 25 }
+    },
+    {
+      "id": "flashlight_01", 
+      "name": "Heavy-Duty Flashlight",
+      "description": "A military-grade flashlight with extended battery life.",
+      "location": "docking_bay",
+      "position": { "x": 50, "y": 250 },
+      "weight": 1,
+      "type": "tool",
+      "uses": -1,
+      "effects": { "lighting": "bright" }
+    },
+    {
+      "id": "keycard_blue",
+      "name": "Blue Security Keycard", 
+      "description": "A blue-level security keycard for accessing restricted areas.",
+      "location": "main_corridor",
+      "position": { "x": 200, "y": 100 },
+      "weight": 1,
+      "type": "key",
+      "uses": -1,
+      "effects": { "access_level": "blue" }
+    },
+    {
+      "id": "data_pad_01",
+      "name": "Research Data Pad",
+      "description": "A damaged data pad with partially corrupted research notes.",
+      "location": "command_bridge",
+      "position": { "x": 300, "y": 150 },
+      "weight": 1,
+      "type": "information",
+      "uses": 1,
+      "effects": { "information": "research_logs" }
     }
+  ],
+  
+  "furniture": [
+    {
+      "id": "storage_locker_01",
+      "name": "Storage Locker A-1",
+      "description": "A standard storage locker. The door hangs slightly open.",
+      "location": "docking_bay",
+      "position": { "x": 100, "y": 50 },
+      "searchable": true,
+      "searched": false,
+      "locked": false,
+      "contains": ["flashlight_01"],
+      "searchDifficulty": 2,
+      "hideable": false
+    },
+    {
+      "id": "medical_cabinet_01", 
+      "name": "Medical Supply Cabinet",
+      "description": "A white medical cabinet with a red cross symbol. The glass door is intact.",
+      "location": "medical_bay",
+      "position": { "x": 200, "y": 100 },
+      "searchable": true,
+      "searched": false, 
+      "locked": true,
+      "contains": ["medical_kit_01"],
+      "searchDifficulty": 5,
+      "hideable": false
+    },
+    {
+      "id": "computer_terminal_01",
+      "name": "Command Terminal",
+      "description": "The main command terminal. The screen flickers occasionally with system warnings.",
+      "location": "command_bridge",
+      "position": { "x": 250, "y": 200 },
+      "searchable": false,
+      "usable": true,
+      "useType": "computer",
+      "locked": false,
+      "accessLevel": "basic",
+      "hideable": false,
+      "data": {
+        "logs": ["System diagnostic failed", "Communication array offline", "Hull breach detected - Sector 7"]
+      }
+    },
+    {
+      "id": "maintenance_panel_01",
+      "name": "Maintenance Panel",
+      "description": "An open maintenance panel with exposed wiring and diagnostic displays.",
+      "location": "main_corridor", 
+      "position": { "x": 150, "y": 50 },
+      "searchable": true,
+      "searched": false,
+      "usable": true,
+      "useType": "technical",
+      "locked": false,
+      "contains": ["keycard_blue"],
+      "searchDifficulty": 6,
+      "hideable": false
+    },
+    {
+      "id": "crate_cargo_01",
+      "name": "Supply Crate",
+      "description": "A large metal crate marked 'EMERGENCY SUPPLIES'. One corner is dented.",
+      "location": "docking_bay",
+      "position": { "x": 300, "y": 300 },
+      "searchable": true,
+      "searched": false,
+      "locked": false,
+      "contains": [],
+      "searchDifficulty": 3,
+      "hideable": true,
+      "hideCapacity": 1
+    },
+    {
+      "id": "debris_pile_01",
+      "name": "Debris Pile",
+      "description": "A pile of twisted metal and broken equipment. Something might be hidden underneath.",
+      "location": "main_corridor",
+      "position": { "x": 50, "y": 200 },
+      "searchable": true,
+      "searched": false,
+      "locked": false,
+      "contains": [],
+      "searchDifficulty": 4,
+      "hideable": true,
+      "hideCapacity": 2
+    }
+  ],
+
+  "expansionPlans": {
+    "phase2_testing": {
+      "actions_to_test": [
+        "MOVE_ROOM - Move between connected rooms",
+        "SEARCH_AREA - Search furniture and containers for items",
+        "PICK_UP_ITEM - Collect items from the environment",
+        "QUICK_LOOK - Fast examination of current area"
+      ],
+      "item_interactions": [
+        "Medical kit - use for healing",
+        "Flashlight - use for better visibility",
+        "Keycard - use to unlock doors/containers",
+        "Data pad - examine for information"
+      ],
+      "furniture_interactions": [
+        "Storage lockers - search for items",
+        "Computer terminals - use for information",
+        "Maintenance panels - technical interactions",
+        "Crates and debris - search and hide"
+      ]
+    },
+    "phase3_ai_ready": [
+      "Rich environmental descriptions for AI context",
+      "Multiple interaction types for AI decision-making",
+      "Clear success/failure feedback for AI learning",
+      "Varied difficulty levels for skill-based challenges"
+    ]
   }
 }
