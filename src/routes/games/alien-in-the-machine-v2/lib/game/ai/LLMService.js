@@ -17,7 +17,7 @@
  */
 const LLM_CONFIG = {
 	provider: 'openrouter', // 'openrouter' | 'openai' | 'local'
-	model: 'openrouter/sonoma-sky-alpha',
+	model: 'openai/gpt-oss-120b:free',
 	maxTokens: 150,
 	temperature: 0.7,
 

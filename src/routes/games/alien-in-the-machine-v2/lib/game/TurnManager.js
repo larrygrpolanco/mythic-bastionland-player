@@ -404,11 +404,10 @@ export async function processAITurn(world) {
 		
 		// Execute the AI action through the same system as human actions
 		console.log(`🎯 Executing AI action: ${parseResult.action.type}`);
-		const actionResult = await executeGameAction(world, {
+		const actionResult = await executeGameAction(world, activeCharacterId, {
 			type: parseResult.action.type,
 			target: parseResult.action.target,
-			parameters: parseResult.action.parameters || {},
-			characterId: activeCharacterId
+			parameters: parseResult.action.parameters || {}
 		});
 		
 		if (!actionResult.success) {

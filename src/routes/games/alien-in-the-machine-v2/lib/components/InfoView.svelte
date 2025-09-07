@@ -102,11 +102,14 @@
 
 	$: selectedEntityData = getEnhancedEntityData(selectedEntityId, selectedEntityType);
 
-	// Mission briefing data
+	// Mission briefing data - handle primary/secondary objectives structure
 	$: missionBriefing = world ? {
 		title: "First Contact Protocol",
 		overview: "Your team has boarded the research station to investigate and establish team communication. Work together to complete all mission objectives while ensuring team safety.",
-		objectives: missionStatus?.objectives || [],
+		objectives: missionStatus?.objectives ? [
+			...(missionStatus.objectives.primary || []),
+			...(missionStatus.objectives.secondary || [])
+		] : [],
 		status: missionStatus?.status || 'IN_PROGRESS',
 		timeElapsed: world.metadata?.gameTime || 0,
 		criticalInfo: [

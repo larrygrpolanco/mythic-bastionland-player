@@ -628,6 +628,37 @@ export async function debugTestAI(characterId = null) {
 }
 
 /**
+ * Get current turn queue information
+ * @returns {Array} Turn queue with character information
+ */
+export function getTurnQueue() {
+	let currentWorld;
+	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
+	unsubscribe();
+	
+	if (!currentWorld || !currentWorld.turnSystem) {
+		return [];
+	}
+	
+	const turnQueue = currentWorld.turnSystem.turnQueue || [];
+	
+	return turnQueue.map(entry => {
+		const marine = currentWorld.components?.isMarine?.[entry.characterId];
+		const aiComponent = currentWorld.components?.isAI?.[entry.characterId];
+		
+		return {
+			characterId: entry.characterId,
+			name: marine?.name || 'Unknown',
+			rank: marine?.rank || 'Unknown',
+			readyAt: entry.readyAt,
+			speed: entry.speed,
+			isAI: Boolean(aiComponent?.enabled),
+			isReady: entry.readyAt <= (currentWorld.turnSystem?.gameTick || 0)
+		};
+	});
+}
+
+/**
  * Debug function: Log current world state
  */
 export function debugWorldState() {

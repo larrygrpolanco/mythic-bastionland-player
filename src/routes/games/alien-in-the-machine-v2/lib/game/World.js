@@ -90,6 +90,17 @@ export function addComponent(world, entityId, componentType, componentData) {
 }
 
 /**
+ * Set a component on an entity (alias for addComponent for consistency)
+ * @param {object} world - The world object
+ * @param {number} entityId - Target entity ID
+ * @param {string} componentType - Type of component to set
+ * @param {object} componentData - Component data
+ */
+export function setComponent(world, entityId, componentType, componentData) {
+	return addComponent(world, entityId, componentType, componentData);
+}
+
+/**
  * Get a component from an entity
  * @param {object} world - The world object
  * @param {number} entityId - Target entity ID

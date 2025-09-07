@@ -54,9 +54,14 @@
 	// Mission-relevant actions get priority highlighting
 	$: missionRelevantActions = context?.availableActions?.filter(action => {
 		if (!missionStatus?.objectives) return false;
-		return missionStatus.objectives.some(obj => {
-			if (obj.type === 'REACH_LOCATION' && action.type === 'MOVE') return action.target === obj.target;
-			if (obj.type === 'SEARCH_LOCATION' && action.type === 'SEARCH') return action.target === obj.target;
+		
+		const primaryObjectives = missionStatus.objectives.primary || [];
+		const secondaryObjectives = missionStatus.objectives.secondary || [];
+		const allObjectives = [...primaryObjectives, ...secondaryObjectives];
+		
+		return allObjectives.some(obj => {
+			if (obj.type === 'REACH_LOCATION' && action.type === 'MOVE') return action.target === obj.parameters?.targetRoomId;
+			if (obj.type === 'SEARCH_LOCATION' && action.type === 'SEARCH') return action.target === obj.parameters?.targetRoomId;
 			if (obj.type === 'EXAMINE_TARGET' && action.type === 'EXAMINE') return true;
 			if (obj.type === 'TEAM_COMMUNICATION' && action.type === 'RADIO_QUICK') return true;
 			return false;
@@ -259,13 +264,13 @@
 			<div class="mission-context">
 				<h3>🎯 Mission Priorities</h3>
 				<div class="priority-objectives">
-					{#each missionStatus.objectives.filter(obj => obj.status !== 'COMPLETED').slice(0, 2) as objective}
+					{#each [...(missionStatus.objectives.primary || []), ...(missionStatus.objectives.secondary || [])].filter(obj => !obj.completed).slice(0, 2) as objective}
 						<div class="priority-objective">
 							<span class="objective-icon">
-								{objective.status === 'COMPLETED' ? '✅' : '⏳'}
+								{objective.completed ? '✅' : '⏳'}
 							</span>
 							<span class="objective-priority">
-								{objective.description || objective.type}
+								{objective.description || objective.title}
 							</span>
 						</div>
 					{/each}

@@ -24,10 +24,19 @@
 		const occupants = marinesByRoom[room.id] || [];
 		const hasActiveCharacter = occupants.some(m => m.entityId === activeCharacter?.entityId);
 		const hasSearched = room.searched || false;
-		const missionRelevant = missionStatus?.objectives?.some(obj => 
-			obj.type === 'REACH_LOCATION' && obj.target === room.id ||
-			obj.type === 'SEARCH_LOCATION' && obj.target === room.id
-		) || false;
+		
+		// Fix: Handle correct mission objectives structure
+		let missionRelevant = false;
+		if (missionStatus?.objectives) {
+			const primaryObjectives = missionStatus.objectives.primary || [];
+			const secondaryObjectives = missionStatus.objectives.secondary || [];
+			const allObjectives = [...primaryObjectives, ...secondaryObjectives];
+			
+			missionRelevant = allObjectives.some(obj => 
+				(obj.type === 'REACH_LOCATION' && obj.parameters?.targetRoomId === room.id) ||
+				(obj.type === 'SEARCH_LOCATION' && obj.parameters?.targetRoomId === room.id)
+			);
+		}
 		
 		statuses[room.id] = {
 			hasActiveCharacter,
@@ -170,13 +179,13 @@
 			<div class="mission-overview">
 				<h4>🎯 Mission Status</h4>
 				<div class="objectives-summary">
-					{#each missionStatus.objectives.slice(0, 3) as objective}
-						<div class="objective-item" class:completed={objective.status === 'COMPLETED'}>
+					{#each [...(missionStatus.objectives.primary || []), ...(missionStatus.objectives.secondary || [])].slice(0, 3) as objective}
+						<div class="objective-item" class:completed={objective.completed}>
 							<span class="objective-icon">
-								{objective.status === 'COMPLETED' ? '✅' : '⏳'}
+								{objective.completed ? '✅' : '⏳'}
 							</span>
 							<span class="objective-text">
-								{objective.description || objective.type}
+								{objective.description || objective.title}
 							</span>
 						</div>
 					{/each}
