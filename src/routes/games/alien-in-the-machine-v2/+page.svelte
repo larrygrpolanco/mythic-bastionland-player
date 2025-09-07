@@ -141,6 +141,12 @@
 
 <style>
 	/* Terminal/Retro Sci-Fi Theme - Foundation for V2 styling */
+	:global(body) {
+		background: #0a0a0a !important;
+		margin: 0;
+		padding: 0;
+	}
+
 	.game-container {
 		background: #0a0a0a;
 		color: #00ff41;
