@@ -16,6 +16,7 @@ import { getComponent, hasComponent, getAllMarines, getAllRooms, getRoomEntityBy
 import { getTurnSystemStatus, getCharacterTurnStatus } from '../TurnManager.js';
 import { generateAvailableActions } from './ActionBuilder.js';
 import { compileAIPrompt, compileUIText, CHARACTER_TEMPLATES, ENVIRONMENT_TEMPLATES, AI_PROMPT_TEMPLATES } from './PromptTemplates.js';
+import { getMissionContext } from '../systems/MissionSystem.js';
 
 /**
  * Build complete decision context for a character
@@ -42,6 +43,9 @@ export function buildDecisionContext(world, characterId) {
 		
 		// Turn system status
 		turnSystem: getTurnContext(world, characterId),
+		
+		// Mission objectives and status
+		mission: getMissionContext(world, characterId),
 		
 		// World state information
 		worldState: getWorldStateContext(world),

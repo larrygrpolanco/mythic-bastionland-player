@@ -16,6 +16,12 @@ import { validateAction } from '../actions/ActionValidator.js';
 import { executeAction as applyActionCost } from '../TurnManager.js';
 import { executeMove } from './MovementSystem.js';
 import { executeExamine, executeSearch } from './InteractionSystem.js';
+import { 
+	updateMissionStatus, 
+	trackCommunication, 
+	trackSearch, 
+	trackExamination 
+} from './MissionSystem.js';
 
 /**
  * Execute a validated action through the appropriate system
@@ -95,11 +101,18 @@ export function executeAction(world, characterId, action) {
 				};
 			}
 			
+			// Track action for mission objectives
+			trackActionForMission(world, characterId, actionData, executionResult);
+			
+			// Update mission status after successful action
+			const missionUpdate = updateMissionStatus(world);
+			
 			// Combine results
 			return {
 				success: true,
 				actionResult: executionResult,
 				turnResult,
+				missionUpdate,
 				actionData,
 				warnings: validation.warnings,
 				type: 'success'
@@ -123,6 +136,46 @@ export function executeAction(world, characterId, action) {
 			warnings: validation.warnings,
 			type: 'exception_error'
 		};
+	}
+}
+
+/**
+ * Track action for mission objectives
+ * @param {object} world - The world object
+ * @param {number} characterId - Character who performed action
+ * @param {object} actionData - Action data
+ * @param {object} executionResult - Result from action execution
+ */
+function trackActionForMission(world, characterId, actionData, executionResult) {
+	try {
+		switch (actionData.type) {
+			case 'SEARCH':
+			case 'SEARCH_THOROUGH':
+				if (actionData.target) {
+					trackSearch(world, characterId, actionData.target);
+				}
+				break;
+				
+			case 'EXAMINE':
+			case 'EXAMINE_THOROUGH':
+				if (actionData.target) {
+					trackExamination(world, characterId, actionData.target);
+				}
+				break;
+				
+			case 'RADIO_QUICK':
+			case 'RADIO_DETAILED':
+				trackCommunication(world, characterId, executionResult.message || 'Communication');
+				break;
+				
+			// Other action types don't need specific tracking
+			default:
+				// No specific mission tracking needed
+				break;
+		}
+	} catch (error) {
+		console.warn('⚠️ Mission tracking failed:', error.message);
+		// Don't fail the action if mission tracking fails
 	}
 }
 

@@ -25,6 +25,11 @@ import {
 	getHumanCharacters,
 	autoProcessAITurns 
 } from '../game/TurnManager.js';
+import { 
+	initializeMissionSystem, 
+	getMissionStatus, 
+	updateMissionStatus 
+} from '../game/systems/MissionSystem.js';
 import { executeAction } from '../game/systems/ActionSystem.js';
 import { buildDecisionContext, buildUIContext } from '../game/context/ContextAssembler.js';
 
@@ -134,6 +139,11 @@ export const humanCharactersStore = derived(worldStore, $world => {
 	});
 });
 
+export const missionStatusStore = derived(worldStore, $world => {
+	if (!$world) return null;
+	return getMissionStatus($world);
+});
+
 /**
  * Initialize the world from JSON data
  */
@@ -150,9 +160,15 @@ export async function initializeWorld() {
 			throw new Error(`Turn system initialization failed: ${turnResult.error}`);
 		}
 		
+		// Initialize mission system
+		const missionResult = initializeMissionSystem(world);
+		if (!missionResult.success) {
+			throw new Error(`Mission system initialization failed: ${missionResult.error}`);
+		}
+		
 		// Update world status
 		world.metadata.status = 'PLAYING';
-		world.metadata.phase = 'Phase 0';
+		world.metadata.phase = 'Phase 3';  // Updated to Phase 3 with mission system
 		
 		// Set the world in the store
 		worldStore.set(world);
