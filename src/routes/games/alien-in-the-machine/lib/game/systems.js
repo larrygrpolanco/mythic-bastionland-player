@@ -274,19 +274,45 @@ export function executeAction(world, action) {
   
   // Route to specific action handler
   switch (action.type) {
+    case 'WAIT':
+    case 'wait':
+      return executeWait(world, action);
+    case 'MOVE_TO':
     case 'moveTo':
       return executeMoveTo(world, action);
+    case 'PICK_UP_ITEM':
     case 'pickUpItem':
       return executePickUpItem(world, action);
+    case 'USE_ITEM':
     case 'useItem':
       return executeUseItem(world, action);
+    case 'HIDE_IN_COVER':
     case 'hideInCover':
       return executeHideInCover(world, action);
+    case 'SEARCH_AREA':
     case 'searchArea':
       return executeSearchArea(world, action);
     default:
       return { success: false, error: `Unknown action type: ${action.type}` };
   }
+}
+
+/**
+ * Wait Action - Basic action that does nothing but costs time
+ * @param {Object} world - The world object
+ * @param {Object} action - { type: 'wait', entityId: number }
+ */
+export function executeWait(world, action) {
+  const { entityId } = action;
+  
+  // Get character name for logging
+  const marineComponent = getComponent(world, entityId, 'isMarine');
+  const characterName = marineComponent?.name || `Entity ${entityId}`;
+  
+  return { 
+    success: true, 
+    details: `${characterName} waits and observes the surroundings`
+  };
 }
 
 /**

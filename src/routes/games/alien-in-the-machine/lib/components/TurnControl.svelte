@@ -28,8 +28,22 @@
 	$: turnSystem = $turnSystemStore;
 	$: activeCharacter = $activeCharacterStore;
 
-	// Action selection state
+	// Action selection state - default to WAIT action
 	let selectedAction = null;
+	
+	// Set default WAIT action when character changes
+	$: {
+		if (activeCharacter && (!selectedAction || selectedAction.name !== 'WAIT')) {
+			// Find WAIT action and set as default
+			const waitAction = {
+				name: 'WAIT',
+				cost: 2,
+				category: 'core',
+				description: 'Wait and observe surroundings'
+			};
+			selectedAction = waitAction;
+		}
+	}
 
 	// Get categorized actions for the active character
 	$: availableActionCategories = getActionCategoriesForCharacter(activeCharacter);
@@ -93,16 +107,6 @@
 	}
 
 	/**
-	 * Clear action selection
-	 */
-	function clearAction() {
-		selectedAction = null;
-		
-		// Dispatch clear event to parent
-		dispatch('actionCleared');
-	}
-
-	/**
 	 * Toggle category expansion
 	 */
 	function toggleCategory(categoryKey) {
@@ -155,24 +159,12 @@
 
 			<!-- Action Status Section -->
 			<div class="action-status">
-				{#if selectedAction}
-					<div class="selected-action">
-						<div class="status-text">
-							Selected: {getActionDescription(selectedAction.name)}
-							<span class="tick-cost">({selectedAction.cost} ticks)</span>
-						</div>
-						<div class="action-buttons">
-							<button class="clear-btn" on:click={clearAction}>
-								Clear Selection
-							</button>
-						</div>
+				<div class="selected-action">
+					<div class="status-text">
+						Selected: {getActionDescription(selectedAction.name)}
+						<span class="tick-cost">({selectedAction.cost} ticks)</span>
 					</div>
-				{:else}
-					<div class="no-selection">
-						<div class="status-text">No action selected</div>
-						<div class="instruction">Click an action below to select</div>
-					</div>
-				{/if}
+				</div>
 			</div>
 		</div>
 
@@ -344,28 +336,6 @@
 		font-weight: normal;
 	}
 
-	.action-buttons {
-		display: flex;
-		gap: 0.5rem;
-		margin-top: 0.5rem;
-	}
-
-	.clear-btn {
-		padding: 0.4rem 0.8rem;
-		border-radius: 3px;
-		font-family: 'Courier New', monospace;
-		font-size: 0.8rem;
-		cursor: pointer;
-		transition: all 0.2s;
-		background: transparent;
-		color: #888888;
-		border: 1px solid #666666;
-	}
-
-	.clear-btn:hover {
-		color: #aaaaaa;
-		border-color: #888888;
-	}
 
 	.action-selection {
 		flex: 1;

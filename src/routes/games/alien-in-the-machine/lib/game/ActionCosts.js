@@ -105,7 +105,7 @@ export function getActionCost(actionName) {
 
 /**
  * Get all available actions for a character based on their skills and situation
- * This will be expanded in Phase 2 to consider character skills, items, and location
+ * Phase 2: Only returns implemented core actions to avoid confusion
  * @param {Object} characterComponents - All components for a character
  * @param {Object} worldContext - Relevant world state (location, items, etc.)
  * @returns {Array} Array of action objects with costs
@@ -113,7 +113,7 @@ export function getActionCost(actionName) {
 export function getAvailableActionsForCharacter(characterComponents, worldContext = {}) {
   const availableActions = [];
   
-  // Core actions available to everyone
+  // Core actions available to everyone (these are all implemented in systems.js)
   Object.entries(CORE_ACTIONS).forEach(([actionName, cost]) => {
     availableActions.push({
       name: actionName,
@@ -123,31 +123,9 @@ export function getAvailableActionsForCharacter(characterComponents, worldContex
     });
   });
   
-  // Add medical actions if character has medical skills or items
-  if (characterComponents.skills?.medical > 5 || worldContext.hasMedicalItems) {
-    Object.entries(MEDICAL_ACTIONS).forEach(([actionName, cost]) => {
-      availableActions.push({
-        name: actionName,
-        cost,
-        category: 'medical',
-        description: getActionDescription(actionName),
-        requiresSkill: 'medical'
-      });
-    });
-  }
-  
-  // Add technical actions if character has technical skills or access to systems
-  if (characterComponents.skills?.technical > 5 || worldContext.hasSystemAccess) {
-    Object.entries(TECHNICAL_ACTIONS).forEach(([actionName, cost]) => {
-      availableActions.push({
-        name: actionName,
-        cost,
-        category: 'technical',
-        description: getActionDescription(actionName),
-        requiresSkill: 'technical'
-      });
-    });
-  }
+  // Phase 2: Medical, technical, combat, and environmental actions are disabled
+  // until they are properly implemented in systems.js
+  // This prevents UI confusion with non-functional actions
   
   return availableActions;
 }
@@ -159,27 +137,13 @@ export function getAvailableActionsForCharacter(characterComponents, worldContex
  */
 export function getActionDescription(actionName) {
   const descriptions = {
-    // Core Actions
-    MOVE_ROOM: "Move to a connected room",
-    MOVE_ADJACENT: "Move to different area in current room", 
+    // Core Actions (implemented)
+    WAIT: "Wait and observe surroundings",
+    MOVE_TO: "Move to a connected room", 
     SEARCH_AREA: "Search containers and furniture",
-    SEARCH_THOROUGH: "Perform detailed search of area",
-    EXAMINE_ITEM: "Look closely at an item",
-    USE_ITEM: "Use a simple item",
-    USE_COMPLEX_ITEM: "Operate complex equipment",
-    PICK_UP_ITEM: "Pick up a small item",
-    PICK_UP_HEAVY: "Pick up a heavy item",
-    DROP_ITEM: "Drop item from inventory",
-    QUICK_LOOK: "Take a quick look around",
-    LISTEN: "Listen carefully for sounds",
-    CHECK_HEALTH: "Check your health status",
-    COMMUNICATE: "Send radio message",
+    USE_ITEM: "Use an item from inventory",
+    PICK_UP_ITEM: "Pick up an item",
     HIDE_IN_COVER: "Find cover and hide",
-    SNEAK_MOVE: "Move quietly and carefully",
-    PEEK_AROUND: "Carefully look around corner",
-    DUCK_FOR_COVER: "Quick defensive reaction",
-    DODGE_DANGER: "Dodge incoming danger",
-    EMERGENCY_STOP: "Stop current action immediately",
     
     // Medical Actions
     FIRST_AID: "Provide basic medical treatment",

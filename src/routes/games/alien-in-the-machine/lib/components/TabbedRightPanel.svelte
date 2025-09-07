@@ -21,11 +21,6 @@ the existing InfoView and RadioLog components.
 		dispatch('actionSelected', event.detail);
 	}
 
-	// Handle action cleared events from TurnControl and forward to parent
-	function handleActionCleared(event) {
-		dispatch('actionCleared', event.detail);
-	}
-
 	function setActiveTab(tab) {
 		activeTab = tab;
 	}
@@ -62,7 +57,6 @@ the existing InfoView and RadioLog components.
 		{#if activeTab === 'turn-control'}
 			<TurnControl 
 				on:actionSelected={handleActionSelected}
-				on:actionCleared={handleActionCleared}
 			/>
 		{:else if activeTab === 'info'}
 			<InfoView />
@@ -80,7 +74,6 @@ the existing InfoView and RadioLog components.
 		border: 2px solid #00ff41;
 		border-radius: 4px;
 		background: rgba(0, 255, 65, 0.05);
-		overflow: hidden;
 	}
 
 	.tab-headers {
@@ -125,5 +118,6 @@ the existing InfoView and RadioLog components.
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
+		min-height: 0;
 	}
 </style>
