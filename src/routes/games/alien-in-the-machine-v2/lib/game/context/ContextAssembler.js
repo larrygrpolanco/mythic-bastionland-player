@@ -15,6 +15,7 @@
 import { getComponent, hasComponent, getAllMarines, getAllRooms, getRoomEntityByRoomId, getEntityDebugInfo } from '../World.js';
 import { getTurnSystemStatus, getCharacterTurnStatus } from '../TurnManager.js';
 import { generateAvailableActions } from './ActionBuilder.js';
+import { compileAIPrompt, compileUIText, CHARACTER_TEMPLATES, ENVIRONMENT_TEMPLATES, AI_PROMPT_TEMPLATES } from './PromptTemplates.js';
 
 /**
  * Build complete decision context for a character
@@ -365,7 +366,7 @@ function calculateDistance(world, characterId1, characterId2) {
 }
 
 /**
- * Build simplified context for UI display
+ * Build simplified context for UI display with template-generated text
  * @param {object} world - The world object
  * @param {number} characterId - Character entity ID
  * @returns {object} Simplified context for UI
@@ -373,8 +374,17 @@ function calculateDistance(world, characterId1, characterId2) {
 export function buildUIContext(world, characterId) {
 	const context = buildDecisionContext(world, characterId);
 	
-	// Return simplified version for UI rendering
+	// Generate template-compiled UI text
+	const uiText = compileUIText(context);
+	
+	// Return simplified version for UI rendering with template text
 	return {
+		...context,
+		
+		// Template-generated UI text
+		uiText,
+		
+		// Legacy fields for backwards compatibility
 		character: context.character,
 		currentRoom: context.environment.currentRoom,
 		availableActions: context.availableActions,
@@ -392,22 +402,28 @@ export function buildUIContext(world, characterId) {
 }
 
 /**
- * Build context specifically formatted for AI prompts
+ * Build context specifically formatted for AI prompts with template-generated text
  * @param {object} world - The world object
  * @param {number} characterId - Character entity ID
- * @returns {object} AI-formatted context
+ * @returns {object} AI-formatted context with complete prompt
  */
 export function buildAIContext(world, characterId) {
 	const context = buildDecisionContext(world, characterId);
 	
-	// Format for AI consumption with rich text descriptions
+	// Generate template-compiled AI prompt
+	const compiledPrompt = compileAIPrompt(context);
+	
+	// Format for AI consumption with template-based text
 	return {
 		...context,
 		
-		// Add formatted text descriptions for AI
-		situationSummary: generateSituationSummary(context),
-		actionSummary: generateActionSummary(context.availableActions),
-		tacticalSummary: generateTacticalSummary(context)
+		// Complete AI prompt from templates
+		compiledPrompt,
+		
+		// Legacy fields for backwards compatibility (now template-based)
+		situationSummary: generateSituationSummaryFromTemplates(context),
+		actionSummary: generateActionSummaryFromTemplates(context.availableActions),
+		tacticalSummary: generateTacticalSummaryFromTemplates(context)
 	};
 }
 
@@ -488,6 +504,78 @@ function generateTacticalSummary(context) {
 	}
 	
 	return summary;
+}
+
+/**
+ * Generate template-based situation summary for AI
+ * @param {object} context - Decision context
+ * @returns {string} Template-based situation summary
+ */
+function generateSituationSummaryFromTemplates(context) {
+	const char = context.character;
+	const room = context.environment.currentRoom;
+	
+	if (!char || !room) {
+		return 'Unable to assess current situation due to missing information.';
+	}
+	
+	// Use CHARACTER_TEMPLATES for consistent character status
+	const characterStatus = CHARACTER_TEMPLATES.STATUS.compile({
+		name: char.name,
+		rank: char.rank,
+		health: char.health.percentage,
+		roomName: room.name,
+		speed: char.speed.current
+	});
+	
+	// Use ENVIRONMENT_TEMPLATES for room description
+	const roomDescription = ENVIRONMENT_TEMPLATES.ROOM_DESCRIPTION.compile({
+		roomName: room.name,
+		description: room.description,
+		lighting: room.conditions.lighting,
+		temperature: room.conditions.temperature
+	});
+	
+	let summary = characterStatus + ' ' + roomDescription;
+	
+	if (context.environment.currentRoom.entities.length > 0) {
+		const entitiesDescription = ENVIRONMENT_TEMPLATES.ENTITIES.compile({
+			entities: context.environment.currentRoom.entities
+		});
+		summary += ' ' + entitiesDescription;
+	}
+	
+	return summary;
+}
+
+/**
+ * Generate template-based action summary for AI
+ * @param {object[]} actions - Available actions array
+ * @returns {string} Template-based action summary
+ */
+function generateActionSummaryFromTemplates(actions) {
+	if (actions.length === 0) {
+		return 'No actions are currently available.';
+	}
+	
+	// Use AI_PROMPT_TEMPLATES for action listing
+	return AI_PROMPT_TEMPLATES.AVAILABLE_ACTIONS.compile({
+		availableActions: actions
+	});
+}
+
+/**
+ * Generate template-based tactical summary for AI
+ * @param {object} context - Decision context
+ * @returns {string} Template-based tactical summary
+ */
+function generateTacticalSummaryFromTemplates(context) {
+	const turnInfo = context.turnSystem;
+	
+	// Use TURN_TEMPLATES for consistent turn status
+	const turnStatus = AI_PROMPT_TEMPLATES.SITUATION_HEADER.compile(context);
+	
+	return turnStatus;
 }
 
 /**

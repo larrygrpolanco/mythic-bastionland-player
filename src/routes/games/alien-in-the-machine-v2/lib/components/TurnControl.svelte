@@ -1,13 +1,17 @@
 <script>
-	// TurnControl.svelte - Minimal Turn Control Interface
-	// Architecture-first approach: UI follows backend reality
+	// TurnControl.svelte - Template-Integrated Turn Control Interface
+	// Architecture-first approach: UI follows backend reality with template consistency
 
 	import { worldStore, activeCharacterStore, executeCharacterAction, getActiveCharacterContext } from '../stores/worldStore.js';
+	import { CHARACTER_TEMPLATES, UI_TEMPLATES, compileUIText } from '../game/context/PromptTemplates.js';
 
 	// Reactive state - purely from backend
 	$: world = $worldStore;
 	$: activeCharacter = $activeCharacterStore;
 	$: context = activeCharacter ? getActiveCharacterContext() : null;
+	
+	// Template-compiled UI text based on context
+	$: uiText = context ? compileUIText(context) : null;
 
 	// Execute action through backend pipeline
 	function handleActionExecute(action) {
@@ -35,10 +39,18 @@
 	{#if !world}
 		<div class="loading">Loading...</div>
 	{:else}
-		<!-- Active Character Display -->
+		<!-- Active Character Display - Template Generated -->
 		<div class="active-character">
 			<h3>Active Character</h3>
-			{#if activeCharacter}
+			{#if activeCharacter && uiText}
+				<div class="character-card">
+					<div class="char-name">{activeCharacter.name} ({activeCharacter.rank})</div>
+					<div class="char-status">{uiText.characterStatus}</div>
+					{#if uiText.turnStatus}
+						<div class="turn-status">{uiText.turnStatus}</div>
+					{/if}
+				</div>
+			{:else if activeCharacter}
 				<div class="character-card">
 					<div class="char-name">{activeCharacter.name} ({activeCharacter.rank})</div>
 					<div class="char-status">Ready: {activeCharacter.isReady} | Timer: {activeCharacter.timer}</div>
@@ -48,10 +60,22 @@
 			{/if}
 		</div>
 
-		<!-- Available Actions - Direct from Backend -->
+		<!-- Available Actions - Template Generated Text -->
 		<div class="actions-section">
 			<h3>Available Actions</h3>
-			{#if context?.availableActions && context.availableActions.length > 0}
+			{#if uiText?.actionButtons && uiText.actionButtons.length > 0}
+				<div class="action-list">
+					{#each uiText.actionButtons as action}
+						<button 
+							class="action-btn"
+							on:click={() => handleActionExecute(action)}
+						>
+							<span class="action-name">{action.displayText || action.name}</span>
+							<span class="action-cost">{action.cost}t</span>
+						</button>
+					{/each}
+				</div>
+			{:else if context?.availableActions && context.availableActions.length > 0}
 				<div class="action-list">
 					{#each context.availableActions as action}
 						<button 

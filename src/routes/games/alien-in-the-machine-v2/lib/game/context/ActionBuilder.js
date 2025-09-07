@@ -15,6 +15,7 @@
 import { getComponent, hasComponent, getAllRooms, getRoomEntityByRoomId } from '../World.js';
 import { getActionType, getActionsByCategory } from '../actions/ActionTypes.js';
 import { calculateActionCost } from '../actions/ActionCosts.js';
+import { ACTION_TEMPLATES, UI_TEMPLATES } from './PromptTemplates.js';
 
 /**
  * Generate all available actions for a character based on current world state
@@ -96,11 +97,17 @@ function generateMovementActions(world, characterId) {
 		
 		// Generate standard move action
 		const baseCost = calculateActionCost('MOVE', getCharacterSkillContext(world, characterId), environment);
+		const moveActionText = ACTION_TEMPLATES.MOVEMENT.compile({
+			targetRoomName: targetRoom?.name || connection.targetRoomId,
+			cost: baseCost,
+			description: `Travel to the ${targetRoom?.name || 'target room'}`
+		});
+		
 		actions.push({
 			id: `move_${connection.targetRoomId}`,
 			type: 'MOVE',
-			name: `Move to ${targetRoom?.name || connection.targetRoomId}`,
-			description: `Move to the ${targetRoom?.name || 'target room'}`,
+			name: moveActionText,
+			description: `Travel to the ${targetRoom?.name || 'target room'}`,
 			category: 'MOVEMENT',
 			cost: baseCost,
 			target: targetRoomEntityId,
@@ -118,10 +125,16 @@ function generateMovementActions(world, characterId) {
 		
 		// Generate careful move action (higher cost, potentially safer)
 		const carefulCost = calculateActionCost('MOVE_CAREFUL', getCharacterSkillContext(world, characterId), environment);
+		const carefulActionText = ACTION_TEMPLATES.MOVEMENT.compile({
+			targetRoomName: `${targetRoom?.name || connection.targetRoomId} (Carefully)`,
+			cost: carefulCost,
+			description: `Move cautiously to the ${targetRoom?.name || 'target room'}`
+		});
+		
 		actions.push({
 			id: `move_careful_${connection.targetRoomId}`,
 			type: 'MOVE_CAREFUL',
-			name: `Move Carefully to ${targetRoom?.name || connection.targetRoomId}`,
+			name: carefulActionText,
 			description: `Move cautiously to the ${targetRoom?.name || 'target room'}`,
 			category: 'MOVEMENT',
 			cost: carefulCost,
@@ -140,10 +153,16 @@ function generateMovementActions(world, characterId) {
 		
 		// Generate quick move action (lower cost, potentially riskier)
 		const quickCost = calculateActionCost('MOVE_QUICK', getCharacterSkillContext(world, characterId), environment);
+		const quickActionText = ACTION_TEMPLATES.MOVEMENT.compile({
+			targetRoomName: `${targetRoom?.name || connection.targetRoomId} (Quickly)`,
+			cost: quickCost,
+			description: `Move rapidly to the ${targetRoom?.name || 'target room'}`
+		});
+		
 		actions.push({
 			id: `move_quick_${connection.targetRoomId}`,
 			type: 'MOVE_QUICK', 
-			name: `Move Quickly to ${targetRoom?.name || connection.targetRoomId}`,
+			name: quickActionText,
 			description: `Move rapidly to the ${targetRoom?.name || 'target room'}`,
 			category: 'MOVEMENT',
 			cost: quickCost,
@@ -187,10 +206,16 @@ function generateInteractionActions(world, characterId) {
 	for (const entity of entitiesInRoom) {
 		// Basic examine action
 		const examineCost = calculateActionCost('EXAMINE', characterSkills, environment);
+		const examineActionText = ACTION_TEMPLATES.EXAMINE.compile({
+			targetName: entity.name,
+			cost: examineCost,
+			description: `Take a quick look at ${entity.name}`
+		});
+		
 		actions.push({
 			id: `examine_${entity.entityId}`,
 			type: 'EXAMINE',
-			name: `Examine ${entity.name}`,
+			name: examineActionText,
 			description: `Take a quick look at ${entity.name}`,
 			category: 'INTERACTION',
 			cost: examineCost,
@@ -206,10 +231,16 @@ function generateInteractionActions(world, characterId) {
 		
 		// Thorough examine action
 		const thoroughCost = calculateActionCost('EXAMINE_THOROUGH', characterSkills, environment);
+		const thoroughActionText = ACTION_TEMPLATES.EXAMINE.compile({
+			targetName: `${entity.name} (Thorough)`,
+			cost: thoroughCost,
+			description: `Conduct a detailed examination of ${entity.name}`
+		});
+		
 		actions.push({
 			id: `examine_thorough_${entity.entityId}`,
 			type: 'EXAMINE_THOROUGH',
-			name: `Examine ${entity.name} Thoroughly`,
+			name: thoroughActionText,
 			description: `Conduct a detailed examination of ${entity.name}`,
 			category: 'INTERACTION',
 			cost: thoroughCost,
@@ -229,11 +260,16 @@ function generateInteractionActions(world, characterId) {
 	if (roomEntityId) {
 		const room = getComponent(world, roomEntityId, 'isRoom');
 		const searchCost = calculateActionCost('SEARCH', characterSkills, environment);
+		const searchActionText = ACTION_TEMPLATES.SEARCH.compile({
+			targetName: room?.name || 'Room',
+			cost: searchCost,
+			description: `Search the ${room?.name || 'current room'} for items`
+		});
 		
 		actions.push({
 			id: `search_room_${position.roomId}`,
 			type: 'SEARCH',
-			name: `Search ${room?.name || 'Room'}`,
+			name: searchActionText,
 			description: `Search the ${room?.name || 'current room'} for items`,
 			category: 'INTERACTION',
 			cost: searchCost,
@@ -264,10 +300,16 @@ function generateCommunicationActions(world, characterId) {
 	
 	// Quick radio communication
 	const radioCost = calculateActionCost('RADIO_QUICK', characterSkills, environment);
+	const radioActionText = ACTION_TEMPLATES.COMMUNICATION.compile({
+		actionName: 'Quick Radio Message',
+		cost: radioCost,
+		description: 'Send a brief radio message to the team'
+	});
+	
 	actions.push({
 		id: 'radio_quick',
 		type: 'RADIO_QUICK',
-		name: 'Quick Radio Message',
+		name: radioActionText,
 		description: 'Send a brief radio message to the team',
 		category: 'COMMUNICATION',
 		cost: radioCost,
@@ -282,10 +324,16 @@ function generateCommunicationActions(world, characterId) {
 	
 	// Listen to surroundings
 	const listenCost = calculateActionCost('LISTEN', characterSkills, environment);
+	const listenActionText = ACTION_TEMPLATES.COMMUNICATION.compile({
+		actionName: 'Listen Carefully',
+		cost: listenCost,
+		description: 'Listen to your surroundings for important sounds'
+	});
+	
 	actions.push({
 		id: 'listen',
 		type: 'LISTEN',
-		name: 'Listen Carefully',
+		name: listenActionText,
 		description: 'Listen to your surroundings for important sounds',
 		category: 'COMMUNICATION',
 		cost: listenCost,
