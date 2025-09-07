@@ -17,6 +17,11 @@
  */
 
 import { getComponent, hasComponent, getEntitiesWithComponent } from './World.js';
+import { buildAIContext } from './context/ContextAssembler.js';
+import { callLLM } from './ai/LLMService.js';
+import { parseResponse } from './ai/ResponseParser.js';
+import { executeAction as executeGameAction } from './systems/ActionSystem.js';
+import { compileAIPrompt } from './context/PromptTemplates.js';
 
 /**
  * Initialize the turn system for all characters in the world
@@ -333,6 +338,259 @@ export function advanceUntilCharacterReady(world) {
 }
 
 /**
+ * Process AI turn for the active character
+ * @param {object} world - The world object
+ * @returns {Promise<object>} AI turn execution result
+ */
+export async function processAITurn(world) {
+	const activeCharacterId = world.turnSystem?.activeCharacterId;
+	
+	if (!activeCharacterId) {
+		return {
+			success: false,
+			error: 'No active character for AI turn'
+		};
+	}
+	
+	const characterTimer = world.turnSystem.characterTimers[activeCharacterId];
+	if (!characterTimer) {
+		return {
+			success: false,
+			error: `Active character ${activeCharacterId} not found in turn system`
+		};
+	}
+	
+	console.log(`🤖 Processing AI turn for ${characterTimer.name} (ID: ${activeCharacterId})`);
+	
+	try {
+		// Build AI decision context using same system as human UI
+		const aiContext = buildAIContext(world, activeCharacterId);
+		
+		if (!aiContext.availableActions || aiContext.availableActions.length === 0) {
+			console.warn(`⚠️ No available actions for AI character ${characterTimer.name}`);
+			return {
+				success: false,
+				error: 'No available actions for AI character'
+			};
+		}
+		
+		console.log(`🧠 AI context built: ${aiContext.availableActions.length} actions available`);
+		
+		// Generate AI prompt using template system
+		const aiPrompt = compileAIPrompt(aiContext);
+		
+		// Call LLM for decision
+		console.log('📡 Calling LLM for AI decision...');
+		const llmResponse = await callLLM(aiPrompt, aiContext);
+		
+		if (!llmResponse.success) {
+			console.error('❌ LLM call failed:', llmResponse);
+			return {
+				success: false,
+				error: 'LLM call failed',
+				llmResponse
+			};
+		}
+		
+		console.log('✅ LLM response received');
+		
+		// Parse and validate AI response
+		const parseResult = parseResponse(llmResponse, aiContext, world);
+		
+		if (!parseResult.success) {
+			console.warn('⚠️ AI response parsing failed, using fallback:', parseResult.error);
+			// parseResult includes fallback action even on failure
+		}
+		
+		// Execute the AI action through the same system as human actions
+		console.log(`🎯 Executing AI action: ${parseResult.action.type}`);
+		const actionResult = await executeGameAction(world, {
+			type: parseResult.action.type,
+			target: parseResult.action.target,
+			parameters: parseResult.action.parameters || {},
+			characterId: activeCharacterId
+		});
+		
+		if (!actionResult.success) {
+			console.error('❌ AI action execution failed:', actionResult.error);
+			return {
+				success: false,
+				error: `AI action execution failed: ${actionResult.error}`,
+				actionResult
+			};
+		}
+		
+		console.log(`✅ AI turn completed successfully for ${characterTimer.name}`);
+		
+		return {
+			success: true,
+			characterId: activeCharacterId,
+			characterName: characterTimer.name,
+			action: parseResult.action,
+			communication: parseResult.communication,
+			actionResult,
+			llmResponse,
+			parseResult,
+			usedFallback: parseResult.usedFallback || false,
+			metadata: {
+				provider: llmResponse.provider,
+				tokensUsed: llmResponse.tokensUsed,
+				responseTime: llmResponse.responseTime,
+				gameTick: world.turnSystem.gameTick
+			}
+		};
+		
+	} catch (error) {
+		console.error('❌ Unexpected error in AI turn processing:', error);
+		return {
+			success: false,
+			error: `Unexpected AI turn error: ${error.message}`,
+			characterId: activeCharacterId,
+			characterName: characterTimer.name
+		};
+	}
+}
+
+/**
+ * Check if the current active character is AI-controlled
+ * @param {object} world - The world object
+ * @returns {boolean} True if active character is AI-controlled
+ */
+export function isActiveCharacterAI(world) {
+	const activeCharacterId = world.turnSystem?.activeCharacterId;
+	
+	if (!activeCharacterId) {
+		return false;
+	}
+	
+	// Check if character has AI component (this will be set up later)
+	// For now, we'll determine by checking if character has isAI component
+	const isAI = hasComponent(world, activeCharacterId, 'isAI');
+	
+	return isAI;
+}
+
+/**
+ * Mark a character as AI-controlled
+ * @param {object} world - The world object
+ * @param {number} characterId - Character entity ID
+ * @returns {object} Result
+ */
+export function setCharacterAI(world, characterId, aiPersonality = {}) {
+	if (!hasComponent(world, characterId, 'isMarine')) {
+		return {
+			success: false,
+			error: `Entity ${characterId} is not a marine`
+		};
+	}
+	
+	// Add AI component to character
+	if (!world.components.isAI) {
+		world.components.isAI = {};
+	}
+	
+	world.components.isAI[characterId] = {
+		enabled: true,
+		personality: aiPersonality,
+		decisionHistory: [],
+		lastDecisionTime: 0
+	};
+	
+	const marine = getComponent(world, characterId, 'isMarine');
+	console.log(`🤖 Character ${marine?.name || characterId} is now AI-controlled`);
+	
+	return { success: true };
+}
+
+/**
+ * Mark a character as human-controlled
+ * @param {object} world - The world object
+ * @param {number} characterId - Character entity ID
+ * @returns {object} Result
+ */
+export function setCharacterHuman(world, characterId) {
+	if (!hasComponent(world, characterId, 'isMarine')) {
+		return {
+			success: false,
+			error: `Entity ${characterId} is not a marine`
+		};
+	}
+	
+	// Remove AI component from character
+	if (world.components.isAI && world.components.isAI[characterId]) {
+		delete world.components.isAI[characterId];
+	}
+	
+	const marine = getComponent(world, characterId, 'isMarine');
+	console.log(`👤 Character ${marine?.name || characterId} is now human-controlled`);
+	
+	return { success: true };
+}
+
+/**
+ * Get all AI-controlled characters
+ * @param {object} world - The world object
+ * @returns {number[]} Array of AI character entity IDs
+ */
+export function getAICharacters(world) {
+	if (!world.components.isAI) {
+		return [];
+	}
+	
+	return Object.keys(world.components.isAI)
+		.map(id => parseInt(id))
+		.filter(id => world.components.isAI[id]?.enabled);
+}
+
+/**
+ * Get all human-controlled characters
+ * @param {object} world - The world object
+ * @returns {number[]} Array of human character entity IDs
+ */
+export function getHumanCharacters(world) {
+	const marineIds = getEntitiesWithComponent(world, 'isMarine');
+	const aiIds = getAICharacters(world);
+	
+	return marineIds.filter(id => !aiIds.includes(id));
+}
+
+/**
+ * Auto-process AI turns when AI character becomes active
+ * This can be called periodically to handle AI turns automatically
+ * @param {object} world - The world object
+ * @returns {Promise<object>} Processing result
+ */
+export async function autoProcessAITurns(world) {
+	const results = {
+		processed: [],
+		errors: [],
+		totalProcessed: 0
+	};
+	
+	// Keep processing while active character is AI
+	while (isActiveCharacterAI(world)) {
+		const aiTurnResult = await processAITurn(world);
+		
+		if (aiTurnResult.success) {
+			results.processed.push(aiTurnResult);
+			results.totalProcessed++;
+			
+			// Safety limit to prevent infinite AI loops
+			if (results.totalProcessed >= 10) {
+				console.warn('⚠️ AI turn processing limit reached, stopping auto-processing');
+				break;
+			}
+		} else {
+			results.errors.push(aiTurnResult);
+			console.error('❌ AI turn processing failed:', aiTurnResult.error);
+			break; // Stop on first error to prevent infinite loops
+		}
+	}
+	
+	return results;
+}
+
+/**
  * Debug function: Get complete turn system state
  * @param {object} world - The world object
  * @returns {object} Complete turn system debug info
@@ -342,17 +600,30 @@ export function getDebugTurnInfo(world) {
 		return { error: 'Turn system not initialized' };
 	}
 	
+	const aiCharacters = getAICharacters(world);
+	const humanCharacters = getHumanCharacters(world);
+	
 	return {
 		gameTick: world.turnSystem.gameTick,
 		activeCharacterId: world.turnSystem.activeCharacterId,
+		activeCharacterIsAI: isActiveCharacterAI(world),
 		characterCount: Object.keys(world.turnSystem.characterTimers).length,
+		aiCharacterCount: aiCharacters.length,
+		humanCharacterCount: humanCharacters.length,
 		characterTimers: world.turnSystem.characterTimers,
 		turnQueue: world.turnSystem.turnQueue,
 		queueOrder: world.turnSystem.turnQueue.map(entry => ({
 			name: world.turnSystem.characterTimers[entry.characterId]?.name || 'Unknown',
 			entityId: entry.characterId,
 			readyAt: entry.readyAt,
-			speed: entry.speed
+			speed: entry.speed,
+			isAI: aiCharacters.includes(entry.characterId),
+			isHuman: humanCharacters.includes(entry.characterId)
+		})),
+		aiCharacters: aiCharacters.map(id => ({
+			entityId: id,
+			name: getComponent(world, id, 'isMarine')?.name || 'Unknown',
+			aiData: getComponent(world, id, 'isAI')
 		}))
 	};
 }

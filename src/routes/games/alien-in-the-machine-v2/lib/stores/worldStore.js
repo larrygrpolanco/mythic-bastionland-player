@@ -14,7 +14,17 @@
 
 import { writable, derived } from 'svelte/store';
 import { initWorld } from '../game/World.js';
-import { initializeTurnSystem, getTurnSystemStatus } from '../game/TurnManager.js';
+import { 
+	initializeTurnSystem, 
+	getTurnSystemStatus, 
+	processAITurn, 
+	isActiveCharacterAI, 
+	setCharacterAI, 
+	setCharacterHuman, 
+	getAICharacters, 
+	getHumanCharacters,
+	autoProcessAITurns 
+} from '../game/TurnManager.js';
 import { executeAction } from '../game/systems/ActionSystem.js';
 import { buildDecisionContext, buildUIContext } from '../game/context/ContextAssembler.js';
 
@@ -66,6 +76,7 @@ export const activeCharacterStore = derived([worldStore, turnSystemStore], ([$wo
 	const characterId = $turnSystem.activeCharacterId;
 	const marine = $world.components?.isMarine?.[characterId];
 	const timer = $turnSystem.characterTimers?.[characterId];
+	const aiComponent = $world.components?.isAI?.[characterId];
 	
 	if (!marine || !timer) return null;
 	
@@ -76,8 +87,51 @@ export const activeCharacterStore = derived([worldStore, turnSystemStore], ([$wo
 		isActive: timer.isActive,
 		isReady: timer.isReady,
 		timer: timer.timer,
-		speed: timer.speed
+		speed: timer.speed,
+		isAI: Boolean(aiComponent?.enabled),
+		isHuman: !Boolean(aiComponent?.enabled)
 	};
+});
+
+export const aiCharactersStore = derived(worldStore, $world => {
+	if (!$world) return [];
+	
+	const aiIds = getAICharacters($world);
+	return aiIds.map(entityId => {
+		const marine = $world.components?.isMarine?.[entityId];
+		const timer = $world.turnSystem?.characterTimers?.[entityId];
+		const aiComponent = $world.components?.isAI?.[entityId];
+		
+		return {
+			entityId,
+			name: marine?.name || 'Unknown',
+			rank: marine?.rank || 'Unknown',
+			timer: timer?.timer || 0,
+			isReady: timer?.isReady || false,
+			isActive: timer?.isActive || false,
+			personality: aiComponent?.personality || {},
+			decisionHistory: aiComponent?.decisionHistory || []
+		};
+	});
+});
+
+export const humanCharactersStore = derived(worldStore, $world => {
+	if (!$world) return [];
+	
+	const humanIds = getHumanCharacters($world);
+	return humanIds.map(entityId => {
+		const marine = $world.components?.isMarine?.[entityId];
+		const timer = $world.turnSystem?.characterTimers?.[entityId];
+		
+		return {
+			entityId,
+			name: marine?.name || 'Unknown',
+			rank: marine?.rank || 'Unknown',
+			timer: timer?.timer || 0,
+			isReady: timer?.isReady || false,
+			isActive: timer?.isActive || false
+		};
+	});
 });
 
 /**
@@ -342,6 +396,222 @@ export function getWorldDebugInfo() {
 }
 
 /**
+ * Set a character as AI-controlled
+ * @param {number} characterId - Character entity ID
+ * @param {object} personality - AI personality settings
+ * @returns {object} Result
+ */
+export function makeCharacterAI(characterId, personality = {}) {
+	console.log(`🤖 Setting character ${characterId} as AI-controlled`);
+	
+	let currentWorld;
+	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
+	unsubscribe();
+	
+	if (!currentWorld) {
+		return { success: false, error: 'World not initialized' };
+	}
+	
+	const result = setCharacterAI(currentWorld, characterId, personality);
+	
+	if (result.success) {
+		// Trigger reactivity
+		worldStore.update(world => world);
+	}
+	
+	return result;
+}
+
+/**
+ * Set a character as human-controlled
+ * @param {number} characterId - Character entity ID
+ * @returns {object} Result
+ */
+export function makeCharacterHuman(characterId) {
+	console.log(`👤 Setting character ${characterId} as human-controlled`);
+	
+	let currentWorld;
+	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
+	unsubscribe();
+	
+	if (!currentWorld) {
+		return { success: false, error: 'World not initialized' };
+	}
+	
+	const result = setCharacterHuman(currentWorld, characterId);
+	
+	if (result.success) {
+		// Trigger reactivity
+		worldStore.update(world => world);
+	}
+	
+	return result;
+}
+
+/**
+ * Process AI turn for the active character
+ * @returns {Promise<object>} AI turn result
+ */
+export async function processActiveAITurn() {
+	console.log('🤖 Processing AI turn for active character...');
+	
+	let currentWorld;
+	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
+	unsubscribe();
+	
+	if (!currentWorld) {
+		return { success: false, error: 'World not initialized' };
+	}
+	
+	if (!isActiveCharacterAI(currentWorld)) {
+		return { success: false, error: 'Active character is not AI-controlled' };
+	}
+	
+	const result = await processAITurn(currentWorld);
+	
+	if (result.success) {
+		// Trigger reactivity after AI action
+		worldStore.update(world => world);
+		
+		console.log(`✅ AI turn completed for ${result.characterName}`);
+		
+		// Log AI communication if available
+		if (result.communication?.dialogue) {
+			console.log(`💬 AI said: ${result.communication.dialogue}`);
+		}
+	}
+	
+	return result;
+}
+
+/**
+ * Auto-process multiple AI turns in sequence
+ * @returns {Promise<object>} Auto-processing result
+ */
+export async function autoProcessAI() {
+	console.log('🤖 Starting auto AI processing...');
+	
+	let currentWorld;
+	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
+	unsubscribe();
+	
+	if (!currentWorld) {
+		return { success: false, error: 'World not initialized' };
+	}
+	
+	const result = await autoProcessAITurns(currentWorld);
+	
+	if (result.totalProcessed > 0) {
+		// Trigger reactivity after all AI actions
+		worldStore.update(world => world);
+		console.log(`✅ Auto-processed ${result.totalProcessed} AI turns`);
+	}
+	
+	return result;
+}
+
+/**
+ * Check if the active character is AI-controlled
+ * @returns {boolean} True if active character is AI
+ */
+export function isActiveAI() {
+	let currentWorld;
+	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
+	unsubscribe();
+	
+	if (!currentWorld) {
+		return false;
+	}
+	
+	return isActiveCharacterAI(currentWorld);
+}
+
+/**
+ * Get current AI/Human character distribution
+ * @returns {object} Character distribution info
+ */
+export function getCharacterDistribution() {
+	let currentWorld;
+	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
+	unsubscribe();
+	
+	if (!currentWorld) {
+		return { ai: [], human: [], total: 0 };
+	}
+	
+	const aiIds = getAICharacters(currentWorld);
+	const humanIds = getHumanCharacters(currentWorld);
+	
+	const aiCharacters = aiIds.map(id => {
+		const marine = currentWorld.components?.isMarine?.[id];
+		return { entityId: id, name: marine?.name || 'Unknown' };
+	});
+	
+	const humanCharacters = humanIds.map(id => {
+		const marine = currentWorld.components?.isMarine?.[id];
+		return { entityId: id, name: marine?.name || 'Unknown' };
+	});
+	
+	return {
+		ai: aiCharacters,
+		human: humanCharacters,
+		total: aiCharacters.length + humanCharacters.length,
+		activeIsAI: isActiveCharacterAI(currentWorld)
+	};
+}
+
+/**
+ * Debug function: Test AI decision-making
+ * @param {number} characterId - Character to test (optional, uses active if not provided)
+ * @returns {Promise<object>} Test result
+ */
+export async function debugTestAI(characterId = null) {
+	console.log('🧪 Testing AI decision-making...');
+	
+	let currentWorld;
+	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
+	unsubscribe();
+	
+	if (!currentWorld) {
+		return { success: false, error: 'World not initialized' };
+	}
+	
+	const targetCharacterId = characterId || currentWorld.turnSystem?.activeCharacterId;
+	
+	if (!targetCharacterId) {
+		return { success: false, error: 'No character to test' };
+	}
+	
+	// Temporarily make character AI for testing
+	const wasAI = isActiveCharacterAI(currentWorld);
+	if (!wasAI) {
+		setCharacterAI(currentWorld, targetCharacterId, { testMode: true });
+	}
+	
+	try {
+		const result = await processAITurn(currentWorld);
+		
+		// Restore original AI status
+		if (!wasAI) {
+			setCharacterHuman(currentWorld, targetCharacterId);
+		}
+		
+		// Trigger reactivity
+		worldStore.update(world => world);
+		
+		return result;
+		
+	} catch (error) {
+		// Restore original AI status on error
+		if (!wasAI) {
+			setCharacterHuman(currentWorld, targetCharacterId);
+		}
+		
+		return { success: false, error: error.message };
+	}
+}
+
+/**
  * Debug function: Log current world state
  */
 export function debugWorldState() {
@@ -349,6 +619,9 @@ export function debugWorldState() {
 	
 	const debugInfo = getWorldDebugInfo();
 	console.log('Debug info:', debugInfo);
+	
+	const distribution = getCharacterDistribution();
+	console.log('Character distribution:', distribution);
 	
 	let currentWorld;
 	const unsubscribe = worldStore.subscribe(world => currentWorld = world);
