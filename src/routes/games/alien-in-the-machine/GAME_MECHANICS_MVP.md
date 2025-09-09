@@ -2,7 +2,7 @@
 **Version 1.0 - Simplified & Unified**
 
 ## Core Philosophy
-The player is a **Commander** watching autonomous AI marines through monitors, guiding them via radio. Marines act independently based on training and personality, but the Commander can intervene at critical moments.
+The player is a **Commander** watching autonomous AI marines/crew through monitors, guiding them via radio. Marines/crew act independently based on training and personality, but the Commander can intervene at critical moments. Crew and marine can be used interchangable as not all characters are marines
 
 ---
 
@@ -63,39 +63,39 @@ Examples:
 ## 3. Turn Flow & Commander Interaction
 
 ### The Core Loop
-1. **Marine's Turn Begins**
+1. **Marine/Crew's Turn Begins**
    - AI evaluates situation based on personality, stress, and mission
    - AI selects intended action
    
 2. **Commander Review Phase** (Game Pauses)
-   - Screen shows: "Marine [Name] intends to [Action]"
+   - Screen shows: "Crew [Name] intends to [Action]"
    - Commander can:
      - View map and current positions
-     - Check marine's stress and health
+     - Check Crew's stress and health
      - Review recent radio communications
      - See mission objectives
    
 3. **Commander Decision**
-   - **Advance:** Let the marine proceed with their action
-   - **Radio Command:** Issue verbal order (marine may ignore)
-   - **Override:** Force specific action (costs +1 marine stress)
+   - **Advance:** Let the Crew proceed with their action
+   - **Radio Command:** Issue verbal order (crew may ignore)
+   - **Override:** Force specific action (costs +1 crew stress)
    
 4. **Action Resolution**
    - Action executes with appropriate skill check
    - Results logged to radio/event system
-   - Next marine in initiative order
+   - Next crew in initiative order
 
 ### Radio Commands
-- Commander types/selects command: "Fall back!" or "Check that door carefully"
-- Marine evaluates based on:
+- Commander types command: "Fall back!" or "Check that door carefully"
+- Crew evaluates based on:
   - Current stress (high stress = less likely to obey)
   - Command logic (does it make sense?)
-  - Personality (some marines more independent)
+  - Personality (some crew more independent)
 - **Compliance chance:** `(10 - Stress) × 10%`
 
 ### Override System
 - Commander forces specific action from available list
-- Marine gains +1 Stress from being micromanaged
+- Crew gains +1 Stress from being micromanaged
 - Action automatically executes (no compliance check)
 - Too many overrides risk panic
 
@@ -153,7 +153,7 @@ Examples:
 
 ### Gaining Stress
 - Taking damage: +1 Stress
-- Witnessing marine death: +2 Stress
+- Witnessing Crew death: +2 Stress
 - Encountering alien: +1 Stress
 - Commander override: +1 Stress
 - Mission timer pressure: +1 Stress per warning
@@ -188,7 +188,7 @@ Examples:
 ### Weapons (Simple)
 - **Unarmed:** 1 damage
 - **Pistol:** 1 damage, standard sidearm
-- **Rifle:** 2 damage, marine primary weapon
+- **Rifle:** 2 damage, crew primary weapon
 - **Shotgun:** 3 damage, close range only
 
 ---
@@ -197,8 +197,8 @@ Examples:
 
 ### Setup
 1. **Briefing:** Commander receives objective from Company
-2. **Squad Selection:** Choose 4 marines from roster
-3. **Deployment:** Squad starts in entry point (safe room)
+2. **Squad Selection:** Choose 4 Crew from roster
+3. **Deployment:** Squad starts in entry point the shuttle (safe room)
 
 ### Objective Types (MVP = Single Objective)
 - **Retrieve:** Get to Room X, grab Item Y, return to start
@@ -241,12 +241,8 @@ Marines evaluate actions in this order:
 - Mark cleared areas
 - Search for better equipment
 
-### Personality Modifiers
-Each marine has traits affecting priorities:
-- **Brave:** Less likely to flee
-- **Cautious:** More observation actions
-- **Team Player:** Prioritizes squad support
-- **Lone Wolf:** Ignores squad cohesion
+### Personality Modifiers & Personal Agendas
+Each marine/crew has traits and personal agendas affecting priorities
 
 ---
 
@@ -278,18 +274,19 @@ Each marine has traits affecting priorities:
 
 ## 10. Data Structures for Implementation
 
-### Marine State
+### Crew State
 ```json
 {
-  "id": "marine_1",
+  "id": "Crew_1",
   "name": "Hudson",
   "attributes": {"STR": 3, "AGI": 2, "WTS": 2, "EMP": 3},
   "skills": {"combat": 2, "mobility": 1, "technical": 0, 
              "observation": 1, "medical": 0, "command": 1},
   "health": 3,
   "stress": 0,
-  "inventory": ["rifle", "medkit"],
-  "personality": ["brave", "team_player"],
+  "gear": ["rifle", "medkit"],
+  "personality": "Selfish",
+  "agenda": "Follow company protocol, get the job done and cash in. If things are going south fast, get the hell out of dodge, by any means necessary.",
   "currentRoom": "cargo_bay",
   "intendedAction": null
 }
@@ -310,7 +307,7 @@ Each marine has traits affecting priorities:
 ```json
 {
   "tick": 24,
-  "actor": "marine_1",
+  "actor": "crew_1",
   "action": "ATTACK",
   "target": "alien_drone",
   "success": true,
@@ -325,7 +322,7 @@ Each marine has traits affecting priorities:
 ## 11. Edge Cases & Clarifications
 
 ### Room Capacity
-- Unlimited marines can occupy one room
+- Unlimited marines/crew can occupy one room
 - Enemies block doorways (must defeat to pass)
 
 ### Simultaneous Actions
@@ -361,11 +358,11 @@ To keep scope manageable, these are excluded:
 ## Quick Reference Card
 
 **Every Turn:**
-1. Marine AI decides action
+1. Marine/Crew AI decides action
 2. Commander reviews and can intervene
 3. Action resolves with `(Attribute + Skill) × 10%`
 4. Update stress and health
-5. Next marine
+5. Next marine/crew
 
 **Stress Levels:**
 - 0-4: Fine
@@ -376,7 +373,7 @@ To keep scope manageable, these are excluded:
 **Commander Options:**
 - Advance (let it happen)
 - Radio (may be ignored)
-- Override (+1 stress to marine)
+- Override (+1 stress to marine/crew)
 
 **Mission Flow:**
 Brief → Deploy → Execute → Extract → Score

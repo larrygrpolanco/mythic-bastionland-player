@@ -18,7 +18,7 @@ Version 2 began September 6, 2025, as a clean-slate rebuild after Version 1's "U
 - Mission system integrated seamlessly without breaking core systems
 
 **The Reality Check:**
-We built an excellent squad-based tactical game where players control individual marines. But this wasn't the vision. The vision was players as **commanders** sending **autonomous teams** on missions. We got caught up in making individual character control work perfectly, when we should have been building autonomous AI teams from the start.
+We built an excellent squad-based tactical game where players control individual marines/crew. But this wasn't the vision. The vision was players as **commanders** sending **autonomous teams** on missions. We got caught up in making individual character control work perfectly, when we should have been building autonomous AI teams from the start.
 
 ### Critical Lessons Learned
 
@@ -38,15 +38,15 @@ We built an excellent squad-based tactical game where players control individual
 - Clear rule references for every mechanic
 
 #### Lesson 2: Build for the Actual Vision
-**v2 Problem:** Built player-controlled marines first, then tried to add AI:
+**v2 Problem:** Built player-controlled marines/crew first, then tried to add AI:
 - UI assumed direct character control
 - Systems optimized for human decision-making
 - AI felt bolted-on rather than integral
 - Never achieved commander perspective
 
 **v3 Solution:** Commander-first architecture:
-- Player IS the commander, not the marines
-- Marines are ALWAYS AI-controlled (with override option)
+- Player IS the commander, not the marines/crew
+- Marines/crew are ALWAYS AI-controlled (with override option)
 - UI shows commander's perspective (radio reports, limited intel)
 - Natural language orders are primary interaction
 

@@ -130,7 +130,7 @@ The MVP mechanics are fully documented in `GAME_MECHANICS_MVP.md`:
 
 ### Phase 2: Autonomous AI Squad (Core AI)
 **Duration:** 3-4 sessions
-**Goal:** AI marines complete missions without any commander
+**Goal:** AI marines/crew complete missions without any commander
 
 **Deliverables:**
 1. **CharacterAI.js**
@@ -366,13 +366,13 @@ The MVP mechanics are fully documented in `GAME_MECHANICS_MVP.md`:
 
 After achieving a working prototype:
 - **Persistence System:** Save games, character progression
-- **Character Creation:** Custom marine generation
+- **Character Creation:** Custom marine/crew generation
 - **Campaign Mode:** Multiple linked missions
 - **Expanded Mechanics:** Vehicles, alien encounters, more equipment
 - **Multiplayer:** Multiple commanders, competing squads
 - **Mod Support:** Custom missions and maps
 
-But NONE of this until we have a working game that delivers the core experience: **commanding autonomous AI marines through dangerous missions with limited information and indirect control.**
+But NONE of this until we have a working game that delivers the core experience: **commanding autonomous AI marines/crew through dangerous missions with limited information and indirect control.**
 
 ## The Prime Directive
 
