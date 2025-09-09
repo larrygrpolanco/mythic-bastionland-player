@@ -25,7 +25,7 @@ Before ANY coding begins, the following documentation must be 100% complete:
      * Consequences and side effects
 
 2. Alien RPG Systems Adaptation
-   - Stress levels (0-10) and effects
+   - Stress levels and effects
    - Panic rolls and results table
    - Skill checks (D6 system simplified)
    - Damage and health conditions
@@ -384,100 +384,14 @@ After achieving a working prototype:
 - **Persistence System:** Save games, character progression
 - **Character Creation:** Custom marine generation
 - **Campaign Mode:** Multiple linked missions
-- **Expanded Mechanics:** command center upgrades and map, more alien encounters, more equipment
-**Validation Criteria:**
-- ✅ Clear mission objectives guide gameplay
-- ✅ AI makes mission-relevant decisions
-- ✅ Victory/failure conditions work correctly
-- ✅ Complex interactions enhance gameplay depth
+- **Expanded Mechanics:** Vehicles, alien encounters, more equipment
+- **Multiplayer:** Multiple commanders, competing squads
+- **Mod Support:** Custom missions and maps
 
-**Exit Criteria:** Complete game loop with meaningful objectives
+But NONE of this until we have a working game that delivers the core experience: **commanding autonomous AI marines through dangerous missions with limited information and indirect control.**
 
----
+## The Prime Directive
 
-### **Session 3.2: UI Polish & User Experience (Polish Session)**
+**We are building a command simulation, not a squad tactics game.**
 
-**Entry Criteria:** Session 3.1 complete, mission system working
-
-**Deliverables:**
-1. **Enhanced MapView.svelte:**
-   - Rich visual representation of station
-   - Entity state visualization (items, characters, interactive objects)
-   - Visual feedback for actions and state changes
-
-2. **Advanced TurnControl.svelte:**
-   - Intuitive action selection and execution
-   - Clear turn order and timing display
-   - Action preview and confirmation system
-
-3. **Information Systems:**
-   - Detailed entity examination interface
-   - Mission briefing and status display
-   - AI communication and reasoning log
-
-4. **User Experience Polish:**
-   - Smooth interactions and transitions
-   - Clear feedback for all player actions
-   - Intuitive interface for complex decisions
-
-**Validation Criteria:**
-- ✅ Interface is intuitive and informative
-- ✅ All game state is clearly visible to player
-- ✅ Actions provide immediate and clear feedback
-- ✅ UI supports both debugging and gameplay
-
-**Exit Criteria:** Professional-quality user interface ready for extended play
-
----
-
-### **Session 3.3: Final Integration & Testing (Validation Session)**
-
-**Entry Criteria:** All previous sessions complete, full feature set implemented
-
-**Deliverables:**
-1. **Comprehensive Testing:**
-   - End-to-end gameplay validation
-   - Edge case handling and error recovery
-   - Performance optimization and debugging tools
-
-2. **Documentation Completion:**
-   - Updated architecture documentation
-   - Usage guide for extending the system
-   - AI integration guide for future development
-
-3. **Final Polish:**
-   - Bug fixes and stability improvements
-   - Balance tweaks for gameplay experience
-   - Code cleanup and optimization
-
-4. **Deployment Preparation:**
-   - Production build configuration
-   - Performance monitoring setup
-   - Future development roadmap
-
-**Validation Criteria:**
-- ✅ Complete gameplay experience from start to finish
-- ✅ Stable performance with no critical bugs
-- ✅ Human-AI integration seamless and reliable
-- ✅ Ready for extended play and future development
-
-**Exit Criteria:** Production-ready prototype demonstrating unified decision pipeline architecture
-
----
-
-## **Development Anti-Patterns to Avoid**
-
-**For LLM Development Sessions:**
-- **Don't build polish before functionality** - Always ensure core mechanics work first
-- **Don't create divergent human/AI paths** - Use unified systems for both
-- **Don't use placeholder mocks** - Create working stubs that match final architecture
-- **Don't skip validation steps** - Each session must prove its deliverables work
-- **Don't build monolithic files** - Keep systems modular and focused
-
-**Session Success Indicators:**
-- Can demonstrate working functionality at end of each session
-- Each system integrates cleanly with existing architecture
-- No "TODO" comments or placeholder functions remain
-- Code follows established patterns and documentation standards
-
-**Key to Success:** Each session builds working, validated functionality that moves us closer to the unified decision pipeline goal. No session should end without demonstrable progress toward the final architecture.
+Every decision should be evaluated against this vision. If it doesn't enhance the experience of being a commander sending autonomous teams into danger, it doesn't belong in v3.

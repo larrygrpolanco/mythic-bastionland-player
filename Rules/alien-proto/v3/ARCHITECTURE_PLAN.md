@@ -230,63 +230,15 @@ lib/game/
 - **Perfect History:** Event log provides complete game history for debugging/replay
 - **LLM-Optimized:** Events structured for easy context extraction
 - **Testable:** Can test mechanics without UI or AI
-4. **Action Execution:** `ActionSystem.executeAction(world, validatedAction)`
-   - Delegates to specific system (MovementSystem, InteractionSystem, etc.)
-5. **Turn Processing:** `TurnManager.executeAction(characterId, actionCost)`
-   - Updates character's position in turn queue
-6. **World Update:** Modified world state flows to reactive stores
-7. **UI Reactivity:** All Svelte components update automatically
+- **Portable:** LLM integration can move to other projects
+- **Scalable:** Can add persistence, character creation, etc. later
 
-#### **9. Module Responsibilities**
+### Critical Success Factors
 
-- **`World.js`:** ECS foundation, entity/component management, world state structure
-- **`TurnManager.js`:** Pure turn logic - queue management, tick advancement, readiness calculation
-- **`systems/ActionSystem.js`:** Coordinates action execution, delegates to specialized systems
-- **`systems/MovementSystem.js`:** Room navigation, door logic, position updates
-- **`systems/InteractionSystem.js`:** Object interaction, searching, item handling
-- **`context/ContextAssembler.js`:** Builds decision context for both human UI and AI
-- **`context/ActionBuilder.js`:** Generates available actions based on world state
-- **`context/PromptTemplates.js`:** Template system for consistent text across UI and AI
-- **`actions/ActionValidator.js`:** Validates actions before execution, prevents invalid states
-- **`actions/ActionCosts.js`:** Defines tick costs, applies skill modifiers
-- **`ai/LLMService.js`:** Handles LLM API calls, model selection, response parsing
-- **`/stores/worldStore.js`:** Reactive bridge between game engine and UI
-- **`/components/*.svelte`:** Presentation layer, displays context and available actions
+1. **No Coding Until Mechanics Complete:** Must have full game design first
+2. **Event Log is Sacred:** Every state change must go through events
+3. **AI Teams Work Independently:** Commander enhances but isn't required
+4. **Clean Context Windows:** LLM gets exactly what it needs, no more
+5. **Test Mechanics in Isolation:** Validate rules before integration
 
-#### **10. Development Progression Strategy**
-
-**Phase 0: Modular Foundation**
-- Create all file stubs with proper interfaces and JSDoc
-- Implement core World.js ECS with component definitions
-- Set up TurnManager.js with working priority queue
-- Create ContextAssembler.js with stub functions that return proper data structures
-
-**Phase 1: Context-Driven Actions (Human)**  
-- Implement ActionBuilder.js to generate context-aware actions
-- Build working MovementSystem.js and InteractionSystem.js
-- Create functional ActionValidator.js and ActionSystem.js coordination
-- UI displays real context and executes real actions through unified pipeline
-
-**Phase 2: Template System & AI Integration**
-- Complete PromptTemplates.js with comprehensive template library
-- Implement LLMService.js and ResponseParser.js
-- AI uses same context assembly and action execution as humans
-- Both human and AI actions flow through identical validation and execution
-
-**Phase 3: Advanced Features**
-- Complete InteractionSystem.js with searching, item handling
-- Add MissionSystem.js for objectives and win conditions
-- Enhance ContextAssembler.js with richer environmental awareness
-- Polish UI for production rather than debugging
-
-#### **11. Key Architectural Benefits**
-
-- **Human-AI Parity:** Identical decision-making pipeline ensures consistent game rules
-- **Modular Systems:** Easy to modify, test, and extend individual components
-- **Template Consistency:** All text managed centrally, changes propagate everywhere
-- **Context-Driven:** Actions generated based on actual world state, eliminating invalid choices
-- **Tick Foundation:** Turn system built correctly from start, not retrofitted
-- **Working Stubs:** Each phase produces functional systems that look like final versions
-- **LLM-Friendly:** Rich context and specific action choices make AI decision-making reliable
-
-This architecture ensures we build working systems from day 1, with each phase adding capability while maintaining a solid foundation.
+This architecture ensures v3 will have a solid mechanical foundation, clean AI integration, and achieve the commander-sending-autonomous-teams vision that v2 missed.
