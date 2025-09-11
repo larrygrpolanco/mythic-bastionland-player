@@ -1,1 +1,131 @@
-@import 'tailwindcss';
+/* 90s AOL-Vaesen Global Styles */
+:root {
+  --primary-bg: #000080;
+  --content-bg: #F5F5DC;
+  --accent-primary: #008080;
+  --link-color: #0000FF;
+  --text-color: #000000;
+  --highlight-bg: #FFFF00;
+  --bevel-light: #C0C0C0;
+  --bevel-dark: #808080;
+  --notification-red: #FF0000;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "MS Sans Serif", "Geneva", "Verdana", "Arial", sans-serif;
+  font-size: 12px;
+  color: var(--text-color);
+  background-color: black;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: never;
+  line-height: 1.2;
+}
+
+/* Main application container */
+.app-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  background-color: var(--primary-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 90s Button Styles */
+.button-90s {
+  background-color: var(--bevel-light);
+  border: 1px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  box-shadow: 1px 1px 0 0 var(--bevel-dark);
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.button-90s:active, .button-90s.active {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  box-shadow: inset 1px 1px 0 0 var(--bevel-dark);
+}
+
+/* Link Styles */
+a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #800080;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bevel-light);
+  border: 1px solid var(--bevel-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bevel-light);
+  border: 1px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+}
+
+/* Window/Pane Styles */
+.window-frame {
+  background-color: var(--content-bg);
+  border: 2px inset var(--bevel-dark);
+  padding: 8px;
+}
+
+.window-title {
+  background-color: var(--primary-bg);
+  color: white;
+  padding: 4px 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Typography */
+h1 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+p {
+  margin-bottom: 8px;
+}
+
+/* Loading state */
+.loading {
+  cursor: wait;
+}
+
+/* Utility classes */
+.spacing-8 { margin: 8px; }
+.spacing-16 { margin: 16px; }
+.padding-8 { padding: 8px; }
+.padding-16 { padding: 16px; }
+
+.flex-row { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-8 { gap: 8px; }
+.gap-16 { gap: 16px; }
