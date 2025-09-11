@@ -9,6 +9,11 @@
 			id: 'alien-in-the-machine',
 			title: 'Alien in the Machine',
 			description: 'A sci-fi simulation featuring AI-controlled marines navigating a small station. The player acts as a commander, observing and issuing commands via a retro-terminal interface.'
+		},
+    {
+			id: 'the-society',
+			title: 'The Society',
+			description: 'Log into your terminal and uncover the secret, supernatural world hiding beneath 1990s New York City. From the safety of your retro desktop, you\'ll piece together clues from emails and news reports to guide a mysterious society of investigators against folkloric monsters.'
 		}
 	];
 </script>
