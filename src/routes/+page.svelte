@@ -6,6 +6,11 @@
 			description: 'A narrative game about places over time. Build stories around a single location as it evolves through cycles of change.'
 		},
     {
+			id: 'alien-in-the-machine-v2',
+			title: 'Alien in the Machine Old',
+			description: 'A sci-fi simulation featuring AI-controlled marines navigating a small station. The player acts as a commander, observing and issuing commands via a retro-terminal interface.'
+		},
+    {
 			id: 'alien-in-the-machine',
 			title: 'Alien in the Machine',
 			description: 'A sci-fi simulation featuring AI-controlled marines navigating a small station. The player acts as a commander, observing and issuing commands via a retro-terminal interface.'
